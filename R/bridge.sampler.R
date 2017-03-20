@@ -359,6 +359,8 @@
 #' Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. Statistica Sinica, 6, 831-860.
 #'
 #' Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. Journal of Computational and Graphical Statistics, 11(3), 552-586.
+#'
+#' @example examples/example.bridge_sampler.R
 bridge_sampler <- function(samples = NULL, log_posterior = NULL, data = NULL,
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
                            packages = NULL, rcppFile = NULL) {
