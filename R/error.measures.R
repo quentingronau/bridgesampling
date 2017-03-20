@@ -1,9 +1,8 @@
 #' Computes error measures for estimated marginal likelihood
 #' @export
 #' @title Computes error measures for estimated marginal likelihood
-#' @name error.measures
-#' @param bridgeObject output from \code{\link{bridge.sampler}}
-#' @details Computes approximate error measures for marginal likelihood bridge sampling estimates
+#' @param bridgeObject output from \code{\link{bridge_sampler}}.
+#' @details Computes approximate error measures for marginal likelihood bridge sampling estimates.
 #' based on Fruehwirth-Schnatter (2004).
 #' @return a list with the objects:
 #' \itemize{
@@ -16,7 +15,7 @@
 #' Frühwirth‐Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. The Econometrics Journal, 7, 143-167.
 #' @import Brobdingnag
 #' @importFrom coda spectrum0.ar
-error.measures <- function(bridgeObject) {
+error_measures <- function(bridgeObject) {
 
   if (bridgeObject$method == "warp3")
     stop("error.measures not implemented for warp3 method. We recommend to run

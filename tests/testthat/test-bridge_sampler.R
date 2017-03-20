@@ -135,8 +135,8 @@ test_that("bridge sampler matches anlytical value hierarchical normal example", 
   lb[[ "invTau2" ]] <- 0
 
   # compute log marginal likelihood via bridge sampling
-  H1.bridge <- bridge.sampler(post.samples = s, data = data,
-                              log.posterior = log.posterior.H1, lb = lb,
+  H1.bridge <- bridge_sampler(samples = s, data = data,
+                              log_posterior = log.posterior.H1, lb = lb,
                               ub = ub)
 
   # compute "exact" marginal likelihood
