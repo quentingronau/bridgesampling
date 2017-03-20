@@ -129,7 +129,7 @@
 
   while (abs((r - rold)/r) > tol) {
 
-    cat(paste0("Iterative scheme iteration: ", i, "\n"))
+    cat(paste0("Iteration: ", i, "\n"))
     rold <- r
     numi <- as.numeric( e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r) )
     deni <- as.numeric( 1/(s1 * e^(l1 - lstar) + s2 * r) )

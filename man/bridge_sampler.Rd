@@ -25,7 +25,7 @@ bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
 
 \item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).}
 
-\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).}
+\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores} > 1 as those objects will be exported to the nodes). Those objects need to exist in the \code{\link{.GlobalEnv}}.}
 
 \item{rcppFile}{in case \code{cores} > 1 and log_posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).}
 }
