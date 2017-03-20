@@ -14,6 +14,7 @@ test_that("bridge sampler matches anlytical value hierarchical normal example", 
 
   mH1 <- function(y, sigma2 = 1, mu0 = 0, tau20 = 1, alpha = 2, beta = 3, rel.tol = 10^(-80)) {
 
+    n <- length(y)
     mH1integrand <- function(tau2, y, sigma2, mu0, tau20, alpha, beta) {
 
       (sigma2 + tau2)^(-n/2) *
@@ -139,7 +140,7 @@ test_that("bridge sampler matches anlytical value hierarchical normal example", 
                               ub = ub)
 
   # compute "exact" marginal likelihood
-  mlH1.exact <- mH1(y, rel.tol = 10^(-20), sigma2 = data$sigma2, alpha = data$alpha,
+  mlH1.exact <- mH1(data$y, rel.tol = 10^(-20), sigma2 = data$sigma2, alpha = data$alpha,
                     beta = data$beta, mu0 = data$mu0, tau20 = data$tau20)
 
   expect_equal(exp(H1.bridge$logml), expected = mlH1.exact)
