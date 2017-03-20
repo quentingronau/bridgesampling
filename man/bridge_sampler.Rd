@@ -6,7 +6,7 @@
 \usage{
 bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
   lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
-  varlist = NULL, rcppFile = NULL)
+  varlist = NULL, rcppFile = NULL, maxiter = 1000)
 }
 \arguments{
 \item{samples}{matrix with posterior samples (colnames need to correspond to parameter names in \code{lb} and \code{ub}).}
@@ -28,6 +28,8 @@ bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
 \item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores} > 1 as those objects will be exported to the nodes). Those objects need to exist in the \code{\link{.GlobalEnv}}.}
 
 \item{rcppFile}{in case \code{cores} > 1 and log_posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).}
+
+\item{maxiter}{maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.}
 }
 \value{
 a list of class \code{"bridge"} with components:

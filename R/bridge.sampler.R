@@ -4,7 +4,6 @@
 # library(stringr)
 # library(coda)
 
-#' @importFrom  stats qnorm
 .transform2Real <- function(theta, lb, ub) {
 
   ### transform samples to real line
@@ -42,7 +41,6 @@
 
 }
 
-#' @importFrom  stats pnorm
 .invTransform2Real <- function(theta_t, lb, ub) {
 
   ### transform transformed samples back to original scales
@@ -74,7 +72,6 @@
 
 }
 
-#' @importFrom  stats dnorm
 .logJacobian <- function(theta_t, transTypes, lb, ub) {
 
   ### compute log of Jacobian
@@ -102,8 +99,7 @@
 
 }
 
-#' @importFrom stats median
-.run.iterative.scheme <- function(q11, q12, q21, q22, r0, tol, L, method) {
+.run.iterative.scheme <- function(q11, q12, q21, q22, r0, tol, L, method, maxiter) {
 
   ### run iterative updating scheme (using "optimal" bridge function,
   ### see Meng & Wong, 1996)
@@ -127,7 +123,7 @@
 
   e <- as.brob( exp(1) )
 
-  while (abs((r - rold)/r) > tol) {
+  while (i <= maxiter && abs((r - rold)/r) > tol) {
 
     cat(paste0("Iteration: ", i, "\n"))
     rold <- r
@@ -139,21 +135,15 @@
   }
 
   logml <- log(r) + lstar
+  stop("logml could not be estimated within maxiter")
+
   return(list(logml = logml, niter = i-1))
 
 }
 
-#' @importFrom mvtnorm rmvnorm dmvnorm
-#' @importFrom Matrix nearPD
-#' @import Brobdingnag
-#' @import stringr
-#' @import coda
-#' @import parallel
-#' @import rlecuyer
-#' @importFrom Rcpp sourceCpp
-#' @import stats
 .bridge.sampler.normal <- function(samples, log_posterior, data, lb, ub,
-                                   cores, packages, varlist, rcppFile, r0, tol) {
+                                   cores, packages, varlist, rcppFile,
+                                   maxiter, r0, tol) {
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
@@ -195,7 +185,7 @@
     if ( ! is.null(rcppFile)) {
       parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
       parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
-      parallel::clusterEvalQ(cl = cl, sourceCpp(file = rcppFile))
+      parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
     }
 
     q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub), log_posterior,
@@ -208,7 +198,8 @@
 
   # run iterative updating scheme to compute log of marginal likelihood
   tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-                               r0 = r0, tol = tol, L = NULL, method = "normal")
+                               r0 = r0, tol = tol, L = NULL, method = "normal",
+                               maxiter = maxiter)
   logml <- tmp$logml
   niter <- tmp$niter
 
@@ -219,16 +210,9 @@
 
 }
 
-#' @importFrom mvtnorm rmvnorm dmvnorm
-#' @importFrom Matrix nearPD
-#' @import Brobdingnag
-#' @import stringr
-#' @import coda
-#' @import rlecuyer
-#' @importFrom Rcpp sourceCpp
-#' @import stats
 .bridge.sampler.warp3 <- function(samples, log_posterior, data, lb, ub,
-                                  cores, packages, varlist, rcppFile, r0, tol) {
+                                  cores, packages, varlist, rcppFile,
+                                  maxiter, r0, tol) {
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
@@ -284,7 +268,7 @@
     if ( ! is.null(rcppFile)) {
       parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
       parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
-      parallel::clusterEvalQ(cl = cl, sourceCpp(file = rcppFile))
+      parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
     }
 
     q11 <- log(e^(parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub),
@@ -314,7 +298,8 @@
 
   # run iterative updating scheme to compute log of marginal likelihood
   tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-                               r0 = r0, tol = tol, L = L, method = "warp3")
+                               r0 = r0, tol = tol, L = L, method = "warp3",
+                               maxiter = maxiter)
   logml <- tmp$logml
   niter <- tmp$niter
 
@@ -339,6 +324,7 @@
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).
 #' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores} > 1 as those objects will be exported to the nodes). Those objects need to exist in the \code{\link{.GlobalEnv}}.
 #' @param rcppFile in case \code{cores} > 1 and log_posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).
+#' @param maxiter maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.
 #' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. When \code{method = "warp3"},
 #' the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix and skew as samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
 #' @return a list of class \code{"bridge"} with components:
@@ -358,16 +344,24 @@
 #' Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. Journal of Computational and Graphical Statistics, 11(3), 552-586.
 #'
 #' @example examples/example.bridge_sampler.R
+#'
+#' @importFrom mvtnorm rmvnorm dmvnorm
+#' @importFrom Matrix nearPD
+#' @import Brobdingnag
+#' @importFrom stringr str_sub
+#' @importFrom stats qnorm pnorm dnorm median cov var
 bridge_sampler <- function(samples = NULL, log_posterior = NULL, data = NULL,
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
-                           packages = NULL, varlist = NULL, rcppFile = NULL) {
+                           packages = NULL, varlist = NULL, rcppFile = NULL,
+                           maxiter = 1000) {
 
   # see Meng & Wong (1996), equation 4.1
 
   out <- do.call(what = paste0(".bridge.sampler.", method),
                  args = list(samples = samples, log_posterior = log_posterior,
                              data = data, lb = lb, ub = ub, cores = cores,
-                             packages = packages, varlist = varlist, rcppFile = rcppFile, r0 = 0,
+                             packages = packages, varlist = varlist,
+                             rcppFile = rcppFile, maxiter = maxiter, r0 = 0,
                              tol = 1e-10))
   class(out) <- "bridge"
   return(out)
