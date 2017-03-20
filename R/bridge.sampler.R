@@ -153,16 +153,16 @@
 #' @import rlecuyer
 #' @importFrom Rcpp sourceCpp
 #' @import stats
-.bridge.sampler.normal <- function(post.samples, log.posterior, data, lb, ub,
+.bridge.sampler.normal <- function(samples, log_posterior, data, lb, ub,
                                   cores, packages, rcppFile, r0, tol) {
 
   # transform parameters to real line
-  tmp <- .transform2Real(post.samples, lb, ub)
+  tmp <- .transform2Real(samples, lb, ub)
   theta_t <- tmp$theta_t
   transTypes <- tmp$transTypes
 
   # split samples for proposal/iterative scheme
-  nr <- nrow(post.samples)
+  nr <- nrow(samples)
   samples4fit_index <- seq_len(nr) %% 2 == TRUE # split samples in even/odd
   samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
   samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
@@ -182,9 +182,9 @@
   # evaluate log likelihood times prior for posterior samples and generated samples
   if (cores == 1) {
 
-    q11 <- apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log.posterior,
+    q11 <- apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
                  data = data) + .logJacobian(samples_4_iter, transTypes, lb, ub)
-    q21 <- apply(.invTransform2Real(gen_samples, lb, ub), 1, log.posterior,
+    q21 <- apply(.invTransform2Real(gen_samples, lb, ub), 1, log_posterior,
                  data = data) + .logJacobian(gen_samples, transTypes, lb, ub)
 
   } else if (cores > 1) {
@@ -202,9 +202,9 @@
       sfClusterEval(sourceCpp(file = rcppFile))
     }
 
-    q11 <- sfApply(.invTransform2Real(samples_4_iter, lb, ub), 1, log.posterior,
+    q11 <- sfApply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
                    data = data) + .logJacobian(samples_4_iter, transTypes, lb, ub)
-    q21 <- sfApply(.invTransform2Real(gen_samples, lb, ub), 1, log.posterior,
+    q21 <- sfApply(.invTransform2Real(gen_samples, lb, ub), 1, log_posterior,
                    data = data) + .logJacobian(gen_samples, transTypes, lb, ub)
 
     sfStop()
@@ -234,16 +234,16 @@
 #' @import rlecuyer
 #' @importFrom Rcpp sourceCpp
 #' @import stats
-.bridge.sampler.warp3 <- function(post.samples, log.posterior, data, lb, ub,
+.bridge.sampler.warp3 <- function(samples, log_posterior, data, lb, ub,
                                  cores, packages, rcppFile, r0, tol) {
 
   # transform parameters to real line
-  tmp <- .transform2Real(post.samples, lb, ub)
+  tmp <- .transform2Real(samples, lb, ub)
   theta_t <- tmp$theta_t
   transTypes <- tmp$transTypes
 
   # split samples for proposal/iterative scheme
-  nr <- nrow(post.samples)
+  nr <- nrow(samples)
   samples4fit_index <- seq_len(nr) %% 2 == TRUE # split samples in even/odd
   samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
   samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
@@ -267,18 +267,18 @@
   # evaluate log likelihood times prior for posterior samples and generated samples
   if (cores == 1) {
 
-    q11 <- log(e^(apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log.posterior,
+    q11 <- log(e^(apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
                         data = data) + .logJacobian(samples_4_iter, transTypes, lb, ub)) +
                  e^(apply(.invTransform2Real(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                              samples_4_iter, lb, ub), 1, log.posterior, data = data) +
+                                              samples_4_iter, lb, ub), 1, log_posterior, data = data) +
                       .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                     samples_4_iter, transTypes, lb, ub)))
     q21 <- log(e^(apply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                            gen_samples %*% t(L), lb, ub), 1, log.posterior, data = data) +
+                                            gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data) +
                     .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                   gen_samples %*% t(L), transTypes, lb, ub)) +
                  e^(apply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                              gen_samples %*% t(L), lb, ub), 1, log.posterior, data = data) +
+                                              gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data) +
                       .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                                     gen_samples %*% t(L), transTypes, lb, ub)))
 
@@ -297,18 +297,18 @@
       sfClusterEval(sourceCpp(file = rcppFile))
     }
 
-    q11 <- log(e^(sfApply(.invTransform2Real(samples_4_iter, lb, ub), 1, log.posterior,
+    q11 <- log(e^(sfApply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
                           data = data) + .logJacobian(samples_4_iter, transTypes, lb, ub)) +
                  e^(sfApply(.invTransform2Real(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                                samples_4_iter, lb, ub), 1, log.posterior, data = data) +
+                                                samples_4_iter, lb, ub), 1, log_posterior, data = data) +
                       .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                     samples_4_iter, transTypes, lb, ub)))
     q21 <- log(e^(sfApply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                              gen_samples %*% t(L), lb, ub), 1, log.posterior, data = data) +
+                                              gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data) +
                     .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                   gen_samples %*% t(L), transTypes, lb, ub)) +
                  e^(sfApply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                                gen_samples %*% t(L), lb, ub), 1, log.posterior, data = data) +
+                                                gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data) +
                       .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                                     gen_samples %*% t(L), transTypes, lb, ub)))
 
@@ -332,41 +332,41 @@
 #' Computes log marginal likelihood via bridge sampling
 #' @export
 #' @title Computes log marginal likelihood via bridge sampling
-#' @name bridge.sampler
-#' @param post.samples matrix with posterior samples (colnames need to correspond to parameter names)
-#' @param log.posterior function for computing log of prior times likelihood
-#' @param data data
-#' @param lb named vector with lower bounds for parameters
-#' @param ub named vector with upper bounds for parameters
-#' @param method either "normal" or "warp3"
-#' @param cores number of cores used for evaluating log.posterior
-#' @param packages character vector with names of packages needed for evaluating log.posterior in parallel (only relevant if cores > 1)
-#' @param rcppFile in case cores > 1 and log.posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores)
-#' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{post.samples} and covariance matrix equal to the sample covariance matrix of \code{post.samples}. When \code{method = "warp3"},
-#' the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix and skew as post.samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
-#' @return a list of the class \code{bridge} with the objects:
+#' @name bridge_sampler
+#' @param samples matrix with posterior samples (colnames need to correspond to parameter names in \code{lb} and \code{ub}).
+#' @param log_posterior function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value).
+#' @param data data.
+#' @param lb named vector with lower bounds for parameters.
+#' @param ub named vector with upper bounds for parameters.
+#' @param method either \code{"normal"} or \code{"warp3"}.
+#' @param cores number of cores used for evaluating \code{log_posterior}.
+#' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).
+#' @param rcppFile in case \code{cores} > 1 and log_posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).
+#' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. When \code{method = "warp3"},
+#' the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix and skew as samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
+#' @return a list of class \code{"bridge"} with components:
 #' \itemize{
-#'  \item \code{logml}: estimate of log marginal likelihood
-#'  \item \code{niter}: number of iterations of the iterative updating scheme
-#'  \item \code{method}: bridge sampling method that was used to obtain estimate
-#'  \item \code{q11}: log.posterior evaluations for posterior samples
-#'  \item \code{q12}: log proposal evaluations for posterior samples
-#'  \item \code{q21}: log.posterior evaluations for samples from proposal
-#'  \item \code{q22}: log proposal evaluations for samples from proposal
+#'  \item \code{logml}: estimate of log marginal likelihood.
+#'  \item \code{niter}: number of iterations of the iterative updating scheme.
+#'  \item \code{method}: bridge sampling method that was used to obtain estimate.
+#'  \item \code{q11}: log_posterior evaluations for posterior samples.
+#'  \item \code{q12}: log proposal evaluations for posterior samples.
+#'  \item \code{q21}: log_posterior evaluations for samples from proposal.
+#'  \item \code{q22}: log proposal evaluations for samples from proposal.
 #' }
 #' @author Quentin F. Gronau
 #' @references
 #' Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. Statistica Sinica, 6, 831-860.
 #'
 #' Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. Journal of Computational and Graphical Statistics, 11(3), 552-586.
-bridge.sampler <- function(post.samples = NULL, log.posterior = NULL, data = NULL,
+bridge_sampler <- function(samples = NULL, log_posterior = NULL, data = NULL,
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
                            packages = NULL, rcppFile = NULL) {
 
   # see Meng & Wong (1996), equation 4.1
 
   out <- do.call(what = paste0(".bridge.sampler.", method),
-          args = list(post.samples = post.samples, log.posterior = log.posterior,
+          args = list(samples = samples, log_posterior = log_posterior,
                       data = data, lb = lb, ub = ub, cores = cores,
                       packages = packages, rcppFile = rcppFile, r0 = 0,
                       tol = 1e-10))
