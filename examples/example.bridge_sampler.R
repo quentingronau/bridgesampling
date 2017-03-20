@@ -194,9 +194,9 @@ names(lb) <- names(ub) <- colnames(s)
 lb[[ "invTau2" ]] <- 0
 
 # compute log marginal likelihood via bridge sampling
-H0.bridge <- bridge.sampler(post.samples = s, data = data,
-                            log.posterior = log.posterior.H0, lb = lb,
-                            ub = ub)
+H0.bridge <- bridge_sampler(samples = s, data = data,
+                            log_posterior = log.posterior.H0, lb = lb,
+                            ub = ub, cores = 4)
 
 # compute "exact" marginal likelihood
 mlH0.exact <- mH0(y, rel.tol = 10^(-20), sigma2 = sigma2, alpha = alpha, beta = beta)
@@ -226,9 +226,9 @@ names(lb) <- names(ub) <- colnames(s)
 lb[[ "invTau2" ]] <- 0
 
 # compute log marginal likelihood via bridge sampling
-H1.bridge <- bridge.sampler(post.samples = s, data = data,
-                            log.posterior = log.posterior.H1, lb = lb,
-                            ub = ub)
+H1.bridge <- bridge_sampler(samples = s, data = data,
+                            log_posterior = log.posterior.H1, lb = lb,
+                            ub = ub, cores = 4)
 
 # compute "exact" marginal likelihood
 mlH1.exact <- mH1(y, rel.tol = 10^(-20), sigma2 = sigma2, alpha = alpha,

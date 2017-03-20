@@ -6,7 +6,7 @@
 \usage{
 bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
   lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
-  rcppFile = NULL)
+  varlist = NULL, rcppFile = NULL)
 }
 \arguments{
 \item{samples}{matrix with posterior samples (colnames need to correspond to parameter names in \code{lb} and \code{ub}).}
@@ -24,6 +24,8 @@ bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
 \item{cores}{number of cores used for evaluating \code{log_posterior}.}
 
 \item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).}
+
+\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).}
 
 \item{rcppFile}{in case \code{cores} > 1 and log_posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).}
 }
@@ -243,9 +245,9 @@ names(lb) <- names(ub) <- colnames(s)
 lb[[ "invTau2" ]] <- 0
 
 # compute log marginal likelihood via bridge sampling
-H0.bridge <- bridge.sampler(post.samples = s, data = data,
-                            log.posterior = log.posterior.H0, lb = lb,
-                            ub = ub)
+H0.bridge <- bridge_sampler(samples = s, data = data,
+                            log_posterior = log.posterior.H0, lb = lb,
+                            ub = ub, cores = 4)
 
 # compute "exact" marginal likelihood
 mlH0.exact <- mH0(y, rel.tol = 10^(-20), sigma2 = sigma2, alpha = alpha, beta = beta)
@@ -275,9 +277,9 @@ names(lb) <- names(ub) <- colnames(s)
 lb[[ "invTau2" ]] <- 0
 
 # compute log marginal likelihood via bridge sampling
-H1.bridge <- bridge.sampler(post.samples = s, data = data,
-                            log.posterior = log.posterior.H1, lb = lb,
-                            ub = ub)
+H1.bridge <- bridge_sampler(samples = s, data = data,
+                            log_posterior = log.posterior.H1, lb = lb,
+                            ub = ub, cores = 4)
 
 # compute "exact" marginal likelihood
 mlH1.exact <- mH1(y, rel.tol = 10^(-20), sigma2 = sigma2, alpha = alpha,

@@ -4,7 +4,7 @@ Title: Bridge Sampling for Obtaining Marginal Likelihoods
 Version: 0.1-0
 Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
              email="Quentin.F.Gronau@gmail.com"))
-Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, snow, snowfall, rlecuyer, Rcpp
+Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel, rlecuyer, Rcpp
 Suggests: testthat
 Description: Provides functions for estimating marginal likelihoods, Bayes factors,
              posterior model probabilities, and normalizing constants in general,
