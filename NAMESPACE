@@ -3,6 +3,7 @@
 S3method(print,bridge)
 export(bridge_sampler)
 export(compute_bf)
+export(compute_post_prob)
 export(error_measures)
 import(Brobdingnag)
 importFrom(Matrix,nearPD)

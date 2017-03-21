@@ -1,0 +1,40 @@
+#' Computes posterior model probabilities.
+#' @export
+#' @title Computing posterior model probabilities
+#' @param ... outputs from \code{\link{bridge_sampler}} of class \code{bridge}.
+#' @param prior_prob numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).
+#' @return numeric vector with posterior model probabilities.
+#' @author Quentin F. Gronau
+#' @references
+compute_post_prob <- function(..., prior_prob) {
+
+  dots <- list(...)
+  mc <- match.call()
+  if(!is.null(names(mc))) {
+    mc <- mc[names(mc) != "prior_prob"]
+  }
+
+  mc <- mc[-1]
+
+  if( ! all(vapply(dots, FUN = function(x) class(x) == "bridge", FUN.VALUE = TRUE)))
+    stop("Not all passed objects are of class 'bridge'.")
+
+  if(missing(prior_prob))
+    prior_prob <- rep(1/length(dots), length(dots))
+
+  if(!isTRUE(all.equal(sum(prior_prob), 1)))
+    stop("Prior model probabilities do not sum to one.")
+
+  if(length(mc) != length(prior_prob))
+    stop("Number of objects given needs to match number of elements in prior_prob.")
+
+  logml <- vapply(dots, function(x) x$logml, FUN.VALUE = 0)
+  post_prob <- exp(logml)*prior_prob / sum(exp(logml)*prior_prob)
+  names(post_prob) <- make.unique(as.character(mc))
+
+  if(!isTRUE(all.equal(sum(post_prob), 1)))
+    stop("Posterior model probabilities do not sum to one.")
+
+  return(post_prob)
+
+}
