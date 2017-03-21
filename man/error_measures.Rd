@@ -2,7 +2,7 @@
 % Please edit documentation in R/error_measures.R
 \name{error_measures}
 \alias{error_measures}
-\title{Computes error measures for estimated marginal likelihood}
+\title{Computing error measures for estimated marginal likelihood}
 \usage{
 error_measures(bridgeObject)
 }
@@ -18,11 +18,10 @@ a list with the objects:
 }
 }
 \description{
-Computes error measures for estimated marginal likelihood
+Computes error measures for estimated marginal likelihood.
 }
 \details{
-Computes approximate error measures for marginal likelihood bridge sampling estimates.
-based on Fruehwirth-Schnatter (2004).
+Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
 }
 \references{
 Frühwirth‐Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. The Econometrics Journal, 7, 143-167.

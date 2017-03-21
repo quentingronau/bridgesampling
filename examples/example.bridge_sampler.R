@@ -245,7 +245,7 @@ print(ml.comparison.H1)
 #####################
 
 # compute bridge sampling Bayes factor
-BF.bridge <- exp(H0.bridge$logml - H1.bridge$logml)
+BF.bridge <- compute_bf(H0.bridge, H1.bridge)
 
 # compute "exact" Bayes factor
 BF.exact <- mlH0.exact/mlH1.exact

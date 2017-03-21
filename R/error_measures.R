@@ -1,9 +1,8 @@
-#' Computes error measures for estimated marginal likelihood
+#' Computes error measures for estimated marginal likelihood.
 #' @export
-#' @title Computes error measures for estimated marginal likelihood
+#' @title Computing error measures for estimated marginal likelihood
 #' @param bridgeObject output from \code{\link{bridge_sampler}}.
-#' @details Computes approximate error measures for marginal likelihood bridge sampling estimates.
-#' based on Fruehwirth-Schnatter (2004).
+#' @details Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
 #' @return a list with the objects:
 #' \itemize{
 #'  \item \code{re2}: approximate relative mean squared error for marginal likelihood estimate

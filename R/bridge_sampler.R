@@ -1,8 +1,3 @@
-# library(mvtnorm)
-# library(Matrix)
-# library(Brobdingnag)
-# library(stringr)
-# library(coda)
 
 .transform2Real <- function(theta, lb, ub) {
 
@@ -147,8 +142,8 @@
 }
 
 .bridge.sampler.normal <- function(samples, log_posterior, data, lb, ub,
-                                   cores, packages, varlist, rcppFile,
-                                   maxiter, silent, r0, tol) {
+                                   cores, packages, varlist, envir,
+                                   rcppFile, maxiter, silent, r0, tol) {
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
@@ -184,13 +179,17 @@
   } else if (cores > 1) {
 
     cl <- parallel::makeCluster(cores, useXDR = FALSE)
-    sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x, character.only = TRUE))
-    parallel::clusterExport(cl = cl, varlist = varlist)
+    sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x,
+                                                       character.only = TRUE))
+
+    parallel::clusterExport(cl = cl, varlist = varlist, envir = envir)
 
     if ( ! is.null(rcppFile)) {
       parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
       parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
       parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
+    } else if (is.character(log_posterior)) {
+        parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
     }
 
     q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub), log_posterior,
@@ -216,8 +215,8 @@
 }
 
 .bridge.sampler.warp3 <- function(samples, log_posterior, data, lb, ub,
-                                  cores, packages, varlist, rcppFile,
-                                  maxiter, silent, r0, tol) {
+                                  cores, packages, varlist, envir,
+                                  rcppFile, maxiter, silent, r0, tol) {
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
@@ -268,32 +267,39 @@
 
     cl <- parallel::makeCluster(cores, useXDR = FALSE)
     sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x, character.only = TRUE))
-    parallel::clusterExport(cl = cl, varlist = varlist)
+
+    parallel::clusterExport(cl = cl, varlist = varlist, envir = envir)
 
     if ( ! is.null(rcppFile)) {
       parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
       parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
       parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
+    } else if (is.character(log_posterior)) {
+        parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
     }
 
     q11 <- log(e^(parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub),
                                       log_posterior, data = data) +
                     .logJacobian(samples_4_iter, transTypes, lb, ub)) +
-                 e^(parallel::parRapply(cl = cl, x = .invTransform2Real(matrix(2*m, nrow = n_post,
-                                                                               ncol = length(m),
-                                                                               byrow = TRUE) -
-                                                                          samples_4_iter, lb, ub),
+                 e^(parallel::parRapply(cl = cl,
+                                        x = .invTransform2Real(matrix(2*m, nrow = n_post,
+                                                                      ncol = length(m), byrow = TRUE) -
+                                                                 samples_4_iter, lb, ub),
                                         log_posterior, data = data) +
                       .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                      samples_4_iter, transTypes, lb, ub)))
-    q21 <- log(e^(parallel::parRapply(cl = cl, x = .invTransform2Real(matrix(m, nrow = n_post,
-                                                                             ncol = length(m), byrow = TRUE) -
-                                               gen_samples %*% t(L), lb, ub), log_posterior, data = data) +
+    q21 <- log(e^(parallel::parRapply(cl = cl,
+                                      x = .invTransform2Real(matrix(m, nrow = n_post,
+                                                                    ncol = length(m), byrow = TRUE) -
+                                                               gen_samples %*% t(L), lb, ub),
+                                      log_posterior, data = data) +
                     .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                    gen_samples %*% t(L), transTypes, lb, ub)) +
-                 e^(parallel::parRapply(cl = cl, x = .invTransform2Real(matrix(m, nrow = n_post, ncol = length(m),
-                                                                               byrow = TRUE) +
-                                                 gen_samples %*% t(L), lb, ub), log_posterior, data = data) +
+                 e^(parallel::parRapply(cl = cl,
+                                        x = .invTransform2Real(matrix(m, nrow = n_post,
+                                                                      ncol = length(m),byrow = TRUE) +
+                                                                 gen_samples %*% t(L), lb, ub),
+                                        log_posterior, data = data) +
                       .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                                      gen_samples %*% t(L), transTypes, lb, ub)))
 
@@ -320,19 +326,26 @@
 #' @title Computes log marginal likelihood via bridge sampling
 #' @name bridge_sampler
 #' @param samples matrix with posterior samples (colnames need to correspond to parameter names in \code{lb} and \code{ub}).
-#' @param log_posterior function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value).
+#' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores  > 1} see \code{Details}.
 #' @param data data.
 #' @param lb named vector with lower bounds for parameters.
 #' @param ub named vector with upper bounds for parameters.
 #' @param method either \code{"normal"} or \code{"warp3"}.
 #' @param cores number of cores used for evaluating \code{log_posterior}.
-#' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).
-#' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores} > 1 as those objects will be exported to the nodes). Those objects need to exist in the \code{\link{.GlobalEnv}}.
-#' @param rcppFile in case \code{cores} > 1 and log_posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).
+#' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1}).
+#' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
+#' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
+#' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).
 #' @param maxiter maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.
-#' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE
+#' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
 #' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. When \code{method = "warp3"},
-#' the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix and skew as samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
+#' the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
+#'
+#' \subsection{Parallel Computation}{
+#' For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
+#'
+#'  For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file given in \code{rcppFile}.
+#' }
 #' @return a list of class \code{"bridge"} with components:
 #' \itemize{
 #'  \item \code{logml}: estimate of log marginal likelihood.
@@ -358,15 +371,15 @@
 #' @importFrom stats qnorm pnorm dnorm median cov var
 bridge_sampler <- function(samples = NULL, log_posterior = NULL, data = NULL,
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
-                           packages = NULL, varlist = NULL, rcppFile = NULL,
-                           maxiter = 1000, silent = FALSE) {
+                           packages = NULL, varlist = NULL, envir = .GlobalEnv,
+                           rcppFile = NULL, maxiter = 1000, silent = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
 
   out <- do.call(what = paste0(".bridge.sampler.", method),
                  args = list(samples = samples, log_posterior = log_posterior,
                              data = data, lb = lb, ub = ub, cores = cores,
-                             packages = packages, varlist = varlist,
+                             packages = packages, varlist = varlist, envir = envir,
                              rcppFile = rcppFile, maxiter = maxiter,
                              silent = silent, r0 = 0, tol = 1e-10))
   class(out) <- "bridge"

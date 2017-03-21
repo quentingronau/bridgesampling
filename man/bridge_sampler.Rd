@@ -6,12 +6,13 @@
 \usage{
 bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
   lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
-  varlist = NULL, rcppFile = NULL, maxiter = 1000, silent = FALSE)
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+  silent = FALSE)
 }
 \arguments{
 \item{samples}{matrix with posterior samples (colnames need to correspond to parameter names in \code{lb} and \code{ub}).}
 
-\item{log_posterior}{function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value).}
+\item{log_posterior}{function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores  > 1} see \code{Details}.}
 
 \item{data}{data.}
 
@@ -23,15 +24,17 @@ bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
 
 \item{cores}{number of cores used for evaluating \code{log_posterior}.}
 
-\item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores} > 1).}
+\item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1}).}
 
-\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores} > 1 as those objects will be exported to the nodes). Those objects need to exist in the \code{\link{.GlobalEnv}}.}
+\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.}
 
-\item{rcppFile}{in case \code{cores} > 1 and log_posterior is an Rcpp function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).}
+\item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
+
+\item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).}
 
 \item{maxiter}{maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.}
 
-\item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE}
+\item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.}
 }
 \value{
 a list of class \code{"bridge"} with components:
@@ -50,7 +53,13 @@ Computes log marginal likelihood via bridge sampling
 }
 \details{
 Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. When \code{method = "warp3"},
-the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix and skew as samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
+the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
+
+\subsection{Parallel Computation}{
+For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
+
+ For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file given in \code{rcppFile}.
+}
 }
 \examples{
 \dontrun{
@@ -300,7 +309,7 @@ print(ml.comparison.H1)
 #####################
 
 # compute bridge sampling Bayes factor
-BF.bridge <- exp(H0.bridge$logml - H1.bridge$logml)
+BF.bridge <- compute_bf(H0.bridge, H1.bridge)
 
 # compute "exact" Bayes factor
 BF.exact <- mlH0.exact/mlH1.exact
