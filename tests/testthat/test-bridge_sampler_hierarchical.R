@@ -1,5 +1,5 @@
 
-context('basic bridge sampling behavior')
+context('basic bridge sampling behavior hierarchical')
 
 test_that("bridge sampler matches anlytical value hierarchical normal example", {
 
@@ -137,10 +137,10 @@ test_that("bridge sampler matches anlytical value hierarchical normal example", 
   # compute log marginal likelihood via bridge sampling
   H1.bridge.normal <- bridge_sampler(samples = s, data = data,
                               log_posterior = log.posterior.H1, lb = lb,
-                              ub = ub, method = "normal")
+                              ub = ub, method = "normal", silent = TRUE)
   H1.bridge.warp3 <- bridge_sampler(samples = s, data = data,
                               log_posterior = log.posterior.H1, lb = lb,
-                              ub = ub, method = "warp3")
+                              ub = ub, method = "warp3", silent = TRUE)
 
   # compute "exact" marginal likelihood
   mlH1.exact <- mH1(data$y, rel.tol = 10^(-20), sigma2 = data$sigma2, alpha = data$alpha,
