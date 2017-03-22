@@ -5,7 +5,6 @@
 #' @param prior_prob numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).
 #' @return numeric vector with posterior model probabilities.
 #' @author Quentin F. Gronau
-#' @references
 compute_post_prob <- function(..., prior_prob) {
 
   dots <- list(...)

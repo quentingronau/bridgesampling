@@ -17,7 +17,7 @@
 error_measures <- function(bridgeObject) {
 
   if (bridgeObject$method == "warp3")
-    stop("error.measures not implemented for warp3 method. We recommend to run
+    stop("error_measures not implemented for warp3 method. We recommend to run
          the warp3 procedure multiple times to assess the uncertainty of the
          estimate.")
 

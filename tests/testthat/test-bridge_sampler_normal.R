@@ -29,10 +29,34 @@ test_that("bridge sampler matches anlytical value normal example", {
                                  data = NULL, lb = lb, ub = ub,
                                  method = "warp3", silent = TRUE)
 
-
   expect_equal(bridge_normal$logml, expected = log(2*pi), tolerance = 0.01)
   expect_equal(bridge_warp3$logml, expected = log(2*pi), tolerance = 0.01)
   expect_equal(bridge_normal_c$logml, expected = log(2*pi), tolerance = 0.01)
   expect_equal(bridge_warp3_c$logml, expected = log(2*pi), tolerance = 0.01)
+
+  # check error_measures
+  err <- error_measures(bridge_normal)
+  expect_equal(names(err), c("re2", "cv", "percentage"))
+  expect_is(unlist(err), "numeric")
+
+  expect_error(error_measures(bridge_warp3), "not implemented for warp3")
+
+  ### these are meant to check the compute_bf and compute_post_prob functions and not as a meaningful comparisons
+  bf <- compute_bf(bridgeObject1 = bridge_normal, bridgeObject2 = bridge_warp3)
+  expect_is(bf, "numeric")
+
+  # without prior_prob
+  post1 <- compute_post_prob(bridge_normal, bridge_warp3, bridge_normal_c, bridge_warp3_c)
+  expect_equal(sum(post1), 1)
+
+  # with prior_prob
+  post2 <- compute_post_prob(bridge_normal, bridge_warp3, bridge_normal_c,
+                             bridge_warp3_c, prior_prob = c(0.2, 0.1, 0.25, 0.45))
+  expect_equal(sum(post2), 1)
+
+  # with incorrect prior_prob
+  expect_error(compute_post_prob(bridge_normal, bridge_warp3, bridge_normal_c,
+                                 bridge_warp3_c, prior_prob = c(0.2, 0.1, 0.25, 0.55)),
+               "do not sum to one")
 
 })
