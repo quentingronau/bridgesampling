@@ -3,8 +3,8 @@ context('basic bridge sampling behavior hierarchical parallel')
 
 test_that("bridge sampler matches anlytical value hierarchical normal example", {
 
-  # testthat::skip_on_cran()
-  # testthat::skip_on_travis()
+  testthat::skip_on_cran()
+  testthat::skip_on_travis()
 
   # library(R2jags)
   # library(bridgesampling)

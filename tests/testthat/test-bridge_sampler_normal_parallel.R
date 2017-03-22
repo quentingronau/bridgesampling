@@ -3,8 +3,8 @@ context('basic bridge sampling behavior normal parallel')
 
 test_that("bridge sampler matches anlytical value normal example", {
 
-  # testthat::skip_on_cran()
-  # testthat::skip_on_travis()
+  testthat::skip_on_cran()
+  testthat::skip_on_travis()
 
   # library(bridgesampling)
   library(mvtnorm)
