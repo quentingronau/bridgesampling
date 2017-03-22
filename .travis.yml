@@ -7,4 +7,4 @@ r:
   - devel
 r_binary_packages:
   - rjags
-r_build_args: --no-build-vignettes
+r_build_args: --compact-vignettes="gs+qpdf"
