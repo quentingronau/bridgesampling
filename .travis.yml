@@ -7,3 +7,4 @@ r:
   - devel
 r_binary_packages:
   - rjags
+r_build_args: --no-build-vignettes
