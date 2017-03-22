@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 development.R
 examples
+^\.travis\.yml$
+README.md
+CONDUCT.md
