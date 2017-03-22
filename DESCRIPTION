@@ -1,13 +1,16 @@
 Package: bridgesampling
 Type: Package
-Title: Bridge Sampling for Obtaining Marginal Likelihoods
+Title: Bridge Sampling Implementation for Obtaining Marginal Likelihoods, Bayes factors, and Posterior Model Probabilities
 Version: 0.1-0
 Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
              email="Quentin.F.Gronau@gmail.com"), person(given="Henrik",
-             family="Singmann", role="aut"))
+             family="Singmann", role="aut"), person(given="Jonathan J.",
+             family="Forster", role="ctb"))
 Depends: R (>= 3.0.0)
-Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel
-Suggests: testthat, Rcpp, RcppEigen, R2jags
+Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel, scales
+Suggests: testthat, Rcpp, RcppEigen, R2jags,
+    knitr,
+    rmarkdown
 Description: Provides functions for estimating marginal likelihoods, Bayes factors,
              posterior model probabilities, and normalizing constants in general,
              via different versions of bridge sampling (see Meng & Wong, 1996).
@@ -15,3 +18,4 @@ License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
+VignetteBuilder: knitr

@@ -37,7 +37,7 @@ test_that("bridge sampler matches anlytical value normal example", {
   # check error_measures
   err <- error_measures(bridge_normal)
   expect_equal(names(err), c("re2", "cv", "percentage"))
-  expect_is(unlist(err), "numeric")
+  expect_is(unlist(err), "character")
 
   expect_error(error_measures(bridge_warp3), "not implemented for warp3")
 

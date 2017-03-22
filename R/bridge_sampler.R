@@ -323,9 +323,9 @@
 
 #' Computes log marginal likelihood via bridge sampling
 #' @export
-#' @title Computes log marginal likelihood via bridge sampling
+#' @title Compute log marginal likelihood via bridge sampling
 #' @name bridge_sampler
-#' @param samples matrix with posterior samples (colnames need to correspond to parameter names in \code{lb} and \code{ub}).
+#' @param samples matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).
 #' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores  > 1} see \code{Details}.
 #' @param data data.
 #' @param lb named vector with lower bounds for parameters.
@@ -338,8 +338,9 @@
 #' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).
 #' @param maxiter maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
-#' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. When \code{method = "warp3"},
-#' the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} usually yields more precise results, but it takes approximately twice as long as \code{method = "normal"}.
+#' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (2017).
+#'
+#'   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
 #'
 #' \subsection{Parallel Computation}{
 #' For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
@@ -358,10 +359,13 @@
 #' }
 #' @author Quentin F. Gronau
 #' @references
+#' Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). A tutorial on bridge sampling. Manuscript submitted for publication. https://arxiv.org/abs/1703.05984
+#'
 #' Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. Statistica Sinica, 6, 831-860.
 #'
 #' Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. Journal of Computational and Graphical Statistics, 11(3), 552-586.
 #'
+#'Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. Computational Statistics & Data Analysis, 54, 3269 - 3288.
 #' @example examples/example.bridge_sampler.R
 #'
 #' @importFrom mvtnorm rmvnorm dmvnorm

@@ -10,6 +10,7 @@
 #'  \item \code{percentage}: percentage error of marginal likelihood estimate
 #' }
 #' @author Quentin F. Gronau
+#' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
 #' @references
 #' Frühwirth‐Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. The Econometrics Journal, 7, 143-167.
 #' @import Brobdingnag
@@ -49,7 +50,7 @@ error_measures <- function(bridgeObject) {
   cv <- sqrt(re2)
 
   # convert to percentage error
-  percentage <- cv*100
+  percentage <- scales::percent(cv)
   return(list(re2 = re2, cv = cv, percentage = percentage))
 
 }

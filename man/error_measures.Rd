@@ -23,6 +23,9 @@ Computes error measures for estimated marginal likelihood.
 \details{
 Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
 }
+\note{
+For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
+}
 \references{
 Frühwirth‐Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. The Econometrics Journal, 7, 143-167.
 }
