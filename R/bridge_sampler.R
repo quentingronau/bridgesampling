@@ -394,6 +394,7 @@ bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NUL
 
 }
 
+#' @method print bridge
 #' @export
 print.bridge <- function(x, ...) {
 
