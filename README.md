@@ -18,6 +18,8 @@ For additional information, see the [vignette](https://htmlpreview.github.io/?ht
 
 - To install the latest development version you will need the [`devtools`](https://github.com/hadley/devtools) package: 
   `devtools::install_github("quentingronau/bridgesampling@master")`
+  
+- For building, use `--compact-vignettes="gs+qpdf"`
 
 ----
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.

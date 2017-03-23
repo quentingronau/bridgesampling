@@ -11,7 +11,7 @@ Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel, scales
 Suggests: testthat, Rcpp, RcppEigen, R2jags, knitr, rmarkdown, R.rsp
 Description: Provides functions for estimating marginal likelihoods, Bayes factors,
              posterior model probabilities, and normalizing constants in general,
-             via different versions of bridge sampling (see Meng & Wong, 1996,
+             via different versions of bridge sampling (Meng & Wong, 1996,
              <http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm>).
 License: GPL (>=2)
 LazyData: true
