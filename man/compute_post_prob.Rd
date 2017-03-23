@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_post_prob.R
 \name{compute_post_prob}
 \alias{compute_post_prob}
-\title{Computing posterior model probabilities}
+\title{Posterior Model Probabilities from Marginal Likelihoods}
 \usage{
 compute_post_prob(..., prior_prob)
 }

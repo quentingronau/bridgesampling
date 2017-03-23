@@ -2,7 +2,7 @@
 % Please edit documentation in R/bridge_sampler.R
 \name{bridge_sampler}
 \alias{bridge_sampler}
-\title{Compute log marginal likelihood via bridge sampling}
+\title{Log Marginal Likelihood via Bridge Sampling}
 \usage{
 bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
   lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
@@ -59,7 +59,7 @@ Bridge sampling is implemented as described in Meng and Wong (1996, see equation
   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
 
   Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter.
-  Furthermore, constraints that depend on multiple parameters of the model are not supported. For example, this excludes parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
+  Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
 \subsection{Parallel Computation}{
 For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.

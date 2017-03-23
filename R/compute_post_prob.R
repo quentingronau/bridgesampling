@@ -1,6 +1,6 @@
 #' Computes posterior model probabilities.
 #' @export
-#' @title Computing posterior model probabilities
+#' @title Posterior Model Probabilities from Marginal Likelihoods
 #' @param ... objects of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
 #' @param prior_prob numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models are equally likely a priori).
 #' @return Numeric vector with posterior model probabilities.

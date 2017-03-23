@@ -2,7 +2,7 @@
 % Please edit documentation in R/error_measures.R
 \name{error_measures}
 \alias{error_measures}
-\title{Computing error measures for estimated marginal likelihood}
+\title{Error Measures for Estimated Marginal Likelihood}
 \usage{
 error_measures(bridge_object)
 }

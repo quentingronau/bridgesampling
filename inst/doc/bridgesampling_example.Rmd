@@ -168,7 +168,7 @@ ub_H1 <- rep(Inf, ncol(samples_H1))
 names(lb_H1) <- names(ub_H1) <- colnames(samples_H1)
 lb_H1[[ "invTau2" ]] <- 0
 ```
-Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. For example, this excludes parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
+Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
 ## Computing the (Log) Marginal Likelihoods
 Now we are ready to compute the log marginal likelihoods using the `bridge_sampler` function. We use `silent = TRUE` to suppress printing the number of iterations to the console:

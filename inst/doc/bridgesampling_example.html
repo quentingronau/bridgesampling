@@ -222,7 +222,7 @@ lb_H1 &lt;-<span class="st"> </span><span class="kw">rep</span>(-<span class="ot
 ub_H1 &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">Inf</span>, <span class="kw">ncol</span>(samples_H1))
 <span class="kw">names</span>(lb_H1) &lt;-<span class="st"> </span><span class="kw">names</span>(ub_H1) &lt;-<span class="st"> </span><span class="kw">colnames</span>(samples_H1)
 lb_H1[[ <span class="st">&quot;invTau2&quot;</span> ]] &lt;-<span class="st"> </span><span class="dv">0</span></code></pre></div>
-<p>Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. For example, this excludes parameters that constitute a covariance matrix or sets of parameters that need to sum to one.</p>
+<p>Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.</p>
 </div>
 <div id="computing-the-log-marginal-likelihoods" class="section level2">
 <h2>Computing the (Log) Marginal Likelihoods</h2>

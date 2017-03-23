@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_bf.R
 \name{compute_bf}
 \alias{compute_bf}
-\title{Computing the Bayes factor}
+\title{Bayes Factor from Marginal Likelihoods}
 \usage{
 compute_bf(bridge_object1, bridge_object2, log = FALSE)
 }

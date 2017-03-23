@@ -323,7 +323,7 @@
 
 #' Computes log marginal likelihood via bridge sampling.
 #' @export
-#' @title Compute log marginal likelihood via bridge sampling
+#' @title Log Marginal Likelihood via Bridge Sampling
 #' @name bridge_sampler
 #' @param samples matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).
 #' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.
@@ -344,7 +344,7 @@
 #'   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
 #'
 #'   Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter.
-#'   Furthermore, constraints that depend on multiple parameters of the model are not supported. For example, this excludes parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
+#'   Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 #'
 #' \subsection{Parallel Computation}{
 #' For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.

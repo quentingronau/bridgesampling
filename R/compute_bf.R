@@ -1,6 +1,6 @@
 #' Computes the Bayes factor for a model compairson between two models.
 #' @export
-#' @title Computing the Bayes factor
+#' @title Bayes Factor from Marginal Likelihoods
 #' @param bridge_object1 an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
 #' @param bridge_object2 an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
 #' @param log Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.
