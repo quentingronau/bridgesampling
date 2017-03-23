@@ -129,7 +129,7 @@ ub_H1 <- rep(Inf, ncol(samples_H1))
 names(lb_H1) <- names(ub_H1) <- colnames(samples_H1)
 lb_H1[[ "invTau2" ]] <- 0
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------
 # compute log marginal likelihood via bridge sampling for H0
 H0.bridge <- bridge_sampler(samples = samples_H0, data = data_H0,
                             log_posterior = log_posterior_H0, lb = lb_H0,
@@ -142,22 +142,22 @@ H1.bridge <- bridge_sampler(samples = samples_H1, data = data_H1,
                             ub = ub_H1, silent = TRUE)
 print(H1.bridge)
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------
 # compute percentage errors
 print(error_measures(H0.bridge)$percentage)
 print(error_measures(H1.bridge)$percentage)
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------
 # compute Bayes factor
 BF01 <- compute_bf(H0.bridge, H1.bridge)
 print(BF01)
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------
 # compute posterior model probabilities (assuming equal prior model probabilities)
 post1 <- compute_post_prob(H0.bridge, H1.bridge)
 print(post1)
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------
 # compute posterior model probabilities (using user-specified prior model probabilities)
 post2 <- compute_post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
