@@ -9,6 +9,8 @@ Specifically, it allows one to compute marginal likelihoods, Bayes factors, and 
 
 Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. *Statistica Sinica*, 6, 831-860.
 
+For additional information, see the [vignette](https://htmlpreview.github.io/?https://github.com/quentingronau/bridgesampling/blob/master/inst/doc/hierarchical_normal_example.html).
+
 
 ## Installation
 
