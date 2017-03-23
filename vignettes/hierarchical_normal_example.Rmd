@@ -45,7 +45,7 @@ alpha <- 1
 beta <- 1
 ```
 
-## Fitting the Model
+## Fitting the Models
 Now we can fit the null and the alternative model in `Jags` (note that it is necessary to install `Jags` for this). One usually requires a larger number of posterior sample for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples (i.e., 50,000 post burn-in samples per chain) for this comparatively simple model.
 ```{r, message = FALSE, results='hide'}
 library(R2jags)
