@@ -32,7 +32,7 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 
 \item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 
-\item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).}
+\item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (needs to be compiled on all cores).}
 
 \item{maxiter}{maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.}
 
@@ -242,11 +242,11 @@ print(error_measures(H1.bridge)$percentage)
 BF01 <- compute_bf(H0.bridge, H1.bridge)
 print(BF01)
 
-# assuming equal prior model probabilities
+# compute posterior model probabilities (assuming equal prior model probabilities)
 post1 <- compute_post_prob(H0.bridge, H1.bridge)
 print(post1)
 
-# using user-specified prior model probabilities
+# compute posterior model probabilities (using user-specified prior model probabilities)
 post2 <- compute_post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
 

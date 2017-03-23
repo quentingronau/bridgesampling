@@ -3,7 +3,7 @@
 #' @title Computing posterior model probabilities
 #' @param ... outputs from \code{\link{bridge_sampler}} of class \code{bridge}.
 #' @param prior_prob numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).
-#' @return numeric vector with posterior model probabilities.
+#' @return Numeric vector with posterior model probabilities.
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
 compute_post_prob <- function(..., prior_prob) {

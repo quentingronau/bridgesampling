@@ -5,9 +5,9 @@
 #' @details Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
 #' @return a list with the objects:
 #' \itemize{
-#'  \item \code{re2}: approximate relative mean squared error for marginal likelihood estimate
-#'  \item \code{cv}: coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased)
-#'  \item \code{percentage}: percentage error of marginal likelihood estimate
+#'  \item \code{re2}: approximate relative mean squared error for marginal likelihood estimate.
+#'  \item \code{cv}: coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased).
+#'  \item \code{percentage}: percentage error of marginal likelihood estimate.
 #' }
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.

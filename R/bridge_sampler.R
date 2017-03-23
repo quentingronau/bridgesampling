@@ -336,7 +336,7 @@
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1}).
 #' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
 #' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
-#' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, rcppFile specifies the path to the cpp file (needs to be compiled on all cores).
+#' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (needs to be compiled on all cores).
 #' @param maxiter maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
 #' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (2017).

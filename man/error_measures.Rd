@@ -12,9 +12,9 @@ error_measures(bridgeObject)
 \value{
 a list with the objects:
 \itemize{
- \item \code{re2}: approximate relative mean squared error for marginal likelihood estimate
- \item \code{cv}: coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased)
- \item \code{percentage}: percentage error of marginal likelihood estimate
+ \item \code{re2}: approximate relative mean squared error for marginal likelihood estimate.
+ \item \code{cv}: coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased).
+ \item \code{percentage}: percentage error of marginal likelihood estimate.
 }
 }
 \description{

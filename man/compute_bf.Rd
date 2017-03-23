@@ -14,7 +14,7 @@ compute_bf(bridgeObject1, bridgeObject2, log = FALSE)
 \item{log}{Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.}
 }
 \value{
-value of the Bayes factor (scalar)
+Value of the Bayes factor (scalar).
 }
 \description{
 Computes the Bayes factor for a model compairson between two models.

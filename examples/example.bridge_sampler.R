@@ -173,11 +173,11 @@ print(error_measures(H1.bridge)$percentage)
 BF01 <- compute_bf(H0.bridge, H1.bridge)
 print(BF01)
 
-# assuming equal prior model probabilities
+# compute posterior model probabilities (assuming equal prior model probabilities)
 post1 <- compute_post_prob(H0.bridge, H1.bridge)
 print(post1)
 
-# using user-specified prior model probabilities
+# compute posterior model probabilities (using user-specified prior model probabilities)
 post2 <- compute_post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
 

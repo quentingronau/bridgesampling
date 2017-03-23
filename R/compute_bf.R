@@ -5,7 +5,7 @@
 #' @param bridgeObject2 output from \code{\link{bridge_sampler}}.
 #' @param log Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.
 #' @details Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{bridgeObject1} over the model associated with \code{bridgeObject2}.
-#' @return value of the Bayes factor (scalar)
+#' @return Value of the Bayes factor (scalar).
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
 #' @references

@@ -12,7 +12,7 @@ compute_post_prob(..., prior_prob)
 \item{prior_prob}{numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).}
 }
 \value{
-numeric vector with posterior model probabilities.
+Numeric vector with posterior model probabilities.
 }
 \description{
 Computes posterior model probabilities.
