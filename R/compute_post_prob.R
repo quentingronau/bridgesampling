@@ -5,7 +5,7 @@
 #' @param prior_prob numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).
 #' @return Numeric vector with posterior model probabilities.
 #' @author Quentin F. Gronau
-#' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
+#' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \code{vignette("bridgesampling_example")}.
 compute_post_prob <- function(..., prior_prob) {
 
   dots <- list(...)

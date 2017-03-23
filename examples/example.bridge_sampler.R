@@ -3,6 +3,7 @@
 ##            Standard Normal Distribution
 ## ------------------------------------------------------------------------
 
+library(bridgesampling)
 library(mvtnorm)
 
 samples <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
@@ -26,6 +27,9 @@ print(cbind(bridge_result$logml, analytical))
 ## ------------------------------------------------------------------------
 ## Example 2: Hierarchical Normal Model
 ## ------------------------------------------------------------------------
+
+# for a full description of the example, see
+vignette("bridgesampling_example")
 
 library(R2jags)
 

@@ -18,7 +18,7 @@ Numeric vector with posterior model probabilities.
 Computes posterior model probabilities.
 }
 \note{
-For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
+For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \code{vignette("bridgesampling_example")}.
 }
 \author{
 Quentin F. Gronau

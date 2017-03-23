@@ -12,7 +12,7 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 \arguments{
 \item{samples}{matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).}
 
-\item{log_posterior}{function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores  > 1} see \code{Details}.}
+\item{log_posterior}{function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.}
 
 \item{...}{additional arguments passed to \code{log_posterior}.}
 
@@ -32,9 +32,9 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 
 \item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 
-\item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (needs to be compiled on all cores).}
+\item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).}
 
-\item{maxiter}{maximum number of iterations for the iterative updating scheme (see Meng & Wong, 1996). Default is 1,000.}
+\item{maxiter}{maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.}
 
 \item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.}
 }
@@ -43,7 +43,7 @@ a list of class \code{"bridge"} with components:
 \itemize{
  \item \code{logml}: estimate of log marginal likelihood.
  \item \code{niter}: number of iterations of the iterative updating scheme.
- \item \code{method}: bridge sampling method that was used to obtain estimate.
+ \item \code{method}: bridge sampling method that was used to obtain the estimate.
  \item \code{q11}: log_posterior evaluations for posterior samples.
  \item \code{q12}: log proposal evaluations for posterior samples.
  \item \code{q21}: log_posterior evaluations for samples from proposal.
@@ -59,11 +59,12 @@ Bridge sampling is implemented as described in Meng and Wong (1996, see equation
   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
 
   Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter.
+  Furthermore, constraints that depend on multiple parameters of the model are not supported. For example, this excludes parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
 \subsection{Parallel Computation}{
 For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
 
- For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file given in \code{rcppFile}.
+ For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 }
 }
 \examples{
@@ -72,6 +73,7 @@ For normal parallel computation, the \code{log_posterior} function can be passed
 ##            Standard Normal Distribution
 ## ------------------------------------------------------------------------
 
+library(bridgesampling)
 library(mvtnorm)
 
 samples <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
@@ -95,6 +97,9 @@ print(cbind(bridge_result$logml, analytical))
 ## ------------------------------------------------------------------------
 ## Example 2: Hierarchical Normal Model
 ## ------------------------------------------------------------------------
+
+# for a full description of the example, see
+vignette("bridgesampling_example")
 
 library(R2jags)
 
@@ -254,13 +259,13 @@ print(post2)
 
 }
 \references{
-Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). A tutorial on bridge sampling. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984}
+Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
 
-Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. Statistica Sinica, 6, 831-860.
+Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. \emph{Statistica Sinica}, 6, 831-860.
 
-Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. Journal of Computational and Graphical Statistics, 11(3), 552-586.
+Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Computational and Graphical Statistics}, 11(3), 552-586.
 
-Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. Computational Statistics & Data Analysis, 54, 3269 - 3288.
+Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269 - 3288.
 }
 \author{
 Quentin F. Gronau

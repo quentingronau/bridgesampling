@@ -7,7 +7,7 @@
 #' @details Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{bridgeObject1} over the model associated with \code{bridgeObject2}.
 #' @return Value of the Bayes factor (scalar).
 #' @author Quentin F. Gronau
-#' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
+#' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \code{vignette("bridgesampling_example")}.
 #' @references
 #' Kass, R. E., & Raftery, A. E. (1995). Bayes factors. Journal of the american statistical association, 90(430), 773-795.
 compute_bf <- function(bridgeObject1, bridgeObject2, log = FALSE) {

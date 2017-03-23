@@ -23,7 +23,7 @@ Computes the Bayes factor for a model compairson between two models.
 Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{bridgeObject1} over the model associated with \code{bridgeObject2}.
 }
 \note{
-For examples, see \code{\link{bridge_sampler}} and the accompanying vignette.
+For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \code{vignette("bridgesampling_example")}.
 }
 \references{
 Kass, R. E., & Raftery, A. E. (1995). Bayes factors. Journal of the american statistical association, 90(430), 773-795.
