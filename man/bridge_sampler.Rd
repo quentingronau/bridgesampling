@@ -265,7 +265,7 @@ Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants vi
 
 Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Computational and Graphical Statistics}, 11(3), 552-586.
 
-Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269 - 3288.
+Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269-3288.
 }
 \author{
 Quentin F. Gronau
