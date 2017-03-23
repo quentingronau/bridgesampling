@@ -2,7 +2,7 @@
 #' @export
 #' @title Posterior Model Probabilities from Marginal Likelihoods
 #' @param ... objects of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
-#' @param prior_prob numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models are equally likely a priori).
+#' @param prior_prob numeric vector with prior model probabilities. If omitted, a uniform prior is used (i.e., all models are equally likely a priori).
 #' @return Numeric vector with posterior model probabilities.
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
