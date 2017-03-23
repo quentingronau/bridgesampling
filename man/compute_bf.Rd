@@ -17,7 +17,7 @@ compute_bf(bridge_object1, bridge_object2, log = FALSE)
 Value of the Bayes factor (scalar).
 }
 \description{
-Computes the Bayes factor for a model compairson between two models.
+Computes the Bayes factor for a model comparison between two models.
 }
 \details{
 Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{bridge_object1} over the model associated with \code{bridge_object2}.

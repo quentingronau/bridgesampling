@@ -1,4 +1,4 @@
-#' Computes the Bayes factor for a model compairson between two models.
+#' Computes the Bayes factor for a model comparison between two models.
 #' @export
 #' @title Bayes Factor from Marginal Likelihoods
 #' @param bridge_object1 an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
