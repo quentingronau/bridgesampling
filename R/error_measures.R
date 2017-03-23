@@ -1,7 +1,7 @@
 #' Computes error measures for estimated marginal likelihood.
 #' @export
 #' @title Computing error measures for estimated marginal likelihood
-#' @param bridgeObject output from \code{\link{bridge_sampler}}.
+#' @param bridge_bject an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
 #' @details Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
 #' @return a list with the objects:
 #' \itemize{
@@ -15,20 +15,20 @@
 #' Frühwirth‐Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. \emph{The Econometrics Journal}, 7, 143-167.
 #' @import Brobdingnag
 #' @importFrom coda spectrum0.ar
-error_measures <- function(bridgeObject) {
+error_measures <- function(bridge_object) {
 
-  if (bridgeObject$method == "warp3")
+  if (bridge_object$method == "warp3")
     stop("error_measures not implemented for warp3 method. We recommend to run
          the warp3 procedure multiple times to assess the uncertainty of the
          estimate.")
 
   e <- as.brob( exp(1) )
 
-  ml <- e^(bridgeObject$logml)
-  g_p <- e^(bridgeObject$q12)
-  g_g <- e^(bridgeObject$q22)
-  priorTimesLik_p <- e^(bridgeObject$q11)
-  priorTimesLik_g <- e^(bridgeObject$q21)
+  ml <- e^(bridge_object$logml)
+  g_p <- e^(bridge_object$q12)
+  g_g <- e^(bridge_object$q22)
+  priorTimesLik_p <- e^(bridge_object$q11)
+  priorTimesLik_g <- e^(bridge_object$q21)
   p_p <- priorTimesLik_p/ml
   p_g <- priorTimesLik_g/ml
 

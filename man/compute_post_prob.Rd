@@ -7,7 +7,7 @@
 compute_post_prob(..., prior_prob)
 }
 \arguments{
-\item{...}{outputs from \code{\link{bridge_sampler}} of class \code{bridge}.}
+\item{...}{objects of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
 
 \item{prior_prob}{numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).}
 }

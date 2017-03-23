@@ -72,7 +72,7 @@ test_that("bridge sampler matches anlytical value normal example", {
   expect_error(error_measures(bridge_warp3), "not implemented for warp3")
 
   ### these are meant to check the compute_bf and compute_post_prob functions and not as a meaningful comparisons
-  bf <- compute_bf(bridgeObject1 = bridge_normal, bridgeObject2 = bridge_warp3)
+  bf <- compute_bf(bridge_object1 = bridge_normal, bridge_object2 = bridge_warp3)
   expect_is(bf, "numeric")
 
   # without prior_prob

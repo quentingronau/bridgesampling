@@ -4,12 +4,12 @@
 \alias{compute_bf}
 \title{Computing the Bayes factor}
 \usage{
-compute_bf(bridgeObject1, bridgeObject2, log = FALSE)
+compute_bf(bridge_object1, bridge_object2, log = FALSE)
 }
 \arguments{
-\item{bridgeObject1}{output from \code{\link{bridge_sampler}}.}
+\item{bridge_object1}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
 
-\item{bridgeObject2}{output from \code{\link{bridge_sampler}}.}
+\item{bridge_object2}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
 
 \item{log}{Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.}
 }

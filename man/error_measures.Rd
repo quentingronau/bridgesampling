@@ -4,10 +4,10 @@
 \alias{error_measures}
 \title{Computing error measures for estimated marginal likelihood}
 \usage{
-error_measures(bridgeObject)
+error_measures(bridge_object)
 }
 \arguments{
-\item{bridgeObject}{output from \code{\link{bridge_sampler}}.}
+\item{bridge_bject}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
 }
 \value{
 a list with the objects:

@@ -1,7 +1,7 @@
 #' Computes posterior model probabilities.
 #' @export
 #' @title Computing posterior model probabilities
-#' @param ... outputs from \code{\link{bridge_sampler}} of class \code{bridge}.
+#' @param ... objects of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
 #' @param prior_prob numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).
 #' @return Numeric vector with posterior model probabilities.
 #' @author Quentin F. Gronau
