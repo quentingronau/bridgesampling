@@ -12,7 +12,7 @@
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \code{vignette("bridgesampling_example")}.
 #' @references
-#' Fruehwirth‐Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. \emph{The Econometrics Journal}, 7, 143-167.
+#' Fruehwirth-Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. \emph{The Econometrics Journal}, 7, 143-167.
 #' @import Brobdingnag
 #' @importFrom coda spectrum0.ar
 error_measures <- function(bridge_object) {
