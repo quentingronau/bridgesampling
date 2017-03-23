@@ -9,7 +9,7 @@ compute_post_prob(..., prior_prob)
 \arguments{
 \item{...}{objects of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
 
-\item{prior_prob}{numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models equally likely a priori).}
+\item{prior_prob}{numeric vector with prior model probabilities. If omitted a uniform prior is used (i.e., all models are equally likely a priori).}
 }
 \value{
 Numeric vector with posterior model probabilities.
@@ -18,7 +18,7 @@ Numeric vector with posterior model probabilities.
 Computes posterior model probabilities.
 }
 \note{
-For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \code{vignette("bridgesampling_example")}.
+For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
 }
 \author{
 Quentin F. Gronau
