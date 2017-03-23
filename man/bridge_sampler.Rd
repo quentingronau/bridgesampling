@@ -51,7 +51,7 @@ a list of class \code{"bridge"} with components:
 }
 }
 \description{
-Computes log marginal likelihood via bridge sampling
+Computes log marginal likelihood via bridge sampling.
 }
 \details{
 Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (2017).

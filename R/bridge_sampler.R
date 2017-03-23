@@ -321,7 +321,7 @@
 
 }
 
-#' Computes log marginal likelihood via bridge sampling
+#' Computes log marginal likelihood via bridge sampling.
 #' @export
 #' @title Compute log marginal likelihood via bridge sampling
 #' @name bridge_sampler
