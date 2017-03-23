@@ -4,7 +4,7 @@
 \alias{bridge_sampler}
 \title{Compute log marginal likelihood via bridge sampling}
 \usage{
-bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
+bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
   lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
   varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
   silent = FALSE)
@@ -14,7 +14,9 @@ bridge_sampler(samples = NULL, log_posterior = NULL, data = NULL,
 
 \item{log_posterior}{function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores  > 1} see \code{Details}.}
 
-\item{data}{data.}
+\item{...}{additional arguments passed to \code{log_posterior}.}
+
+\item{data}{data object which is used in \code{log_posterior}.}
 
 \item{lb}{named vector with lower bounds for parameters.}
 
@@ -55,6 +57,8 @@ Computes log marginal likelihood via bridge sampling
 Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (2017).
 
   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
+
+  Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter.
 
 \subsection{Parallel Computation}{
 For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.

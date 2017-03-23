@@ -327,7 +327,7 @@
 #' @name bridge_sampler
 #' @param samples matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).
 #' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores  > 1} see \code{Details}.
-#' @param ... additional arguments to \code{log_posterior}.
+#' @param ... additional arguments passed to \code{log_posterior}.
 #' @param data data object which is used in \code{log_posterior}.
 #' @param lb named vector with lower bounds for parameters.
 #' @param ub named vector with upper bounds for parameters.
