@@ -141,7 +141,7 @@
 
 }
 
-.bridge.sampler.normal <- function(samples, log_posterior, data, lb, ub,
+.bridge.sampler.normal <- function(samples, log_posterior, ..., data, lb, ub,
                                    cores, packages, varlist, envir,
                                    rcppFile, maxiter, silent, r0, tol) {
 
@@ -168,13 +168,13 @@
   q12 <- dmvnorm(samples_4_iter, mean = m, sigma = V, log = TRUE)
   q22 <- dmvnorm(gen_samples, mean = m, sigma = V, log = TRUE)
 
-  # evaluate log likelihood times prior for posterior samples and generated samples
+  # evaluate log of likelihood times prior for posterior samples and generated samples
   if (cores == 1) {
 
     q11 <- apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
-                 data = data) + .logJacobian(samples_4_iter, transTypes, lb, ub)
+                 data = data, ...) + .logJacobian(samples_4_iter, transTypes, lb, ub)
     q21 <- apply(.invTransform2Real(gen_samples, lb, ub), 1, log_posterior,
-                 data = data) + .logJacobian(gen_samples, transTypes, lb, ub)
+                 data = data, ...) + .logJacobian(gen_samples, transTypes, lb, ub)
 
   } else if (cores > 1) {
 
@@ -189,13 +189,13 @@
       parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
       parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
     } else if (is.character(log_posterior)) {
-        parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
+      parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
     }
 
     q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub), log_posterior,
-                               data = data) + .logJacobian(samples_4_iter, transTypes, lb, ub)
+                               data = data, ...) + .logJacobian(samples_4_iter, transTypes, lb, ub)
     q21 <- parallel::parRapply(cl = cl, x = .invTransform2Real(gen_samples, lb, ub), log_posterior,
-                               data = data) + .logJacobian(gen_samples, transTypes, lb, ub)
+                               data = data, ...) + .logJacobian(gen_samples, transTypes, lb, ub)
     parallel::stopCluster(cl)
 
   }
@@ -214,7 +214,7 @@
 
 }
 
-.bridge.sampler.warp3 <- function(samples, log_posterior, data, lb, ub,
+.bridge.sampler.warp3 <- function(samples, log_posterior, ..., data, lb, ub,
                                   cores, packages, varlist, envir,
                                   rcppFile, maxiter, silent, r0, tol) {
 
@@ -245,21 +245,21 @@
 
   e <- as.brob( exp(1) )
 
-  # evaluate log likelihood times prior for posterior samples and generated samples
+  # evaluate log of likelihood times prior for posterior samples and generated samples
   if (cores == 1) {
 
     q11 <- log(e^(apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
-                        data = data) + .logJacobian(samples_4_iter, transTypes, lb, ub)) +
+                        data = data,...) + .logJacobian(samples_4_iter, transTypes, lb, ub)) +
                  e^(apply(.invTransform2Real(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                               samples_4_iter, lb, ub), 1, log_posterior, data = data) +
+                                               samples_4_iter, lb, ub), 1, log_posterior, data = data, ...) +
                       .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                      samples_4_iter, transTypes, lb, ub)))
     q21 <- log(e^(apply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                             gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data) +
+                                             gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data, ...) +
                     .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                    gen_samples %*% t(L), transTypes, lb, ub)) +
                  e^(apply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                               gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data) +
+                                               gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data, ...) +
                       .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                                      gen_samples %*% t(L), transTypes, lb, ub)))
 
@@ -275,31 +275,31 @@
       parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
       parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
     } else if (is.character(log_posterior)) {
-        parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
+      parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
     }
 
     q11 <- log(e^(parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub),
-                                      log_posterior, data = data) +
+                                      log_posterior, data = data, ...) +
                     .logJacobian(samples_4_iter, transTypes, lb, ub)) +
                  e^(parallel::parRapply(cl = cl,
                                         x = .invTransform2Real(matrix(2*m, nrow = n_post,
                                                                       ncol = length(m), byrow = TRUE) -
                                                                  samples_4_iter, lb, ub),
-                                        log_posterior, data = data) +
+                                        log_posterior, data = data, ...) +
                       .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                      samples_4_iter, transTypes, lb, ub)))
     q21 <- log(e^(parallel::parRapply(cl = cl,
                                       x = .invTransform2Real(matrix(m, nrow = n_post,
                                                                     ncol = length(m), byrow = TRUE) -
                                                                gen_samples %*% t(L), lb, ub),
-                                      log_posterior, data = data) +
+                                      log_posterior, data = data, ...) +
                     .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                    gen_samples %*% t(L), transTypes, lb, ub)) +
                  e^(parallel::parRapply(cl = cl,
                                         x = .invTransform2Real(matrix(m, nrow = n_post,
                                                                       ncol = length(m),byrow = TRUE) +
                                                                  gen_samples %*% t(L), lb, ub),
-                                        log_posterior, data = data) +
+                                        log_posterior, data = data, ...) +
                       .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                                      gen_samples %*% t(L), transTypes, lb, ub)))
 
@@ -327,7 +327,8 @@
 #' @name bridge_sampler
 #' @param samples matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).
 #' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores  > 1} see \code{Details}.
-#' @param data data.
+#' @param ... additional arguments to \code{log_posterior}.
+#' @param data data object which is used in \code{log_posterior}.
 #' @param lb named vector with lower bounds for parameters.
 #' @param ub named vector with upper bounds for parameters.
 #' @param method either \code{"normal"} or \code{"warp3"}.
@@ -341,6 +342,8 @@
 #' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (2017).
 #'
 #'   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
+#'
+#'   Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter.
 #'
 #' \subsection{Parallel Computation}{
 #' For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
@@ -373,7 +376,7 @@
 #' @import Brobdingnag
 #' @importFrom stringr str_sub
 #' @importFrom stats qnorm pnorm dnorm median cov var
-bridge_sampler <- function(samples = NULL, log_posterior = NULL, data = NULL,
+bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
                            packages = NULL, varlist = NULL, envir = .GlobalEnv,
                            rcppFile = NULL, maxiter = 1000, silent = FALSE) {
@@ -382,7 +385,7 @@ bridge_sampler <- function(samples = NULL, log_posterior = NULL, data = NULL,
 
   out <- do.call(what = paste0(".bridge.sampler.", method),
                  args = list(samples = samples, log_posterior = log_posterior,
-                             data = data, lb = lb, ub = ub, cores = cores,
+                             "..." = ..., data = data, lb = lb, ub = ub, cores = cores,
                              packages = packages, varlist = varlist, envir = envir,
                              rcppFile = rcppFile, maxiter = maxiter,
                              silent = silent, r0 = 0, tol = 1e-10))
