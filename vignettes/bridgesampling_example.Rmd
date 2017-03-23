@@ -154,8 +154,7 @@ log_posterior_H1 <- function(samples.row, data) {
 ```
 
 ## Specifying the Parameter Bounds
-The final step before computing the log marginal likelihoods is to specify the parameter bounds. In this example, for both models, all parameters can range from $-\infty$ to $\infty$ except the precision `invTau2` which has a lower bound of zero. These boundary vectors need to be named and the names need to match the column names of the `samples` matrix. Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. For example, this excludes parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
-
+The final step before computing the log marginal likelihoods is to specify the parameter bounds. In this example, for both models, all parameters can range from $-\infty$ to $\infty$ except the precision `invTau2` which has a lower bound of zero. These boundary vectors need to be named and the names need to match the column names of the `samples` matrix. 
 ```{r}
 # specify parameter bounds H0
 lb_H0 <- rep(-Inf, ncol(samples_H0))
@@ -169,6 +168,7 @@ ub_H1 <- rep(Inf, ncol(samples_H1))
 names(lb_H1) <- names(ub_H1) <- colnames(samples_H1)
 lb_H1[[ "invTau2" ]] <- 0
 ```
+Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. For example, this excludes parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
 ## Computing the (Log) Marginal Likelihoods
 Now we are ready to compute the log marginal likelihoods using the `bridge_sampler` function. We use `silent = TRUE` to suppress printing the number of iterations to the console:

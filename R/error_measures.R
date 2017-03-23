@@ -1,7 +1,7 @@
 #' Computes error measures for estimated marginal likelihood.
 #' @export
 #' @title Computing error measures for estimated marginal likelihood
-#' @param bridge_bject an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
+#' @param bridge_object an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
 #' @details Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
 #' @return a list with the objects:
 #' \itemize{

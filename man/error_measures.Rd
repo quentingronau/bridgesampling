@@ -7,7 +7,7 @@
 error_measures(bridge_object)
 }
 \arguments{
-\item{bridge_bject}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
+\item{bridge_object}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
 }
 \value{
 a list with the objects:
