@@ -9,7 +9,7 @@
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
 #' @references
-#' Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association}, 90(430), 773-795.
+#' Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association}, 90(430), 773-795. \url{http://dx.doi.org/10.1080/01621459.1995.10476572}
 compute_bf <- function(bridge_object1, bridge_object2, log = FALSE) {
 
   bf <- bridge_object1$logml - bridge_object2$logml
