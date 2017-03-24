@@ -18,8 +18,16 @@
   lst
 }
 
-.stan_log_posterior <- function(s.row, data) {
+.stan_log_posterior_local <- function(s.row, data) {
   rstan::log_prob(object = data$stanfit, upars = s.row)
+}
+
+.stan_log_posterior_distributed <- function(s.row, data) {
+  rstan::log_prob(object = .stanfit_object_bridgesampling, upars = s.row)
+}
+
+.create_stan_log_posterior <- function(stanfit) {
+  assign(".stanfit_object_bridgesampling", rstan::sampling(stanfit@stanmodel), envir = .GlobalEnv)
 }
 
 #' Computes marginal likelihood for an object of class \code{stanfit}.
@@ -60,11 +68,25 @@ stan_bridge_sampler <- function(stanfit = NULL, method = "normal", cores = 1,
   ub <- rep(Inf, ncol(samples))
   names(lb) <- names(ub) <- colnames(samples)
 
+  #browser()
   # run bridge sampling
-  bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
-                                  data = list(stanfit = stanfit), lb = lb, ub = ub,
-                                  method = method, cores = cores, packages = "rstan",
-                                  maxiter = maxiter, silent = silent)
+  if (cores == 1) {
+    bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
+                                    data = list(stanfit = stanfit), lb = lb, ub = ub,
+                                    method = method, cores = cores, packages = "rstan",
+                                      maxiter = maxiter, silent = silent)
+  } else {
+    bridge_output <- bridge_sampler(samples = samples,
+                                    log_posterior = .stan_log_posterior_distributed,
+                                    data = NULL, lb = lb, ub = ub,
+                                    varlist = "stanfit", envir = sys.frame(sys.nframe()),
+                                    method = method, cores = cores, packages = "rstan",
+                                    eval_q =  quote(assign(".stanfit_object_bridgesampling",
+                                                     rstan::sampling(stanfit@stanmodel, chains = 0),
+                                                     envir = .GlobalEnv)),
+                                    maxiter = maxiter, silent = silent)
+  }
+
   return(bridge_output)
 
 }

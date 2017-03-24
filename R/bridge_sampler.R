@@ -142,7 +142,7 @@
 }
 
 .bridge.sampler.normal <- function(samples, log_posterior, ..., data, lb, ub,
-                                   cores, packages, varlist, envir,
+                                   cores, packages, varlist, envir, eval_q,
                                    rcppFile, maxiter, silent, r0, tol) {
 
   # transform parameters to real line
@@ -177,12 +177,12 @@
                  data = data, ...) + .logJacobian(gen_samples, transTypes, lb, ub)
 
   } else if (cores > 1) {
-
+    #browser()
     cl <- parallel::makeCluster(cores, useXDR = FALSE)
     sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x,
                                                        character.only = TRUE))
-
     parallel::clusterExport(cl = cl, varlist = varlist, envir = envir)
+    browser()
 
     if ( ! is.null(rcppFile)) {
       parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
@@ -190,6 +190,10 @@
       parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
     } else if (is.character(log_posterior)) {
       parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
+    }
+
+    if (!is.null(eval_q)) {
+      parallel::clusterEvalQ(cl = cl, expr = eval_q)
     }
 
     q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub), log_posterior,
@@ -336,6 +340,7 @@
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1}).
 #' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
 #' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
+#' @param eval_q expresssion ...
 #' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
@@ -380,7 +385,8 @@
 bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
                            packages = NULL, varlist = NULL, envir = .GlobalEnv,
-                           rcppFile = NULL, maxiter = 1000, silent = FALSE) {
+                           eval_q = NULL, rcppFile = NULL, maxiter = 1000,
+                           silent = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
 
@@ -388,7 +394,7 @@ bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NUL
                  args = list(samples = samples, log_posterior = log_posterior,
                              "..." = ..., data = data, lb = lb, ub = ub, cores = cores,
                              packages = packages, varlist = varlist, envir = envir,
-                             rcppFile = rcppFile, maxiter = maxiter,
+                             eval_q = eval_q, rcppFile = rcppFile, maxiter = maxiter,
                              silent = silent, r0 = 0, tol = 1e-10))
   class(out) <- "bridge"
   return(out)
