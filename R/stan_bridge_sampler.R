@@ -30,7 +30,7 @@
 #' @param cores number of cores used for computations.
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
-#' @details Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
+#' @details
 #' @return a list of class \code{"bridge"} with components:
 #' \itemize{
 #'  \item \code{logml}: estimate of log marginal likelihood.

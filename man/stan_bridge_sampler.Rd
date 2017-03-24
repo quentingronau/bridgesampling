@@ -33,9 +33,6 @@ a list of class \code{"bridge"} with components:
 \description{
 Computes marginal likelihood for an object of class \code{stanfit}.
 }
-\details{
-Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
-}
 \author{
 Quentin F. Gronau
 }
