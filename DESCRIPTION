@@ -7,7 +7,7 @@ Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
              family="Singmann", role="aut"), person(given="Jonathan J.",
              family="Forster", role="ctb"))
 Depends: R (>= 3.0.0)
-Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel, scales
+Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel, scales, rstan, utils
 Suggests: testthat, Rcpp, RcppEigen, R2jags, knitr, rmarkdown, R.rsp
 Description: Provides functions for estimating marginal likelihoods, Bayes factors,
              posterior model probabilities, and normalizing constants in general,
