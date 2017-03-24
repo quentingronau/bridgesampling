@@ -14,7 +14,7 @@ For additional information, see the [vignette](https://htmlpreview.github.io/?ht
 
 ## Installation
 
-- From CRAN in the future
+- `bridgesampling` is available from CRAN so the current stable version can be installed directly via: `install.packages("bridgesampling")`
 
 - To install the latest development version you will need the [`devtools`](https://github.com/hadley/devtools) package: 
   `devtools::install_github("quentingronau/bridgesampling@master")`
