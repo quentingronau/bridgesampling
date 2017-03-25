@@ -24,7 +24,7 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
-\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems \code{\link{makeCluster}} is used and further arguments specified below will be used.}
+\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems ((e.g., Windows)) \code{\link{makeCluster}} is used and further arguments specified below will be used.}
 
 \item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).}
 
@@ -62,9 +62,9 @@ Bridge sampling is implemented as described in Meng and Wong (1996, see equation
   Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
 \subsection{Parallel Computation}{
-On unix-like systems forking is used via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}.
+On unix-like systems forking is used via \code{\link{mclapply}} is used. Hence elements needed for evaluation of \code{log_posterior} should be in the \code{\link{.GlobalEnv}}.
 
-On other OSes, things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
+On other OSes (e.g., Windows), things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 }
 }
 \examples{

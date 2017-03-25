@@ -404,7 +404,7 @@
 #' @param lb named vector with lower bounds for parameters.
 #' @param ub named vector with upper bounds for parameters.
 #' @param method either \code{"normal"} or \code{"warp3"}.
-#' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems \code{\link{makeCluster}} is used and further arguments specified below will be used.
+#' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems ((e.g., Windows)) \code{\link{makeCluster}} is used and further arguments specified below will be used.
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).
 #' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
 #' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
@@ -419,9 +419,9 @@
 #'   Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 #'
 #' \subsection{Parallel Computation}{
-#' On unix-like systems forking is used via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}.
+#' On unix-like systems forking is used via \code{\link{mclapply}} is used. Hence elements needed for evaluation of \code{log_posterior} should be in the \code{\link{.GlobalEnv}}.
 #'
-#' On other OSes, things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
+#' On other OSes (e.g., Windows), things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 #' }
 #' @return a list of class \code{"bridge"} with components:
 #' \itemize{
