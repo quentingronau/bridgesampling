@@ -1,5 +1,5 @@
 ---
-title: "Using Stan: Bayesian One-Sample T-Test"
+title: "Bayesian One-Sample T-Test (Stan)"
 author: "Quentin F. Gronau"
 date: "`r Sys.Date()`"
 show_toc: true
@@ -7,7 +7,7 @@ output:
   knitr:::html_vignette:
     toc: yes
 vignette: >
-  %\VignetteIndexEntry{Stan Bayesian One-Sample T-Test}
+  %\VignetteIndexEntry{Bayesian One-Sample T-Test Stan}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
