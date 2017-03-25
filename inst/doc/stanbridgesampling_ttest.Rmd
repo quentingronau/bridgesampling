@@ -17,7 +17,7 @@ In this vignette, we exlpain how we can compute the (log) marginal likelihood an
 ## Model
 The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean $\mu$ and variance $\sigma^2$. The model is then reparametrized in terms of the standardized effect size $\delta = \mu/\sigma$. For the standardized effect size, a Cauchy prior with location zero and scale $r = 1/\sqrt{2}$ is used. For the variance $\sigma^2$, Jeffreys's prior is used: $p(\sigma^2) \propto 1/\sigma^2$.
   
-In this example, we are interested in comparing the null model $\mathcal{H}_0$, which posits that the effect size $\delta$ is zero to the alternative hypothesis $\mathcal{H}_1$ which assigns $\delta$ the above described Cauchy prior.
+In this example, we are interested in comparing the null model $\mathcal{H}_0$, which posits that the effect size $\delta$ is zero, to the alternative hypothesis $\mathcal{H}_1$, which assigns $\delta$ the above described Cauchy prior.
   
 ## Data
 In this example, we will analyze the `sleep` data set from the `t.test` example. This data set shows the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients. These data can be analyzed via a one-sample t-test by first computing the difference scores and then conducting the t-test using these difference scores as data. The difference scores are calculated as follows:
@@ -32,7 +32,7 @@ n <- length(y)
 ```
 
 ## Specifying the Models
-Next, we implement the models in `Stan`. Note that to use the `stan_bridge_sampler` function, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. This is easier than it might sound. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
+Next, we implement the models in `Stan`. Note that to use the `stan_bridge_sampler` function, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likleihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
 ```{r, message = FALSE, results='hide'}
 library(rstan)
 

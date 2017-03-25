@@ -90,7 +90,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="model" class="section level2">
 <h2>Model</h2>
 <p>The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. The model is then reparametrized in terms of the standardized effect size <span class="math inline">\(\delta = \mu/\sigma\)</span>. For the standardized effect size, a Cauchy prior with location zero and scale <span class="math inline">\(r = 1/\sqrt{2}\)</span> is used. For the variance <span class="math inline">\(\sigma^2\)</span>, Jeffreys’s prior is used: <span class="math inline">\(p(\sigma^2) \propto 1/\sigma^2\)</span>.</p>
-<p>In this example, we are interested in comparing the null model <span class="math inline">\(\mathcal{H}_0\)</span>, which posits that the effect size <span class="math inline">\(\delta\)</span> is zero to the alternative hypothesis <span class="math inline">\(\mathcal{H}_1\)</span> which assigns <span class="math inline">\(\delta\)</span> the above described Cauchy prior.</p>
+<p>In this example, we are interested in comparing the null model <span class="math inline">\(\mathcal{H}_0\)</span>, which posits that the effect size <span class="math inline">\(\delta\)</span> is zero, to the alternative hypothesis <span class="math inline">\(\mathcal{H}_1\)</span>, which assigns <span class="math inline">\(\delta\)</span> the above described Cauchy prior.</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
@@ -104,7 +104,7 @@ n &lt;-<span class="st"> </span><span class="kw">length</span>(y)</code></pre></
 </div>
 <div id="specifying-the-models" class="section level2">
 <h2>Specifying the Models</h2>
-<p>Next, we implement the models in <code>Stan</code>. Note that to use the <code>stan_bridge_sampler</code> function, we need to specify the model in a certain way. Instad of using <code>&quot;~&quot;</code> signs for specifying distributions, we need to directly use the (log) density functions. This is easier than it might sound. For instance, instead of writing <code>y ~ normal(mu, sigma)</code> we would need to write <code>target += normal_lpdf(y | mu, sigma)</code>. The models can then be specified and compiled as follows (note that it is necessary to install <code>rstan</code> for this):</p>
+<p>Next, we implement the models in <code>Stan</code>. Note that to use the <code>stan_bridge_sampler</code> function, we need to specify the model in a certain way. Instad of using <code>&quot;~&quot;</code> signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the <code>&quot;~&quot;</code> sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likleihood, these constants need to be retained. For instance, instead of writing <code>y ~ normal(mu, sigma)</code> we would need to write <code>target += normal_lpdf(y | mu, sigma)</code>. The models can then be specified and compiled as follows (note that it is necessary to install <code>rstan</code> for this):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
 
 <span class="co"># models</span>
