@@ -66,7 +66,12 @@ stan_bridge_sampler <- function(stanfit = NULL, method = "normal", cores = 1,
   upars <- apply(ex, 1:2, FUN = function(theta) {
     rstan::unconstrain_pars(stanfit, .rstan_relist(theta, skeleton))
   })
-  samples <- apply(upars, 1, rbind)
+
+  if (length(dim(upars)) == 3) {
+    samples <- apply(upars, 1, rbind)
+  } else if (length(dim(upars)) == 2) {
+    samples <- as.matrix(as.vector(upars))
+  }
 
   # prepare lb and ub
   colnames(samples) <- paste0("x", seq_len(ncol(samples)))
@@ -80,7 +85,7 @@ stan_bridge_sampler <- function(stanfit = NULL, method = "normal", cores = 1,
     bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
                                     data = list(stanfit = stanfit), lb = lb, ub = ub,
                                     method = method, cores = cores, packages = "rstan",
-                                      maxiter = maxiter, silent = silent)
+                                    maxiter = maxiter, silent = silent)
   } else {
     bridge_output <- bridge_sampler(samples = samples,
                                     log_posterior = .stan_log_posterior,
