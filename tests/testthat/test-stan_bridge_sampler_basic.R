@@ -1,6 +1,20 @@
 
 context('stan_bridge_sampler works.')
 
+
+### H0: mu = 0
+mH0 <- function(y, sigma2 = 1, alpha = 2, beta = 3, rel.tol = 10^(-10)) {
+  n <- length(y)
+  mH0integrand <- function(tau2, y, sigma2, alpha, beta) {
+    (sigma2 + tau2)^(-n/2) * exp(-(n*mean(y)^2 + (n - 1)*sd(y)^2)/(2*(sigma2 + tau2))) *
+      tau2^(-alpha - 1) * exp(-beta/tau2)
+  }
+  (2*pi)^(-n/2) * beta^alpha/gamma(alpha) * integrate(mH0integrand, 0, Inf, rel.tol = rel.tol,
+                                                      y = y, sigma2 = sigma2, alpha = alpha,
+                                                      beta = beta)$value
+}
+
+
 test_that("stan_bridge_sampler", {
   if (require(rstan)) {
     set.seed(12345)
@@ -48,7 +62,7 @@ test_that("stan_bridge_sampler", {
     stanobjectH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                       alpha = alpha,
                                                       beta = beta),
-                             iter = 2500, warmup = 500, chains = 4, show_messages = FALSE))
+                             iter = 3500, warmup = 500, chains = 4, show_messages = FALSE))
     expect_is(
     H0_bridge_norm <- stan_bridge_sampler(stanobjectH0, method = "normal", silent = TRUE)
     , "bridge")
@@ -56,6 +70,9 @@ test_that("stan_bridge_sampler", {
     expect_is(
     H0_bridge_warp3 <- stan_bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE)
     , "bridge")
+
+    expect_equal(H0_bridge_norm$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
+    expect_equal(H0_bridge_warp3$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
 
   }
 })
@@ -118,6 +135,9 @@ test_that("stan_bridge_sampler in multicore", {
     expect_is(
     H0_bridge_warp3 <- stan_bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE, cores = 2)
     , "bridge")
+
+    expect_equal(H0_bridge_norm$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
+    expect_equal(H0_bridge_warp3$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
 
   }
 })
