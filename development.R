@@ -4,6 +4,7 @@ options(error = NULL)
 
 load_all()
 test()
+test_file(path = "test-bridge_sampler_normal_parallel.R")
 test_file(path = "test-bridge_sampler_normal_Rcpp_parallel.R")
 
 roxygen2::roxygenize()

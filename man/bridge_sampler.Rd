@@ -24,13 +24,13 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
-\item{cores}{number of cores used for evaluating \code{log_posterior}.}
+\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems \code{\link{makeCluster}} is used and further arguments specified below will be used.}
 
-\item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1}).}
+\item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).}
 
-\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.}
+\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.}
 
-\item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
+\item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 
 \item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).}
 
@@ -62,9 +62,9 @@ Bridge sampling is implemented as described in Meng and Wong (1996, see equation
   Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
 \subsection{Parallel Computation}{
-For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
+On unix-like systems forking is used via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}.
 
- For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
+On other OSes, things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 }
 }
 \examples{
@@ -268,5 +268,5 @@ Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Comp
 Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 }
 \author{
-Quentin F. Gronau
+Quentin F. Gronau. Parallel computing (i.e., \code{cores > 1}) uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich with modifications by Henrik Singmann.
 }

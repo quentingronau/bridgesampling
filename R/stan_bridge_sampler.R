@@ -18,27 +18,33 @@
   lst
 }
 
-.stan_log_posterior_local <- function(s.row, data) {
+.stan_log_posterior <- function(s.row, data) {
   rstan::log_prob(object = data$stanfit, upars = s.row)
 }
 
-.stan_log_posterior_distributed <- function(s.row, data) {
-  rstan::log_prob(object = .stanfit_object_bridgesampling, upars = s.row)
-}
 
-.create_stan_log_posterior <- function(stanfit) {
-  assign(".stanfit_object_bridgesampling", rstan::sampling(stanfit@stanmodel), envir = .GlobalEnv)
-}
+# .stan_log_posterior_local <- function(s.row, data) {
+#   rstan::log_prob(object = data$stanfit, upars = s.row)
+# }
+#
+# .stan_log_posterior_distributed <- function(s.row, data) {
+#   rstan::log_prob(object = .stanfit_object_bridgesampling, upars = s.row)
+# }
+#
+# .create_stan_log_posterior <- function(stanfit) {
+#   assign(".stanfit_object_bridgesampling", rstan::sampling(stanfit@stanmodel), envir = .GlobalEnv)
+#
+# }
 
 #' Computes marginal likelihood for an object of class \code{stanfit}.
 #' @export
 #' @title Marginal likelihood for an object of class \code{stanfit}
 #' @param stanfit an object of class \code{"stanfit"}.
 #' @param method either \code{"normal"} or \code{"warp3"}.
-#' @param cores number of cores used for computations.
+#' @param cores number of cores used for computations. \code{cores > 1} is currently only supported on unix-like systems that support forking via \code{\link{mclapply}} (e.g., Linux or Mac OS).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
-#' @details
+#' @details Works.
 #' @return a list of class \code{"bridge"} with components:
 #' \itemize{
 #'  \item \code{logml}: estimate of log marginal likelihood.
@@ -49,7 +55,7 @@
 #'  \item \code{q21}: log_posterior evaluations for samples from proposal.
 #'  \item \code{q22}: log proposal evaluations for samples from proposal.
 #' }
-#' @author Quentin F. Gronau
+#' @author Quentin F. Gronau. Uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich with modifications by Henrik Singmann.
 #' @import rstan
 stan_bridge_sampler <- function(stanfit = NULL, method = "normal", cores = 1,
                                 maxiter = 1000, silent = FALSE) {
@@ -77,13 +83,10 @@ stan_bridge_sampler <- function(stanfit = NULL, method = "normal", cores = 1,
                                       maxiter = maxiter, silent = silent)
   } else {
     bridge_output <- bridge_sampler(samples = samples,
-                                    log_posterior = .stan_log_posterior_distributed,
-                                    data = NULL, lb = lb, ub = ub,
+                                    log_posterior = .stan_log_posterior,
+                                    data = list(stanfit = stanfit), lb = lb, ub = ub,
                                     varlist = "stanfit", envir = sys.frame(sys.nframe()),
                                     method = method, cores = cores, packages = "rstan",
-                                    eval_q =  quote(assign(".stanfit_object_bridgesampling",
-                                                     rstan::sampling(stanfit@stanmodel, chains = 0),
-                                                     envir = .GlobalEnv)),
                                     maxiter = maxiter, silent = silent)
   }
 

@@ -12,7 +12,7 @@ stan_bridge_sampler(stanfit = NULL, method = "normal", cores = 1,
 
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
-\item{cores}{number of cores used for computations.}
+\item{cores}{number of cores used for computations. \code{cores > 1} is currently only supported on unix-like systems that support forking via \code{\link{mclapply}} (e.g., Linux or Mac OS).}
 
 \item{maxiter}{maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.}
 
@@ -33,6 +33,9 @@ a list of class \code{"bridge"} with components:
 \description{
 Computes marginal likelihood for an object of class \code{stanfit}.
 }
+\details{
+Works.
+}
 \author{
-Quentin F. Gronau
+Quentin F. Gronau. Uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich with modifications by Henrik Singmann.
 }

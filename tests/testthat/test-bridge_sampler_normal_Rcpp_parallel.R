@@ -16,7 +16,8 @@ test_that("bridge sampler matches anlytical value normal example", {
     lb <- rep(-Inf, 2)
     ub <- rep(Inf, 2)
     names(lb) <- names(ub) <- colnames(x)
-
+    Rcpp::sourceCpp(file = "unnormalized_normal_density.cpp")
+    Rcpp::sourceCpp(file = "unnormalized_normal_density.cpp", env = .GlobalEnv)
     bridge_normal <- bridge_sampler(samples = x, log_posterior = "log_densityRcpp",
                                     data = NULL, lb = lb, ub = ub,
                                     method = "normal", packages = "RcppEigen",
@@ -39,6 +40,8 @@ test_that("bridge sampler matches anlytical value normal example", {
     lb <- rep(-Inf, 2)
     ub <- rep(Inf, 2)
     names(lb) <- names(ub) <- colnames(x)
+    Rcpp::sourceCpp(file = "unnormalized_normal_density_mu.cpp")
+    Rcpp::sourceCpp(file = "unnormalized_normal_density_mu.cpp", env = .GlobalEnv)
 
     bridge_normal_dots <- bridge_sampler(samples = x, log_posterior = "log_densityRcpp_mu",
                                          mu, data = NULL, lb = lb, ub = ub,

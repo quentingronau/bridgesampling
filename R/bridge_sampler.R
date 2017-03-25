@@ -94,6 +94,14 @@
 
 }
 
+.split_matrix <- function(matrix, cores) {
+  out <- vector("list", cores)
+  borders <- ceiling(seq(from = 0, to = nrow(matrix), length.out = cores+1))
+  for (i in seq_len(cores)) {
+    out[[i]] <- matrix[(borders[i]+1):borders[i+1],]
+  }
+  out
+}
 .run.iterative.scheme <- function(q11, q12, q21, q22, r0, tol, L,
                                   method, maxiter, silent) {
 
@@ -127,6 +135,10 @@
     rold <- r
     numi <- as.numeric( e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r) )
     deni <- as.numeric( 1/(s1 * e^(l1 - lstar) + s2 * r) )
+
+    if (any(is.infinite(numi)) || any(is.infinite(deni)))
+      stop("Infinite value in iterative scheme. Try rerunning with more samples.")
+
     r <- (n.1/n.2) * sum(numi)/sum(deni)
     i <- i + 1
 
@@ -142,7 +154,7 @@
 }
 
 .bridge.sampler.normal <- function(samples, log_posterior, ..., data, lb, ub,
-                                   cores, packages, varlist, envir, eval_q,
+                                   cores, packages, varlist, envir,
                                    rcppFile, maxiter, silent, r0, tol) {
 
   # transform parameters to real line
@@ -178,11 +190,27 @@
 
   } else if (cores > 1) {
     #browser()
+    if ( .Platform$OS.type == "unix") { #&&
+        # (!interactive() || isatty(stdout())) ) {
+      #browser()
+      #log_posterior(.invTransform2Real(samples_4_iter, lb, ub)[1,], data = data)
+      split1 <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub), cores=cores)
+      split2 <- .split_matrix(matrix=.invTransform2Real(gen_samples, lb, ub), cores=cores)
+      q11 <- parallel::mclapply(split1, FUN =
+                                  function(x) apply(x, 1, log_posterior, data = data, ...),
+                                  mc.preschedule = FALSE,
+                                  mc.cores = cores)
+      q11 <- unlist(q11) + .logJacobian(samples_4_iter, transTypes, lb, ub)
+      q21 <- parallel::mclapply(split2, FUN =
+                                  function(x) apply(x, 1, log_posterior, data = data, ...),
+                                  mc.preschedule = FALSE,
+                                  mc.cores = cores)
+      q21 <- unlist(q21) + .logJacobian(gen_samples, transTypes, lb, ub)
+    } else {
     cl <- parallel::makeCluster(cores, useXDR = FALSE)
     sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x,
                                                        character.only = TRUE))
     parallel::clusterExport(cl = cl, varlist = varlist, envir = envir)
-    browser()
 
     if ( ! is.null(rcppFile)) {
       parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
@@ -192,16 +220,12 @@
       parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
     }
 
-    if (!is.null(eval_q)) {
-      parallel::clusterEvalQ(cl = cl, expr = eval_q)
-    }
-
     q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub), log_posterior,
                                data = data, ...) + .logJacobian(samples_4_iter, transTypes, lb, ub)
     q21 <- parallel::parRapply(cl = cl, x = .invTransform2Real(gen_samples, lb, ub), log_posterior,
                                data = data, ...) + .logJacobian(gen_samples, transTypes, lb, ub)
     parallel::stopCluster(cl)
-
+}
   }
 
   # run iterative updating scheme to compute log of marginal likelihood
@@ -268,46 +292,90 @@
                                      gen_samples %*% t(L), transTypes, lb, ub)))
 
   } else if (cores > 1) {
+        if ( .Platform$OS.type == "unix") { #&&
+        # (!interactive() || isatty(stdout())) ) {
+      #browser()
+      #log_posterior(.invTransform2Real(samples_4_iter, lb, ub)[1,], data = data)
+      split1a <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub), cores=cores)
+      split1b <- .split_matrix(matrix=.invTransform2Real(
+        matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) - samples_4_iter, lb, ub
+        ), cores=cores)
+      tmp_mat2 <-  gen_samples %*% t(L)
+      split2a <- .split_matrix(matrix=.invTransform2Real(
+        matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) - tmp_mat2, lb, ub
+        ), cores=cores)
+      split2b <- .split_matrix(matrix=.invTransform2Real(
+        matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) + tmp_mat2, lb, ub
+        ), cores=cores)
+      q11a <- parallel::mclapply(split1a, FUN =
+                                   function(x) apply(x, 1, log_posterior, data = data, ...),
+                                 mc.preschedule = FALSE,
+                                 mc.cores = cores)
+      q11b <- parallel::mclapply(split1b, FUN =
+                                   function(x) apply(x, 1, log_posterior, data = data, ...),
+                                 mc.preschedule = FALSE,
+                                 mc.cores = cores)
+      q11 <- log(e^(unlist(q11a) + .logJacobian(samples_4_iter, transTypes, lb, ub)) +
+                   e^(unlist(q11b) +
+                        .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
+                                       samples_4_iter, transTypes, lb, ub)))
+      q21a <- parallel::mclapply(split2a, FUN =
+                                   function(x) apply(x, 1, log_posterior, data = data, ...),
+                                 mc.preschedule = FALSE,
+                                 mc.cores = cores)
+      q21b <- parallel::mclapply(split2b, FUN =
+                                   function(x) apply(x, 1, log_posterior, data = data, ...),
+                                 mc.preschedule = FALSE,
+                                 mc.cores = cores)
+      q21 <- log(e^(unlist(q21a) +
+                      .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
+                                     tmp_mat2, transTypes, lb, ub)) +
+                   e^(unlist(q21b) +
+                        .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
+                                        tmp_mat2, transTypes, lb, ub)))
+        } else {
 
-    cl <- parallel::makeCluster(cores, useXDR = FALSE)
-    sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x, character.only = TRUE))
 
-    parallel::clusterExport(cl = cl, varlist = varlist, envir = envir)
+          cl <- parallel::makeCluster(cores, useXDR = FALSE)
+          sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x, character.only = TRUE))
 
-    if ( ! is.null(rcppFile)) {
-      parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
-      parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
-      parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
-    } else if (is.character(log_posterior)) {
-      parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
-    }
+          parallel::clusterExport(cl = cl, varlist = varlist, envir = envir)
 
-    q11 <- log(e^(parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub),
-                                      log_posterior, data = data, ...) +
-                    .logJacobian(samples_4_iter, transTypes, lb, ub)) +
-                 e^(parallel::parRapply(cl = cl,
-                                        x = .invTransform2Real(matrix(2*m, nrow = n_post,
-                                                                      ncol = length(m), byrow = TRUE) -
-                                                                 samples_4_iter, lb, ub),
-                                        log_posterior, data = data, ...) +
-                      .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                     samples_4_iter, transTypes, lb, ub)))
-    q21 <- log(e^(parallel::parRapply(cl = cl,
-                                      x = .invTransform2Real(matrix(m, nrow = n_post,
-                                                                    ncol = length(m), byrow = TRUE) -
-                                                               gen_samples %*% t(L), lb, ub),
-                                      log_posterior, data = data, ...) +
-                    .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                   gen_samples %*% t(L), transTypes, lb, ub)) +
-                 e^(parallel::parRapply(cl = cl,
-                                        x = .invTransform2Real(matrix(m, nrow = n_post,
-                                                                      ncol = length(m),byrow = TRUE) +
-                                                                 gen_samples %*% t(L), lb, ub),
-                                        log_posterior, data = data, ...) +
-                      .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                     gen_samples %*% t(L), transTypes, lb, ub)))
+          if ( ! is.null(rcppFile)) {
+            parallel::clusterExport(cl = cl, varlist = "rcppFile", envir = parent.frame())
+            parallel::clusterCall(cl = cl, "require", package = "Rcpp", character.only = TRUE)
+            parallel::clusterEvalQ(cl = cl, Rcpp::sourceCpp(file = rcppFile))
+          } else if (is.character(log_posterior)) {
+            parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
+          }
 
-    parallel::stopCluster(cl)
+          q11 <- log(e^(parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub),
+                                            log_posterior, data = data, ...) +
+                          .logJacobian(samples_4_iter, transTypes, lb, ub)) +
+                       e^(parallel::parRapply(cl = cl,
+                                              x = .invTransform2Real(matrix(2*m, nrow = n_post,
+                                                                            ncol = length(m), byrow = TRUE) -
+                                                                       samples_4_iter, lb, ub),
+                                              log_posterior, data = data, ...) +
+                            .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
+                                           samples_4_iter, transTypes, lb, ub)))
+          q21 <- log(e^(parallel::parRapply(cl = cl,
+                                            x = .invTransform2Real(matrix(m, nrow = n_post,
+                                                                          ncol = length(m), byrow = TRUE) -
+                                                                     gen_samples %*% t(L), lb, ub),
+                                            log_posterior, data = data, ...) +
+                          .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
+                                         gen_samples %*% t(L), transTypes, lb, ub)) +
+                       e^(parallel::parRapply(cl = cl,
+                                              x = .invTransform2Real(matrix(m, nrow = n_post,
+                                                                            ncol = length(m),byrow = TRUE) +
+                                                                       gen_samples %*% t(L), lb, ub),
+                                              log_posterior, data = data, ...) +
+                            .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
+                                           gen_samples %*% t(L), transTypes, lb, ub)))
+
+          parallel::stopCluster(cl)
+        }
 
   }
 
@@ -336,11 +404,10 @@
 #' @param lb named vector with lower bounds for parameters.
 #' @param ub named vector with upper bounds for parameters.
 #' @param method either \code{"normal"} or \code{"warp3"}.
-#' @param cores number of cores used for evaluating \code{log_posterior}.
-#' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1}).
-#' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
-#' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
-#' @param eval_q expresssion ...
+#' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems \code{\link{makeCluster}} is used and further arguments specified below will be used.
+#' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).
+#' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
+#' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
 #' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
@@ -352,9 +419,9 @@
 #'   Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 #'
 #' \subsection{Parallel Computation}{
-#' For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
+#' On unix-like systems forking is used via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}.
 #'
-#'  For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
+#' On other OSes, things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 #' }
 #' @return a list of class \code{"bridge"} with components:
 #' \itemize{
@@ -366,7 +433,7 @@
 #'  \item \code{q21}: log_posterior evaluations for samples from proposal.
 #'  \item \code{q22}: log proposal evaluations for samples from proposal.
 #' }
-#' @author Quentin F. Gronau
+#' @author Quentin F. Gronau. Parallel computing (i.e., \code{cores > 1}) uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich with modifications by Henrik Singmann.
 #' @references
 #' Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
 #'
@@ -385,7 +452,7 @@
 bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
                            packages = NULL, varlist = NULL, envir = .GlobalEnv,
-                           eval_q = NULL, rcppFile = NULL, maxiter = 1000,
+                           rcppFile = NULL, maxiter = 1000,
                            silent = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
@@ -394,7 +461,7 @@ bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NUL
                  args = list(samples = samples, log_posterior = log_posterior,
                              "..." = ..., data = data, lb = lb, ub = ub, cores = cores,
                              packages = packages, varlist = varlist, envir = envir,
-                             eval_q = eval_q, rcppFile = rcppFile, maxiter = maxiter,
+                             rcppFile = rcppFile, maxiter = maxiter,
                              silent = silent, r0 = 0, tol = 1e-10))
   class(out) <- "bridge"
   return(out)
