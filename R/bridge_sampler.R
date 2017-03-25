@@ -98,7 +98,7 @@
   out <- vector("list", cores)
   borders <- ceiling(seq(from = 0, to = nrow(matrix), length.out = cores+1))
   for (i in seq_len(cores)) {
-    out[[i]] <- matrix[(borders[i]+1):borders[i+1],]
+    out[[i]] <- matrix[(borders[i]+1):borders[i+1],,drop = FALSE]
   }
   out
 }
