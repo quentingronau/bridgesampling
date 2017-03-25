@@ -104,7 +104,7 @@ n &lt;-<span class="st"> </span><span class="kw">length</span>(y)</code></pre></
 </div>
 <div id="specifying-the-models" class="section level2">
 <h2>Specifying the Models</h2>
-<p>Next, we implement the models in <code>Stan</code>. Note that to use the <code>stan_bridge_sampler</code> function, we need to specify the model in a certain way. Instad of using <code>&quot;~&quot;</code> signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the <code>&quot;~&quot;</code> sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likleihood, these constants need to be retained. For instance, instead of writing <code>y ~ normal(mu, sigma)</code> we would need to write <code>target += normal_lpdf(y | mu, sigma)</code>. The models can then be specified and compiled as follows (note that it is necessary to install <code>rstan</code> for this):</p>
+<p>Next, we implement the models in <code>Stan</code>. Note that to use the <code>stan_bridge_sampler</code> function, we need to specify the model in a certain way. Instad of using <code>&quot;~&quot;</code> signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the <code>&quot;~&quot;</code> sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing <code>y ~ normal(mu, sigma)</code> we would need to write <code>target += normal_lpdf(y | mu, sigma)</code>. The models can then be specified and compiled as follows (note that it is necessary to install <code>rstan</code> for this):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
 
 <span class="co"># models</span>
@@ -221,7 +221,7 @@ stanfitHplus &lt;-<span class="st"> </span><span class="kw">sampling</span>(stan
 ## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(Hplus)$percentage)</code></pre></div>
 <pre><code>## [1] &quot;0.134%&quot;</code></pre>
-<p>The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can then be computed as follows:</p>
+<p>The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can be computed as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BFplus0 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(Hplus, H0)
 <span class="kw">print</span>(BFplus0)</code></pre></div>

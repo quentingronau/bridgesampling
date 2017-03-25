@@ -32,7 +32,7 @@ n <- length(y)
 ```
 
 ## Specifying the Models
-Next, we implement the models in `Stan`. Note that to use the `stan_bridge_sampler` function, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likleihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
+Next, we implement the models in `Stan`. Note that to use the `stan_bridge_sampler` function, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
 ```{r, message = FALSE, results='hide'}
 library(rstan)
 
@@ -147,7 +147,7 @@ print(Hplus)
 print(error_measures(Hplus)$percentage)
 ```
 
-The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can then be computed as follows:
+The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can be computed as follows:
 ```{r}
 # compute Bayes factor
 BFplus0 <- compute_bf(Hplus, H0)
