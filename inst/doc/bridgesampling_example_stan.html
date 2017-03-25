@@ -14,7 +14,7 @@
 
 <meta name="date" content="2017-03-25" />
 
-<title>Using Stan: Bayesian One-Sample T-Test</title>
+<title>Hierarchical Normal Example (Stan)</title>
 
 
 
@@ -68,39 +68,44 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">Using Stan: Bayesian One-Sample T-Test</h1>
+<h1 class="title toc-ignore">Hierarchical Normal Example (Stan)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
 <h4 class="date"><em>2017-03-25</em></h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#model">Model</a></li>
-<li><a href="#data">Data</a></li>
+<li><a href="#model-and-data">Model and Data</a></li>
 <li><a href="#specifying-the-models">Specifying the Models</a></li>
 <li><a href="#fitting-the-models">Fitting the Models</a></li>
 <li><a href="#computing-the-log-marginal-likelihoods">Computing the (Log) Marginal Likelihoods</a></li>
-<li><a href="#computing-the-bayes-factor">Computing the Bayes Factor</a></li>
-<li><a href="#one-sided-test">One-sided Test</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#bayesian-model-comparison">Bayesian Model Comparison</a></li>
 </ul>
 </div>
 
-<p>In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in <code>Stan</code> using the <code>stan_bridge_sampler</code> function. This approach has the advantage that the user only needs to pass the fitted <code>stanfit</code> object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the <code>BayesFactor</code> package (Morey &amp; Rouder, 2015).</p>
-<div id="model" class="section level2">
-<h2>Model</h2>
-<p>The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. The model is then reparametrized in terms of the standardized effect size <span class="math inline">\(\delta = \mu/\sigma\)</span>. For the standardized effect size, a Cauchy prior with location zero and scale <span class="math inline">\(r = 1/\sqrt{2}\)</span> is used. For the variance <span class="math inline">\(\sigma^2\)</span>, Jeffreys’s prior is used: <span class="math inline">\(p(\sigma^2) \propto 1/\sigma^2\)</span>.</p>
-<p>In this example, we are interested in comparing the null model <span class="math inline">\(\mathcal{H}_0\)</span>, which posits that the effect size <span class="math inline">\(\delta\)</span> is zero, to the alternative hypothesis <span class="math inline">\(\mathcal{H}_1\)</span>, which assigns <span class="math inline">\(\delta\)</span> the above described Cauchy prior.</p>
-</div>
-<div id="data" class="section level2">
-<h2>Data</h2>
-<p>In this example, we will analyze the <code>sleep</code> data set from the <code>t.test</code> example. This data set shows the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients. These data can be analyzed via a one-sample t-test by first computing the difference scores and then conducting the t-test using these difference scores as data. The difference scores are calculated as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Sleep data from t.test example</span>
-<span class="kw">data</span>(sleep)
+<p>In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model implemented in <code>Stan</code>. This vignette uses the same models and data as the <a href="bridgesampling_example_jags.html"><code>Jags</code> vignette</a>.</p>
+<div id="model-and-data" class="section level2">
+<h2>Model and Data</h2>
+<p>The model that we will use assumes that each of the <span class="math inline">\(n\)</span> observations <span class="math inline">\(y_i\)</span> (where <span class="math inline">\(i\)</span> indexes the observation, <span class="math inline">\(i = 1,2,...,n\)</span>) is normally distributed with corresponding mean <span class="math inline">\(\theta_i\)</span> and a common known variance <span class="math inline">\(\sigma^2\)</span>: <span class="math inline">\(y_i \sim \mathcal{N}(\theta_i, \sigma^2)\)</span>. Each <span class="math inline">\(\theta_i\)</span> is drawn from a normal group-level distribution with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\tau^2\)</span>: <span class="math inline">\(\theta_i \sim \mathcal{N}(\mu, \tau^2)\)</span>. For the group-level mean <span class="math inline">\(\mu\)</span>, we use a normal prior distribution of the form <span class="math inline">\(\mathcal{N}(\mu_0, \tau^2_0)\)</span>. For the group-level variance <span class="math inline">\(\tau^2\)</span>, we use an inverse-gamma prior of the form <span class="math inline">\(\text{Inv-Gamma}(\alpha, \beta)\)</span>.</p>
+<p>In this example, we are interested in comparing the null model <span class="math inline">\(\mathcal{H}_0\)</span>, which posits that the group-level mean <span class="math inline">\(\mu = 0\)</span>, to the alternative model <span class="math inline">\(\mathcal{H}_1\)</span>, which allows <span class="math inline">\(\mu\)</span> to be different from zero. First, we generate some data from the null model:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bridgesampling)
 
-<span class="co"># compute difference scores</span>
-y &lt;-<span class="st"> </span>sleep$extra[sleep$group ==<span class="st"> </span><span class="dv">2</span>] -<span class="st"> </span>sleep$extra[sleep$group ==<span class="st"> </span><span class="dv">1</span>]
-n &lt;-<span class="st"> </span><span class="kw">length</span>(y)</code></pre></div>
+### generate data ###
+<span class="kw">set.seed</span>(<span class="dv">12345</span>)
+
+mu &lt;-<span class="st"> </span><span class="dv">0</span>
+tau2 &lt;-<span class="st"> </span><span class="fl">0.5</span>
+sigma2 &lt;-<span class="st"> </span><span class="dv">1</span>
+
+n &lt;-<span class="st"> </span><span class="dv">20</span>
+theta &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n, mu, <span class="kw">sqrt</span>(tau2))
+y &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n, theta, <span class="kw">sqrt</span>(sigma2))</code></pre></div>
+<p>Next, we specify the prior parameters <span class="math inline">\(\mu_0\)</span>, <span class="math inline">\(\tau^2_0\)</span>, <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\beta\)</span>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### set prior parameters ###
+mu0 &lt;-<span class="st"> </span><span class="dv">0</span>
+tau20 &lt;-<span class="st"> </span><span class="dv">1</span>
+alpha &lt;-<span class="st"> </span><span class="dv">1</span>
+beta &lt;-<span class="st"> </span><span class="dv">1</span></code></pre></div>
 </div>
 <div id="specifying-the-models" class="section level2">
 <h2>Specifying the Models</h2>
@@ -108,33 +113,42 @@ n &lt;-<span class="st"> </span><span class="kw">length</span>(y)</code></pre></
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
 
 <span class="co"># models</span>
-stancodeH0 &lt;-<span class="st"> '</span>
-<span class="st">data {</span>
+stancodeH0 &lt;-<span class="st"> 'data {</span>
 <span class="st">  int&lt;lower=1&gt; n; // number of observations</span>
 <span class="st">  vector[n] y; // observations</span>
+<span class="st">  real&lt;lower=0&gt; alpha;</span>
+<span class="st">  real&lt;lower=0&gt; beta;</span>
+<span class="st">  real&lt;lower=0&gt; sigma2;</span>
 <span class="st">}</span>
 <span class="st">parameters {</span>
-<span class="st">  real&lt;lower=0&gt; sigma2; // variance parameter</span>
+<span class="st">  real&lt;lower=0&gt; tau2; // group-level variance</span>
+<span class="st">  vector[n] theta; // participant effects</span>
 <span class="st">}</span>
 <span class="st">model {</span>
-<span class="st">  target += log(1/sigma2); // Jeffreys prior on sigma2</span>
-<span class="st">  target += normal_lpdf(y | 0, sqrt(sigma2)); // likelihood</span>
+<span class="st">  target += inv_gamma_lpdf(tau2 | alpha, beta);</span>
+<span class="st">  target += normal_lpdf(theta | 0, sqrt(tau2));</span>
+<span class="st">  target += normal_lpdf(y | theta, sqrt(sigma2));</span>
 <span class="st">}</span>
 <span class="st">'</span>
-stancodeH1 &lt;-<span class="st"> '</span>
-<span class="st">data {</span>
+stancodeH1 &lt;-<span class="st"> 'data {</span>
 <span class="st">  int&lt;lower=1&gt; n; // number of observations</span>
 <span class="st">  vector[n] y; // observations</span>
-<span class="st">  real&lt;lower=0&gt; r; // Cauchy prior scale</span>
+<span class="st">  real mu0;</span>
+<span class="st">  real&lt;lower=0&gt; tau20;</span>
+<span class="st">  real&lt;lower=0&gt; alpha;</span>
+<span class="st">  real&lt;lower=0&gt; beta;</span>
+<span class="st">  real&lt;lower=0&gt; sigma2;</span>
 <span class="st">}</span>
 <span class="st">parameters {</span>
-<span class="st">  real delta;</span>
-<span class="st">  real&lt;lower=0&gt; sigma2;// variance parameter</span>
+<span class="st">  real mu;</span>
+<span class="st">  real&lt;lower=0&gt; tau2; // group-level variance</span>
+<span class="st">  vector[n] theta; // participant effects</span>
 <span class="st">}</span>
 <span class="st">model {</span>
-<span class="st">  target += cauchy_lpdf(delta | 0, r); // Cauchy prior on delta</span>
-<span class="st">  target += log(1/sigma2); // Jeffreys prior on sigma2</span>
-<span class="st">  target += normal_lpdf(y | delta*sqrt(sigma2), sqrt(sigma2));  // likelihood</span>
+<span class="st">  target += normal_lpdf(mu | mu0, sqrt(tau20));</span>
+<span class="st">  target += inv_gamma_lpdf(tau2 | alpha, beta);</span>
+<span class="st">  target += normal_lpdf(theta | mu, sqrt(tau2));</span>
+<span class="st">  target += normal_lpdf(y | theta, sqrt(sigma2));</span>
 <span class="st">}</span>
 <span class="st">'</span>
 <span class="co"># compile models</span>
@@ -145,102 +159,56 @@ stanmodelH1 &lt;-<span class="st"> </span><span class="kw">stan_model</span>(<sp
 <h2>Fitting the Models</h2>
 <p>Now we can fit the null and the alternative model in <code>Stan</code>. One usually requires a larger number of posterior samples for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples for these simple models.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># fit models</span>
-stanfitH0 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH0, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n),
-                      <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>,
-                         <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))
-stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH1, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n, <span class="dt">r =</span> <span class="dv">1</span>/<span class="kw">sqrt</span>(<span class="dv">2</span>)),
-                      <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>,
-                         <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))</code></pre></div>
+stanfitH0 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH0, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n,
+                                               <span class="dt">alpha =</span> alpha,
+                                               <span class="dt">beta =</span> beta),
+                      <span class="dt">iter =</span> <span class="dv">50000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">3</span>)
+stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH1, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n,
+                                               <span class="dt">mu0 =</span> mu0,
+                                               <span class="dt">tau20 =</span> tau20,
+                                               <span class="dt">alpha =</span> alpha,
+                                               <span class="dt">beta =</span> beta),
+                      <span class="dt">iter =</span> <span class="dv">50000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">3</span>)</code></pre></div>
 </div>
 <div id="computing-the-log-marginal-likelihoods" class="section level2">
 <h2>Computing the (Log) Marginal Likelihoods</h2>
 <p>Computing the (log) marginal likelihoods via the <code>stan_bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contains all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
-H0 &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H0)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -20.80914. 
-## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">H1 &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H1)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.96098. 
-## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H0</span>
+H0.bridge &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+<span class="kw">print</span>(H0.bridge)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53568. 
+## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
+H1.bridge &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+<span class="kw">print</span>(H1.bridge)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.80008. 
+## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
-<span class="kw">print</span>(<span class="kw">error_measures</span>(H0)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.0468%&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.0635%&quot;</code></pre>
+<span class="kw">print</span>(<span class="kw">error_measures</span>(H0.bridge)$percentage)</code></pre></div>
+<pre><code>## [1] &quot;0.14%&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1.bridge)$percentage)</code></pre></div>
+<pre><code>## [1] &quot;0.159%&quot;</code></pre>
 </div>
-<div id="computing-the-bayes-factor" class="section level2">
-<h2>Computing the Bayes Factor</h2>
-<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>compute_bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{10}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the alternative versus the null hypothesis:</p>
+<div id="bayesian-model-comparison" class="section level2">
+<h2>Bayesian Model Comparison</h2>
+<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>compute_bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{01}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
-BF10 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(H1, H0)
-<span class="kw">print</span>(BF10)</code></pre></div>
-<pre><code>## [1] 17.25594</code></pre>
-<p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(BayesFactor)
-<span class="kw">print</span>(<span class="kw">ttestBF</span>(y))</code></pre></div>
-<pre><code>## Bayes factor analysis
-## --------------
-## [1] Alt., r=0.707 : 17.25888 ±0%
-## 
-## Against denominator:
-##   Null, mu = 0 
-## ---
-## Bayes factor type: BFoneSample, JZS</code></pre>
-</div>
-<div id="one-sided-test" class="section level2">
-<h2>One-sided Test</h2>
-<p>We can also conduct one-sided tests. For instance, we could test the hypothesis that the effect size is positive versus the null hypothesis. Since we already fitted the null model and computed its marginal likelihood, we only need to slightly adjust the alternative model to reflect the directed hypothesis. To achieve this, we need to truncate the Cauchy prior distribution for <span class="math inline">\(\delta\)</span> at zero and then renormalize the (log) density. This is easily achieved via the <code>Stan</code> function <code>cauchy_lccdf</code> which corresponds to the complementary cumulative distribution function of the Cauchy distribution. Thus, <code>cauchy_lccdf(0 | 0, r)</code> gives us the area greater than zero which is required for renormalizing the truncated Cauchy prior. The model can then be specified and fitted as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stancodeHplus &lt;-<span class="st"> '</span>
-<span class="st">data {</span>
-<span class="st">  int&lt;lower=1&gt; n; // number of observations</span>
-<span class="st">  vector[n] y; // observations</span>
-<span class="st">  real&lt;lower=0&gt; r; // Cauchy prior scale</span>
-<span class="st">}</span>
-<span class="st">parameters {</span>
-<span class="st">  real&lt;lower=0&gt; delta; // constrained to be positive</span>
-<span class="st">  real&lt;lower=0&gt; sigma2;// variance parameter</span>
-<span class="st">}</span>
-<span class="st">model {</span>
-<span class="st">  target += cauchy_lpdf(delta | 0, r) - cauchy_lccdf(0 | 0, r); // Cauchy prior on delta</span>
-<span class="st">  target += log(1/sigma2); // Jeffreys prior on sigma2</span>
-<span class="st">  target += normal_lpdf(y | delta*sqrt(sigma2), sqrt(sigma2));  // likelihood</span>
-<span class="st">}</span>
-<span class="st">'</span>
-<span class="co"># compile models</span>
-stanmodelHplus &lt;-<span class="st"> </span><span class="kw">stan_model</span>(<span class="dt">model_code =</span> stancodeHplus, <span class="dt">model_name=</span><span class="st">&quot;stanmodel&quot;</span>)
-stanfitHplus &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelHplus, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n, <span class="dt">r =</span> <span class="dv">1</span>/<span class="kw">sqrt</span>(<span class="dv">2</span>)),
-                         <span class="dt">iter =</span> <span class="dv">30000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>,
-                         <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))</code></pre></div>
-<p>The (log) marginal likelihood is then obtained as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hplus &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitHplus, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(Hplus)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.27114. 
-## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(Hplus)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.134%&quot;</code></pre>
-<p>The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can be computed as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
-BFplus0 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(Hplus, H0)
-<span class="kw">print</span>(BFplus0)</code></pre></div>
-<pre><code>## [1] 34.39786</code></pre>
-<p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">ttestBF</span>(y, <span class="dt">nullInterval =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="ot">Inf</span>)))</code></pre></div>
-<pre><code>## Bayes factor analysis
-## --------------
-## [1] Alt., r=0.707 0&lt;d&lt;Inf    : 34.41694  ±0%
-## [2] Alt., r=0.707 !(0&lt;d&lt;Inf) : 0.1008246 ±0.06%
-## 
-## Against denominator:
-##   Null, mu = 0 
-## ---
-## Bayes factor type: BFoneSample, JZS</code></pre>
-</div>
-<div id="references" class="section level2">
-<h2>References</h2>
-<p>Richard D. Morey and Jeffrey N. Rouder (2015). BayesFactor: Computation of Bayes Factors for Common Designs. R package version 0.9.12-2. </p>
+BF01 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(H0.bridge, H1.bridge)
+<span class="kw">print</span>(BF01)</code></pre></div>
+<pre><code>## [1] 1.302656</code></pre>
+<p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>compute_post_prob</code> function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (assuming equal prior model probabilities)</span>
+post1 &lt;-<span class="st"> </span><span class="kw">compute_post_prob</span>(H0.bridge, H1.bridge)
+<span class="kw">print</span>(post1)</code></pre></div>
+<pre><code>## H0.bridge H1.bridge 
+## 0.5657188 0.4342812</code></pre>
+<p>When the argument <code>prior_prob</code> is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the <code>prior_prob</code> argument to specify different prior model probabilities:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (using user-specified prior model probabilities)</span>
+post2 &lt;-<span class="st"> </span><span class="kw">compute_post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
+<span class="kw">print</span>(post2)</code></pre></div>
+<pre><code>## H0.bridge H1.bridge 
+## 0.6614741 0.3385259</code></pre>
 </div>
 
 <script type="text/javascript">
