@@ -268,5 +268,5 @@ Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Comp
 Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 }
 \author{
-Quentin F. Gronau. Parallel computing (i.e., \code{cores > 1}) uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich with modifications by Henrik Singmann.
+Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 }

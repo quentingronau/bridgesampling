@@ -433,7 +433,7 @@
 #'  \item \code{q21}: log_posterior evaluations for samples from proposal.
 #'  \item \code{q22}: log proposal evaluations for samples from proposal.
 #' }
-#' @author Quentin F. Gronau. Parallel computing (i.e., \code{cores > 1}) uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich with modifications by Henrik Singmann.
+#' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 #' @references
 #' Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
 #'

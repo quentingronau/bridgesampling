@@ -39,7 +39,8 @@
 #' Computes marginal likelihood for an object of class \code{stanfit}.
 #' @export
 #' @title Marginal likelihood for an object of class \code{stanfit}
-#' @param stanfit an object of class \code{"stanfit"}.
+#' @param stanfit_data an object of class \code{"stanfit"} that contains the posterior samples.
+#' @param stanfit_model an object of class \code{"stanfit"} with the same model as \code{stanfit_data}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{stanfit_data}. In case \code{stanfit_data} was compiled on another computer with a different OS or setup, \code{stanfit_data} usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{stanfit_data} is loaded).
 #' @param method either \code{"normal"} or \code{"warp3"}.
 #' @param cores number of cores used for computations. \code{cores > 1} is currently only supported on unix-like systems that support forking via \code{\link{mclapply}} (e.g., Linux or Mac OS).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
@@ -55,16 +56,17 @@
 #'  \item \code{q21}: log_posterior evaluations for samples from proposal.
 #'  \item \code{q22}: log proposal evaluations for samples from proposal.
 #' }
-#' @author Quentin F. Gronau. Uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich with modifications by Henrik Singmann.
+#' @author Quentin F. Gronau and Henrik Singmann. Uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 #' @import rstan
-stan_bridge_sampler <- function(stanfit = NULL, method = "normal", cores = 1,
+stan_bridge_sampler <- function(stanfit_data = NULL, stanfit_model = stanfit_data,
+                                method = "normal", cores = 1,
                                 maxiter = 1000, silent = FALSE) {
 
   # convert samples into matrix
-  ex <- extract(stanfit, permuted = FALSE)
-  skeleton <- .create_skeleton(stanfit@model_pars, stanfit@par_dims)
+  ex <- extract(stanfit_data, permuted = FALSE)
+  skeleton <- .create_skeleton(stanfit_model@model_pars, stanfit_model@par_dims)
   upars <- apply(ex, 1:2, FUN = function(theta) {
-    rstan::unconstrain_pars(stanfit, .rstan_relist(theta, skeleton))
+    rstan::unconstrain_pars(stanfit_model, .rstan_relist(theta, skeleton))
   })
 
   if (length(dim(upars)) == 3) {
@@ -83,13 +85,13 @@ stan_bridge_sampler <- function(stanfit = NULL, method = "normal", cores = 1,
   # run bridge sampling
   if (cores == 1) {
     bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
-                                    data = list(stanfit = stanfit), lb = lb, ub = ub,
+                                    data = list(stanfit = stanfit_model), lb = lb, ub = ub,
                                     method = method, cores = cores, packages = "rstan",
                                     maxiter = maxiter, silent = silent)
   } else {
     bridge_output <- bridge_sampler(samples = samples,
                                     log_posterior = .stan_log_posterior,
-                                    data = list(stanfit = stanfit), lb = lb, ub = ub,
+                                    data = list(stanfit = stanfit_model), lb = lb, ub = ub,
                                     varlist = "stanfit", envir = sys.frame(sys.nframe()),
                                     method = method, cores = cores, packages = "rstan",
                                     maxiter = maxiter, silent = silent)
