@@ -1,0 +1,163 @@
+---
+title: "Using Stan: Bayesian One-Sample T-Test"
+author: "Quentin F. Gronau"
+date: "`r Sys.Date()`"
+show_toc: true
+output:
+  knitr:::html_vignette:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Stan Bayesian One-Sample T-Test}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in `Stan` using the `stan_bridge_sampler` function. This approach has the advantage that the user only needs to pass the fitted `stanfit` object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the `BayesFactor` package (Morey & Rouder, 2015).
+  
+## Model
+The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean $\mu$ and variance $\sigma^2$. The model is then reparametrized in terms of the standardized effect size $\delta = \mu/\sigma$. For the standardized effect size, a Cauchy prior with location zero and scale $r = 1/\sqrt{2}$ is used. For the variance $\sigma^2$, Jeffreys's prior is used: $p(\sigma^2) \propto 1/\sigma^2$.
+  
+In this example, we are interested in comparing the null model $\mathcal{H}_0$, which posits that the effect size $\delta$ is zero to the alternative hypothesis $\mathcal{H}_1$ which assigns $\delta$ the above described Cauchy prior.
+  
+## Data
+In this example, we will analyze the `sleep` data set from the `t.test` example. This data set shows the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients. These data can be analyzed via a one-sample t-test by first computing the difference scores and then conducting the t-test using these difference scores as data. The difference scores are calculated as follows:
+  
+```{r}
+# Sleep data from t.test example
+data(sleep)
+
+# compute difference scores
+y <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
+n <- length(y)
+```
+
+## Specifying the Models
+Next, we implement the models in `Stan`. Note that to use the `stan_bridge_sampler` function, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. This is easier than it might sound. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
+```{r, message = FALSE, results='hide'}
+library(rstan)
+
+# models
+stancodeH0 <- '
+data {
+  int<lower=1> n; // number of observations
+  vector[n] y; // observations
+}
+parameters {
+  real<lower=0> sigma2; // variance parameter
+}
+model {
+  target += log(1/sigma2); // Jeffreys prior on sigma2
+  target += normal_lpdf(y | 0, sqrt(sigma2)); // likelihood
+}
+'
+stancodeH1 <- '
+data {
+  int<lower=1> n; // number of observations
+  vector[n] y; // observations
+  real<lower=0> r; // Cauchy prior scale
+}
+parameters {
+  real delta;
+  real<lower=0> sigma2;// variance parameter
+}
+model {
+  target += cauchy_lpdf(delta | 0, r); // Cauchy prior on delta
+  target += log(1/sigma2); // Jeffreys prior on sigma2
+  target += normal_lpdf(y | delta*sqrt(sigma2), sqrt(sigma2));  // likelihood
+}
+'
+# compile models
+stanmodelH0 <- stan_model(model_code = stancodeH0, model_name="stanmodel")
+stanmodelH1 <- stan_model(model_code = stancodeH1, model_name="stanmodel")
+```
+
+## Fitting the Models
+Now we can fit the null and the alternative model in `Stan`. One usually requires a larger number of posterior samples for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples for these simple models.
+```{r, message = FALSE, results='hide', warning=FALSE}
+# fit models
+stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n),
+                      iter = 20000, warmup = 1000, chains = 4,
+                         control = list(adapt_delta = .99))
+stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n, r = 1/sqrt(2)),
+                      iter = 20000, warmup = 1000, chains = 4,
+                         control = list(adapt_delta = .99))
+```
+
+## Computing the (Log) Marginal Likelihoods
+Computing the (log) marginal likelihoods via the `stan_bridge_sampler` function is now easy: we only need to pass the `stanfit` objects which contains all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
+```{r}
+set.seed(12345)
+H0 <- stan_bridge_sampler(stanfitH0, silent = TRUE)
+print(H0)
+H1 <- stan_bridge_sampler(stanfitH1, silent = TRUE)
+print(H1)
+```
+
+We can use the `error_measures` function to compute an approximate percentage error of the estimates:
+```{r}
+# compute percentage errors
+print(error_measures(H0)$percentage)
+print(error_measures(H1)$percentage)
+```
+
+## Computing the Bayes Factor
+To compare the null model and the alternative model, we can compute the Bayes factor by using the `compute_bf` function.
+In our case, we compute $\text{BF}_{10}$, that is, the Bayes factor which quantifies how much more likely the data are under the alternative versus the null hypothesis:
+```{r}
+# compute Bayes factor
+BF10 <- compute_bf(H1, H0)
+print(BF10)
+```
+We can compare the bridge sampling result to the `BayesFactor` package result:
+```{r, message=FALSE}
+library(BayesFactor)
+print(ttestBF(y))
+```
+
+## One-sided Test
+We can also conduct one-sided tests. For instance, we could test the hypothesis that the effect size is positive versus the null hypothesis.
+Since we already fitted the null model and computed its marginal likelihood, we only need to slightly adjust the alternative model to reflect the directed hypothesis. To achieve this, we need to truncate the Cauchy prior distribution for $\delta$ at zero and then renormalize the (log) density. This is easily achieved via the `Stan` function `cauchy_lccdf` which corresponds to the complementary cumulative distribution function of the Cauchy distribution. Thus, `cauchy_lccdf(0 | 0, r)` gives us the area greater than zero which is required for renormalizing the truncated Cauchy prior. The model can then be specified and fitted as follows:
+```{r, message = FALSE, results='hide', warnings = FALSE}
+stancodeHplus <- '
+data {
+  int<lower=1> n; // number of observations
+  vector[n] y; // observations
+  real<lower=0> r; // Cauchy prior scale
+}
+parameters {
+  real<lower=0> delta; // constrained to be positive
+  real<lower=0> sigma2;// variance parameter
+}
+model {
+  target += cauchy_lpdf(delta | 0, r) - cauchy_lccdf(0 | 0, r); // Cauchy prior on delta
+  target += log(1/sigma2); // Jeffreys prior on sigma2
+  target += normal_lpdf(y | delta*sqrt(sigma2), sqrt(sigma2));  // likelihood
+}
+'
+# compile models
+stanmodelHplus <- stan_model(model_code = stancodeHplus, model_name="stanmodel")
+stanfitHplus <- sampling(stanmodelHplus, data = list(y = y, n = n, r = 1/sqrt(2)),
+                         iter = 30000, warmup = 1000, chains = 4,
+                         control = list(adapt_delta = .99))
+```
+The (log) marginal likelihood is then obtained as follows:
+```{r}
+Hplus <- stan_bridge_sampler(stanfitHplus, silent = TRUE)
+print(Hplus)
+print(error_measures(Hplus)$percentage)
+```
+
+The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can then be computed as follows:
+```{r}
+# compute Bayes factor
+BFplus0 <- compute_bf(Hplus, H0)
+print(BFplus0)
+```
+
+We can compare the bridge sampling result to the `BayesFactor` package result:
+```{r}
+print(ttestBF(y, nullInterval = c(0, Inf)))
+```
+
+## References
+Richard D. Morey and Jeffrey N. Rouder (2015). BayesFactor: Computation of Bayes Factors for Common Designs. R package version 0.9.12-2. \url{https://CRAN.R-project.org/package=BayesFactor}
