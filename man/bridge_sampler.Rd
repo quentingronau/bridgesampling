@@ -7,7 +7,7 @@
 bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
   lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
   varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-  silent = FALSE)
+  silent = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{samples}{matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).}
@@ -37,6 +37,8 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 \item{maxiter}{maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.}
 
 \item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.}
+
+\item{verbose}{Boolean. Should internal debug information be printed to console? Default is FALSE.}
 }
 \value{
 a list of class \code{"bridge"} with components:

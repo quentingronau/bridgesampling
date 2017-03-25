@@ -19,7 +19,7 @@
 }
 
 .stan_log_posterior <- function(s.row, data) {
-  rstan::log_prob(object = data$stanfit, upars = s.row)
+  tryCatch(rstan::log_prob(object = data$stanfit, upars = s.row), error = function(e) NA)
 }
 
 
@@ -45,6 +45,7 @@
 #' @param cores number of cores used for computations. \code{cores > 1} is currently only supported on unix-like systems that support forking via \code{\link{mclapply}} (e.g., Linux or Mac OS).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
+#' @param verbose Boolean. Should internal debug information be printed to console? Default is FALSE.
 #' @details Works.
 #' @return a list of class \code{"bridge"} with components:
 #' \itemize{
@@ -60,7 +61,7 @@
 #' @import rstan
 stan_bridge_sampler <- function(stanfit_data = NULL, stanfit_model = stanfit_data,
                                 method = "normal", cores = 1,
-                                maxiter = 1000, silent = FALSE) {
+                                maxiter = 1000, silent = FALSE, verbose = FALSE) {
 
   # convert samples into matrix
   ex <- extract(stanfit_data, permuted = FALSE)
@@ -87,14 +88,14 @@ stan_bridge_sampler <- function(stanfit_data = NULL, stanfit_model = stanfit_dat
     bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
                                     data = list(stanfit = stanfit_model), lb = lb, ub = ub,
                                     method = method, cores = cores, packages = "rstan",
-                                    maxiter = maxiter, silent = silent)
+                                    maxiter = maxiter, silent = silent, verbose = verbose)
   } else {
     bridge_output <- bridge_sampler(samples = samples,
                                     log_posterior = .stan_log_posterior,
                                     data = list(stanfit = stanfit_model), lb = lb, ub = ub,
                                     varlist = "stanfit", envir = sys.frame(sys.nframe()),
                                     method = method, cores = cores, packages = "rstan",
-                                    maxiter = maxiter, silent = silent)
+                                    maxiter = maxiter, silent = silent, verbose = verbose)
   }
 
   return(bridge_output)

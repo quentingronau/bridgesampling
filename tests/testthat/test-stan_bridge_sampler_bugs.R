@@ -29,14 +29,17 @@ test_that("stan_bridge_sampler", {
     }
     '
     # compile models
+    tmp <- capture.output(
     stanmodelH0 <- stan_model(model_code = stancodeH0, model_name="stanmodel")
-
+    )
     # fit models
+    tmp <- capture.output(
     stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n),
-                          iter = 10000, warmup = 1000, chains = 4)
-
+                          iter = 10000, warmup = 1000, chains = 4,
+                          control = list(adapt_delta = 0.95))
+    )
     ######### bridge sampling ###########
-    H0 <- stan_bridge_sampler(stanfitH0, cores = 2)
+    H0 <- stan_bridge_sampler(stanfitH0, cores = 2, silent = TRUE)
 
   }
 })

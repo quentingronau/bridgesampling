@@ -5,7 +5,8 @@
 \title{Marginal likelihood for an object of class \code{stanfit}}
 \usage{
 stan_bridge_sampler(stanfit_data = NULL, stanfit_model = stanfit_data,
-  method = "normal", cores = 1, maxiter = 1000, silent = FALSE)
+  method = "normal", cores = 1, maxiter = 1000, silent = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{stanfit_data}{an object of class \code{"stanfit"} that contains the posterior samples.}
@@ -19,6 +20,8 @@ stan_bridge_sampler(stanfit_data = NULL, stanfit_model = stanfit_data,
 \item{maxiter}{maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.}
 
 \item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.}
+
+\item{verbose}{Boolean. Should internal debug information be printed to console? Default is FALSE.}
 }
 \value{
 a list of class \code{"bridge"} with components:

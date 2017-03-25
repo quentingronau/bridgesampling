@@ -112,11 +112,12 @@
     l1 <- q11 - q12 # log(l)
     l2 <- q21 - q22 # log(ltilde)
   } else if (method == "warp3") {
-    l1 <- -log(2) + log(det(L)) + (q11 - q12) # log(l)
-    l2 <-  -log(2) + log(det(L)) + (q21 - q22) # log(ltilde)
+    l1 <- -log(2) + determinant(L)$modulus + (q11 - q12) # log(l)
+    l2 <-  -log(2) + determinant(L)$modulus + (q21 - q22) # log(ltilde)
   }
 
   lstar <- median(l1)
+  #lstar <- median(l2)
   n.1 <- length(l1)
   n.2 <- length(l2)
   s1 <- n.1/(n.1 + n.2)
@@ -126,7 +127,7 @@
   i <- 1
 
   e <- as.brob( exp(1) )
-
+  #browser()
   while (i <= maxiter && abs((r - rold)/r) > tol) {
 
     if (! silent)
@@ -137,7 +138,7 @@
     deni <- as.numeric( 1/(s1 * e^(l1 - lstar) + s2 * r) )
 
     if (any(is.infinite(numi)) || any(is.infinite(deni)))
-      stop("Infinite value in iterative scheme. Try rerunning with more samples.")
+      stop("Infinite value in iterative scheme. Try rerunning with more samples.", call. = FALSE)
 
     r <- (n.1/n.2) * sum(numi)/sum(deni)
     i <- i + 1
@@ -155,7 +156,8 @@
 
 .bridge.sampler.normal <- function(samples, log_posterior, ..., data, lb, ub,
                                    cores, packages, varlist, envir,
-                                   rcppFile, maxiter, silent, r0, tol) {
+                                   rcppFile, maxiter, silent, verbose,
+                                   r0, tol) {
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
@@ -225,9 +227,18 @@
     q21 <- parallel::parRapply(cl = cl, x = .invTransform2Real(gen_samples, lb, ub), log_posterior,
                                data = data, ...) + .logJacobian(gen_samples, transTypes, lb, ub)
     parallel::stopCluster(cl)
-}
+    }
   }
-
+  if(verbose) {
+    print("summary(q12): (log_dens of proposal for posterior samples)")
+    print(summary(q12))
+    print("summary(q22): (log_dens of proposal for generated samples)")
+    print(summary(q22))
+    print("summary(q11): (log_dens of posterior for posterior samples)")
+    print(summary(q11))
+    print("summary(q21): (log_dens of posterior for generated samples)")
+    print(summary(q21))
+  }
   # run iterative updating scheme to compute log of marginal likelihood
   tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21, q22 = q22,
                                r0 = r0, tol = tol, L = NULL, method = "normal",
@@ -244,7 +255,8 @@
 
 .bridge.sampler.warp3 <- function(samples, log_posterior, ..., data, lb, ub,
                                   cores, packages, varlist, envir,
-                                  rcppFile, maxiter, silent, r0, tol) {
+                                  rcppFile, maxiter, silent, verbose,
+                                  r0, tol) {
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
@@ -260,17 +272,19 @@
 
   # get mean & covariance matrix and generate samples from proposal
   m <- apply(samples_4_fit, 2, mean)
+  #m <- apply(samples_4_iter, 2, mean)
+  #V_tmp <- cov(samples_4_iter)
   V_tmp <- cov(samples_4_fit)
   V <- as.matrix(nearPD(V_tmp)$mat) # make sure that V is positive-definite
   L <- t(chol(V))
   gen_samples <- rmvnorm(n_post, sigma = diag(ncol(samples_4_fit)))
   colnames(gen_samples) <- colnames(samples_4_iter)
+  #browser()
 
   # evaluate multivariate normal distribution for posterior samples and generated samples
   q12 <- dmvnorm((samples_4_iter - matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE)) %*%
                    t(solve(L)), sigma = diag(ncol(samples_4_fit)), log = TRUE)
   q22 <- dmvnorm(gen_samples, sigma = diag(ncol(samples_4_fit)), log = TRUE)
-
   e <- as.brob( exp(1) )
 
   # evaluate log of likelihood times prior for posterior samples and generated samples
@@ -378,6 +392,24 @@
         }
 
   }
+  if (any(is.na(q11))) {
+    warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the warp-transformed posterior draws produced -Inf.", call. = FALSE)
+    q11[is.na(q11)] <- -Inf
+  }
+  if (any(is.na(q21))) {
+    warning(sum(is.na(q21)), " evaluation(s) of log_prob() on the warp-transformed proposal draws produced -Inf.", call. = FALSE)
+    q21[is.na(q21)] <- -Inf
+  }
+  if(verbose) {
+    print("summary(q12): (log_dens of proposal for transformed posterior samples)")
+    print(summary(q12))
+    print("summary(q22): (log_dens of proposal for generated samples)")
+    print(summary(q22))
+    print("summary(q11): (log_dens of posterior for transformed posterior samples)")
+    print(summary(q11))
+    print("summary(q21): (log_dens of posterior for generated samples)")
+    print(summary(q21))
+  }
 
   # run iterative updating scheme to compute log of marginal likelihood
   tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21, q22 = q22,
@@ -411,6 +443,7 @@
 #' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
+#' @param verbose Boolean. Should internal debug information be printed to console? Default is FALSE.
 #' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (2017).
 #'
 #'   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
@@ -453,7 +486,7 @@ bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NUL
                            lb = NULL, ub = NULL, method = "normal", cores = 1,
                            packages = NULL, varlist = NULL, envir = .GlobalEnv,
                            rcppFile = NULL, maxiter = 1000,
-                           silent = FALSE) {
+                           silent = FALSE, verbose = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
 
@@ -462,7 +495,8 @@ bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NUL
                              "..." = ..., data = data, lb = lb, ub = ub, cores = cores,
                              packages = packages, varlist = varlist, envir = envir,
                              rcppFile = rcppFile, maxiter = maxiter,
-                             silent = silent, r0 = 0, tol = 1e-10))
+                             silent = silent, verbose = verbose,
+                             r0 = 0.5, tol = 1e-10))
   class(out) <- "bridge"
   return(out)
 
@@ -473,7 +507,7 @@ bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NUL
 print.bridge <- function(x, ...) {
 
   cat("Bridge sampling estimate of the log marginal likelihood: ",
-      round(x$logml, 5), ". \nEstimate obtained in ", x$niter,
+      round(x$logml, 5), "\nEstimate obtained in ", x$niter,
       " iterations via method \"", x$method, "\".", sep = "")
 }
 
