@@ -229,6 +229,14 @@
     parallel::stopCluster(cl)
     }
   }
+  if (any(is.na(q11))) {
+    warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the warp-transformed posterior draws produced -Inf.", call. = FALSE)
+    q11[is.na(q11)] <- -Inf
+  }
+  if (any(is.na(q21))) {
+    warning(sum(is.na(q21)), " evaluation(s) of log_prob() on the warp-transformed proposal draws produced -Inf.", call. = FALSE)
+    q21[is.na(q21)] <- -Inf
+  }
   if(verbose) {
     print("summary(q12): (log_dens of proposal for posterior samples)")
     print(summary(q12))

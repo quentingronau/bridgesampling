@@ -8,6 +8,7 @@
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
 compute_post_prob <- function(..., prior_prob) {
 
+  e <- as.brob(exp(1))
   dots <- list(...)
   mc <- match.call()
   if(!is.null(names(mc))) {
@@ -29,7 +30,7 @@ compute_post_prob <- function(..., prior_prob) {
     stop("Number of objects given needs to match number of elements in prior_prob.")
 
   logml <- vapply(dots, function(x) x$logml, FUN.VALUE = 0)
-  post_prob <- exp(logml)*prior_prob / sum(exp(logml)*prior_prob)
+  post_prob <- as.numeric(e^logml*prior_prob / sum(e^logml*prior_prob))
   names(post_prob) <- make.unique(as.character(mc))
 
   if(!isTRUE(all.equal(sum(post_prob), 1)))
