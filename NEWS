@@ -7,9 +7,23 @@
 
   Significant User Visible Changes and New Features
 
-  o  
+  o Added stan_bridge_sampling(), which allows to obtain the marginal likelihood
+    directly from a fitted stanfit object that contains posterior samples. Note 
+    that it may be necessary to compile a new stanfit object without samples 
+    if the one with samples was compiled in a different session/pc. See new 
+    vignettes for examples.
+    
+  o Multicore computations (i.e., cors > 1) on Unix-like systen (e.g., Mac OS, 
+    Linux) are now performed with forking via parallel::mcapply().
   
   Bugfixes
 
-  o  
+  o compute_post_prob() now works even when exp(logml) initially returns Inf
+    (solution works via brobdingnag).
+    
+  o Bridge sampler more robust due to various small improvements and produces
+    more informative error messages should it fail. 
+    
+  o If log_prob() returns NA, these values are replaced with -Inf on the log 
+    scale (which assumes a likelihood of 0). With warning.
 
