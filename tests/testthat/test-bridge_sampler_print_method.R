@@ -16,6 +16,7 @@ test_that("bridge sampler print method correctly displayed", {
   ub <- rep(Inf, 2)
   names(lb) <- names(ub) <- colnames(x)
 
+  # repetitions = 1
   bridge_normal <- bridge_sampler(samples = x, log_posterior = log_density,
                                   data = NULL, lb = lb, ub = ub,
                                   method = "normal", silent = TRUE)
@@ -25,5 +26,16 @@ test_that("bridge sampler print method correctly displayed", {
 
   expect_output(print(bridge_normal), "Bridge sampling estimate of the log marginal likelihood")
   expect_output(print(bridge_warp3), "Bridge sampling estimate of the log marginal likelihood")
+
+  # repetitions > 1
+  bridge_normal <- bridge_sampler(samples = x, log_posterior = log_density,
+                                  data = NULL, lb = lb, ub = ub,
+                                  method = "normal", silent = TRUE, repetitions = 2)
+  bridge_warp3 <- bridge_sampler(samples = x, log_posterior = log_density,
+                                 data = NULL, lb = lb, ub = ub,
+                                 method = "warp3", silent = TRUE, repetitions = 2)
+
+  expect_output(print(bridge_normal), "Median of")
+  expect_output(print(bridge_warp3), "Median of")
 
 })

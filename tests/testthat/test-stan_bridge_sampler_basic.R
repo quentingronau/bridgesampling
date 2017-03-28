@@ -68,11 +68,24 @@ test_that("stan_bridge_sampler", {
     , "bridge")
 
     expect_is(
+      H0_bridge_norm_rep <- stan_bridge_sampler(stanobjectH0, method = "normal", repetitions = 2, silent = TRUE)
+      , "bridge_list")
+
+    expect_is(
     H0_bridge_warp3 <- stan_bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE)
     , "bridge")
 
+    expect_is(
+      H0_bridge_warp3_rep <- stan_bridge_sampler(stanobjectH0, method = "warp3", repetitions = 2, silent = TRUE)
+      , "bridge_list")
+
     expect_equal(H0_bridge_norm$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
     expect_equal(H0_bridge_warp3$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
+
+    expect_equal(H0_bridge_norm_rep$logml, rep(log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), 2),
+                 tolerance = 0.1)
+    expect_equal(H0_bridge_warp3_rep$logml, rep(log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), 2),
+                 tolerance = 0.1)
 
   }
 })

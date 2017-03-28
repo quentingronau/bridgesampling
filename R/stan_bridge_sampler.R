@@ -41,6 +41,7 @@
 #' @title Marginal likelihood for an object of class \code{stanfit}
 #' @param stanfit_data an object of class \code{"stanfit"} that contains the posterior samples.
 #' @param stanfit_model an object of class \code{"stanfit"} with the same model as \code{stanfit_data}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{stanfit_data}. In case \code{stanfit_data} was compiled on another computer with a different OS or setup, \code{stanfit_data} usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{stanfit_data} is loaded).
+#' @param repetitions number of repetitions.
 #' @param method either \code{"normal"} or \code{"warp3"}.
 #' @param cores number of cores used for computations. \code{cores > 1} is currently only supported on unix-like systems that support forking via \code{\link{mclapply}} (e.g., Linux or Mac OS).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
@@ -60,7 +61,7 @@
 #' @author Quentin F. Gronau and Henrik Singmann. Uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 #' @import rstan
 stan_bridge_sampler <- function(stanfit_data = NULL, stanfit_model = stanfit_data,
-                                method = "normal", cores = 1,
+                                repetitions = 1, method = "normal", cores = 1,
                                 maxiter = 1000, silent = FALSE, verbose = FALSE) {
 
   # convert samples into matrix
@@ -87,15 +88,17 @@ stan_bridge_sampler <- function(stanfit_data = NULL, stanfit_model = stanfit_dat
   if (cores == 1) {
     bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
                                     data = list(stanfit = stanfit_model), lb = lb, ub = ub,
-                                    method = method, cores = cores, packages = "rstan",
-                                    maxiter = maxiter, silent = silent, verbose = verbose)
+                                    repetitions = repetitions, method = method, cores = cores,
+                                    packages = "rstan", maxiter = maxiter, silent = silent,
+                                    verbose = verbose)
   } else {
     bridge_output <- bridge_sampler(samples = samples,
                                     log_posterior = .stan_log_posterior,
                                     data = list(stanfit = stanfit_model), lb = lb, ub = ub,
-                                    varlist = "stanfit", envir = sys.frame(sys.nframe()),
-                                    method = method, cores = cores, packages = "rstan",
-                                    maxiter = maxiter, silent = silent, verbose = verbose)
+                                    repetitions = repetitions, varlist = "stanfit",
+                                    envir = sys.frame(sys.nframe()), method = method,
+                                    cores = cores, packages = "rstan", maxiter = maxiter,
+                                    silent = silent, verbose = verbose)
   }
 
   return(bridge_output)

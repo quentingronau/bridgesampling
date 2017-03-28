@@ -5,9 +5,9 @@
 \title{Log Marginal Likelihood via Bridge Sampling}
 \usage{
 bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
-  lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
-  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-  silent = FALSE, verbose = FALSE)
+  lb = NULL, ub = NULL, repetitions = 1, method = "normal", cores = 1,
+  packages = NULL, varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+  maxiter = 1000, silent = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{samples}{matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).}
@@ -21,6 +21,8 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 \item{lb}{named vector with lower bounds for parameters.}
 
 \item{ub}{named vector with upper bounds for parameters.}
+
+\item{repetitions}{number of repetitions.}
 
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
@@ -41,7 +43,7 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 \item{verbose}{Boolean. Should internal debug information be printed to console? Default is FALSE.}
 }
 \value{
-a list of class \code{"bridge"} with components:
+if \code{repetitions = 1}, returns a list of class \code{"bridge"} with components:
 \itemize{
  \item \code{logml}: estimate of log marginal likelihood.
  \item \code{niter}: number of iterations of the iterative updating scheme.
@@ -50,6 +52,13 @@ a list of class \code{"bridge"} with components:
  \item \code{q12}: log proposal evaluations for posterior samples.
  \item \code{q21}: log_posterior evaluations for samples from proposal.
  \item \code{q22}: log proposal evaluations for samples from proposal.
+}
+if \code{repetitions > 1}, returns a list of class \code{"bridge_list"} with components:
+\itemize{
+ \item \code{logml}: numeric vector with estimates of log marginal likelihood.
+ \item \code{niter}: numeric vector with number of iterations of the iterative updating scheme for each repetition.
+ \item \code{method}: bridge sampling method that was used to obtain the estimates.
+ \item \code{repetitions}: number of repetitions.
 }
 }
 \description{

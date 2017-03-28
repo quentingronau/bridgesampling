@@ -117,7 +117,6 @@
   }
 
   lstar <- median(l1)
-  #lstar <- median(l2)
   n.1 <- length(l1)
   n.2 <- length(l2)
   s1 <- n.1/(n.1 + n.2)
@@ -127,7 +126,7 @@
   i <- 1
 
   e <- as.brob( exp(1) )
-  #browser()
+
   while (i <= maxiter && abs((r - rold)/r) > tol) {
 
     if (! silent)
@@ -155,7 +154,7 @@
 }
 
 .bridge.sampler.normal <- function(samples, log_posterior, ..., data, lb, ub,
-                                   cores, packages, varlist, envir,
+                                   cores, repetitions, packages, varlist, envir,
                                    rcppFile, maxiter, silent, verbose,
                                    r0, tol) {
 
@@ -175,39 +174,42 @@
   m <- apply(samples_4_fit, 2, mean)
   V_tmp <- cov(samples_4_fit)
   V <- as.matrix(nearPD(V_tmp)$mat) # make sure that V is positive-definite
-  gen_samples <- rmvnorm(n_post, mean = m, sigma = V)
-  colnames(gen_samples) <- colnames(samples_4_iter)
 
-  # evaluate multivariate normal distribution for posterior samples and generated samples
+  # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
   q12 <- dmvnorm(samples_4_iter, mean = m, sigma = V, log = TRUE)
-  q22 <- dmvnorm(gen_samples, mean = m, sigma = V, log = TRUE)
+  gen_samples <- vector(mode = "list", length = repetitions)
+  q22 <- vector(mode = "list", length = repetitions)
+  for (i in seq_len(repetitions)) {
+    gen_samples[[i]] <- rmvnorm(n_post, mean = m, sigma = V)
+    colnames(gen_samples[[i]]) <- colnames(samples_4_iter)
+    q22[[i]] <- dmvnorm(gen_samples[[i]], mean = m, sigma = V, log = TRUE)
+  }
 
   # evaluate log of likelihood times prior for posterior samples and generated samples
+  q21 <- vector(mode = "list", length = repetitions)
   if (cores == 1) {
-
     q11 <- apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
                  data = data, ...) + .logJacobian(samples_4_iter, transTypes, lb, ub)
-    q21 <- apply(.invTransform2Real(gen_samples, lb, ub), 1, log_posterior,
-                 data = data, ...) + .logJacobian(gen_samples, transTypes, lb, ub)
-
+    for (i in seq_len(repetitions)) {
+      q21[[i]] <- apply(.invTransform2Real(gen_samples[[i]], lb, ub), 1, log_posterior,
+                        data = data, ...) + .logJacobian(gen_samples[[i]], transTypes, lb, ub)
+    }
   } else if (cores > 1) {
-    #browser()
-    if ( .Platform$OS.type == "unix") { #&&
-        # (!interactive() || isatty(stdout())) ) {
-      #browser()
-      #log_posterior(.invTransform2Real(samples_4_iter, lb, ub)[1,], data = data)
+    if ( .Platform$OS.type == "unix") {
       split1 <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub), cores=cores)
-      split2 <- .split_matrix(matrix=.invTransform2Real(gen_samples, lb, ub), cores=cores)
       q11 <- parallel::mclapply(split1, FUN =
                                   function(x) apply(x, 1, log_posterior, data = data, ...),
                                   mc.preschedule = FALSE,
                                   mc.cores = cores)
       q11 <- unlist(q11) + .logJacobian(samples_4_iter, transTypes, lb, ub)
-      q21 <- parallel::mclapply(split2, FUN =
+      for (i in seq_len(repetitions)) {
+        split2 <- .split_matrix(matrix=.invTransform2Real(gen_samples[[i]], lb, ub), cores = cores)
+        q21[[i]] <- parallel::mclapply(split2, FUN =
                                   function(x) apply(x, 1, log_posterior, data = data, ...),
                                   mc.preschedule = FALSE,
                                   mc.cores = cores)
-      q21 <- unlist(q21) + .logJacobian(gen_samples, transTypes, lb, ub)
+        q21[[i]] <- unlist(q21[[i]]) + .logJacobian(gen_samples[[i]], transTypes, lb, ub)
+      }
     } else {
     cl <- parallel::makeCluster(cores, useXDR = FALSE)
     sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x,
@@ -224,45 +226,59 @@
 
     q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub), log_posterior,
                                data = data, ...) + .logJacobian(samples_4_iter, transTypes, lb, ub)
-    q21 <- parallel::parRapply(cl = cl, x = .invTransform2Real(gen_samples, lb, ub), log_posterior,
-                               data = data, ...) + .logJacobian(gen_samples, transTypes, lb, ub)
+    for (i in seq_len(repetitions)) {
+      q21[[i]] <- parallel::parRapply(cl = cl, x = .invTransform2Real(gen_samples[[i]], lb, ub), log_posterior,
+                                      data = data, ...) + .logJacobian(gen_samples[[i]], transTypes, lb, ub)
+    }
     parallel::stopCluster(cl)
     }
   }
   if (any(is.na(q11))) {
-    warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the warp-transformed posterior draws produced -Inf.", call. = FALSE)
+    warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the posterior draws produced NA and have been replaced by -Inf.", call. = FALSE)
     q11[is.na(q11)] <- -Inf
   }
-  if (any(is.na(q21))) {
-    warning(sum(is.na(q21)), " evaluation(s) of log_prob() on the warp-transformed proposal draws produced -Inf.", call. = FALSE)
-    q21[is.na(q21)] <- -Inf
+  for (i in seq_len(repetitions)) {
+    if (any(is.na(q21[[i]]))) {
+      warning(sum(is.na(q21[[i]])), " evaluation(s) of log_prob() on the proposal draws produced NA nd have been replaced by -Inf.", call. = FALSE)
+      q21[[i]][is.na(q21[[i]])] <- -Inf
+    }
   }
   if(verbose) {
     print("summary(q12): (log_dens of proposal for posterior samples)")
     print(summary(q12))
     print("summary(q22): (log_dens of proposal for generated samples)")
-    print(summary(q22))
+    print(lapply(q22, summary))
     print("summary(q11): (log_dens of posterior for posterior samples)")
     print(summary(q11))
     print("summary(q21): (log_dens of posterior for generated samples)")
-    print(summary(q21))
+    print(lapply(q21, summary))
   }
-  # run iterative updating scheme to compute log of marginal likelihood
-  tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-                               r0 = r0, tol = tol, L = NULL, method = "normal",
-                               maxiter = maxiter, silent = silent)
-  logml <- tmp$logml
-  niter <- tmp$niter
 
-  out <- list(logml = logml, niter = niter, method = "normal", q11 = q11,
-              q12 = q12, q21 = q21, q22 = q22)
+  logml <- numeric(repetitions)
+  niter <- numeric(repetitions)
+  # run iterative updating scheme to compute log of marginal likelihood
+  for (i in seq_len(repetitions)) {
+    tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
+                                 r0 = r0, tol = tol, L = NULL, method = "normal",
+                                 maxiter = maxiter, silent = silent)
+    logml[i] <- tmp$logml
+    niter[i] <- tmp$niter
+  }
+  if (repetitions == 1) {
+    out <- list(logml = logml, niter = niter, method = "normal", q11 = q11,
+                q12 = q12, q21 = q21[[1]], q22 = q22[[1]])
+    class(out) <- "bridge"
+  } else if (repetitions > 1) {
+    out <- list(logml = logml, niter = niter, method = "normal", repetitions = repetitions)
+    class(out) <- "bridge_list"
+  }
 
   return(out)
 
 }
 
 .bridge.sampler.warp3 <- function(samples, log_posterior, ..., data, lb, ub,
-                                  cores, packages, varlist, envir,
+                                  repetitions, cores, packages, varlist, envir,
                                   rcppFile, maxiter, silent, verbose,
                                   r0, tol) {
 
@@ -280,22 +296,25 @@
 
   # get mean & covariance matrix and generate samples from proposal
   m <- apply(samples_4_fit, 2, mean)
-  #m <- apply(samples_4_iter, 2, mean)
-  #V_tmp <- cov(samples_4_iter)
   V_tmp <- cov(samples_4_fit)
   V <- as.matrix(nearPD(V_tmp)$mat) # make sure that V is positive-definite
   L <- t(chol(V))
-  gen_samples <- rmvnorm(n_post, sigma = diag(ncol(samples_4_fit)))
-  colnames(gen_samples) <- colnames(samples_4_iter)
-  #browser()
 
-  # evaluate multivariate normal distribution for posterior samples and generated samples
+  # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
   q12 <- dmvnorm((samples_4_iter - matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE)) %*%
                    t(solve(L)), sigma = diag(ncol(samples_4_fit)), log = TRUE)
-  q22 <- dmvnorm(gen_samples, sigma = diag(ncol(samples_4_fit)), log = TRUE)
+  q22 <- vector(mode = "list", length = repetitions)
+  gen_samples <- vector(mode = "list", length = repetitions)
+  for (i in seq_len(repetitions)) {
+    gen_samples[[i]] <- rmvnorm(n_post, sigma = diag(ncol(samples_4_fit)))
+    colnames(gen_samples[[i]]) <- colnames(samples_4_iter)
+    q22[[i]] <- dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE)
+  }
+
   e <- as.brob( exp(1) )
 
   # evaluate log of likelihood times prior for posterior samples and generated samples
+  q21 <- vector(mode = "list", length = repetitions)
   if (cores == 1) {
 
     q11 <- log(e^(apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
@@ -304,30 +323,22 @@
                                                samples_4_iter, lb, ub), 1, log_posterior, data = data, ...) +
                       .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                      samples_4_iter, transTypes, lb, ub)))
-    q21 <- log(e^(apply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                             gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data, ...) +
+    for (i in seq_len(repetitions)) {
+      q21[[i]] <- log(e^(apply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
+                                             gen_samples[[i]] %*% t(L), lb, ub), 1, log_posterior, data = data, ...) +
                     .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                   gen_samples %*% t(L), transTypes, lb, ub)) +
+                                   gen_samples[[i]] %*% t(L), transTypes, lb, ub)) +
                  e^(apply(.invTransform2Real(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                               gen_samples %*% t(L), lb, ub), 1, log_posterior, data = data, ...) +
+                                               gen_samples[[i]] %*% t(L), lb, ub), 1, log_posterior, data = data, ...) +
                       .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                     gen_samples %*% t(L), transTypes, lb, ub)))
+                                     gen_samples[[i]] %*% t(L), transTypes, lb, ub)))
+    }
 
   } else if (cores > 1) {
-        if ( .Platform$OS.type == "unix") { #&&
-        # (!interactive() || isatty(stdout())) ) {
-      #browser()
-      #log_posterior(.invTransform2Real(samples_4_iter, lb, ub)[1,], data = data)
+        if ( .Platform$OS.type == "unix") {
       split1a <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub), cores=cores)
       split1b <- .split_matrix(matrix=.invTransform2Real(
         matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) - samples_4_iter, lb, ub
-        ), cores=cores)
-      tmp_mat2 <-  gen_samples %*% t(L)
-      split2a <- .split_matrix(matrix=.invTransform2Real(
-        matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) - tmp_mat2, lb, ub
-        ), cores=cores)
-      split2b <- .split_matrix(matrix=.invTransform2Real(
-        matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) + tmp_mat2, lb, ub
         ), cores=cores)
       q11a <- parallel::mclapply(split1a, FUN =
                                    function(x) apply(x, 1, log_posterior, data = data, ...),
@@ -341,23 +352,31 @@
                    e^(unlist(q11b) +
                         .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                        samples_4_iter, transTypes, lb, ub)))
-      q21a <- parallel::mclapply(split2a, FUN =
-                                   function(x) apply(x, 1, log_posterior, data = data, ...),
-                                 mc.preschedule = FALSE,
-                                 mc.cores = cores)
-      q21b <- parallel::mclapply(split2b, FUN =
-                                   function(x) apply(x, 1, log_posterior, data = data, ...),
-                                 mc.preschedule = FALSE,
-                                 mc.cores = cores)
-      q21 <- log(e^(unlist(q21a) +
-                      .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                     tmp_mat2, transTypes, lb, ub)) +
-                   e^(unlist(q21b) +
-                        .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                        tmp_mat2, transTypes, lb, ub)))
+
+      for (i in seq_len(repetitions)) {
+        tmp_mat2 <-  gen_samples[[i]] %*% t(L)
+        split2a <- .split_matrix(matrix=.invTransform2Real(
+          matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) - tmp_mat2, lb, ub
+        ), cores=cores)
+        split2b <- .split_matrix(matrix=.invTransform2Real(
+          matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) + tmp_mat2, lb, ub
+        ), cores=cores)
+        q21a <- parallel::mclapply(split2a, FUN =
+                                     function(x) apply(x, 1, log_posterior, data = data, ...),
+                                   mc.preschedule = FALSE,
+                                   mc.cores = cores)
+        q21b <- parallel::mclapply(split2b, FUN =
+                                     function(x) apply(x, 1, log_posterior, data = data, ...),
+                                   mc.preschedule = FALSE,
+                                   mc.cores = cores)
+        q21[[i]] <- log(e^(unlist(q21a) +
+                        .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
+                                       tmp_mat2, transTypes, lb, ub)) +
+                     e^(unlist(q21b) +
+                          .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
+                                         tmp_mat2, transTypes, lb, ub)))
+      }
         } else {
-
-
           cl <- parallel::makeCluster(cores, useXDR = FALSE)
           sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x, character.only = TRUE))
 
@@ -381,53 +400,65 @@
                                               log_posterior, data = data, ...) +
                             .logJacobian(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                                            samples_4_iter, transTypes, lb, ub)))
-          q21 <- log(e^(parallel::parRapply(cl = cl,
+          for (i in seq_len(repetitions)) {
+            q21[[i]] <- log(e^(parallel::parRapply(cl = cl,
                                             x = .invTransform2Real(matrix(m, nrow = n_post,
                                                                           ncol = length(m), byrow = TRUE) -
-                                                                     gen_samples %*% t(L), lb, ub),
+                                                                     gen_samples[[i]] %*% t(L), lb, ub),
                                             log_posterior, data = data, ...) +
                           .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
-                                         gen_samples %*% t(L), transTypes, lb, ub)) +
+                                         gen_samples[[i]] %*% t(L), transTypes, lb, ub)) +
                        e^(parallel::parRapply(cl = cl,
                                               x = .invTransform2Real(matrix(m, nrow = n_post,
                                                                             ncol = length(m),byrow = TRUE) +
-                                                                       gen_samples %*% t(L), lb, ub),
+                                                                       gen_samples[[i]] %*% t(L), lb, ub),
                                               log_posterior, data = data, ...) +
                             .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
-                                           gen_samples %*% t(L), transTypes, lb, ub)))
-
+                                           gen_samples[[i]] %*% t(L), transTypes, lb, ub)))
+          }
           parallel::stopCluster(cl)
         }
 
   }
   if (any(is.na(q11))) {
-    warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the warp-transformed posterior draws produced -Inf.", call. = FALSE)
+    warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the warp-transformed posterior draws produced NA and have been replaced by -Inf.", call. = FALSE)
     q11[is.na(q11)] <- -Inf
   }
-  if (any(is.na(q21))) {
-    warning(sum(is.na(q21)), " evaluation(s) of log_prob() on the warp-transformed proposal draws produced -Inf.", call. = FALSE)
-    q21[is.na(q21)] <- -Inf
+  for (i in seq_len(repetitions)) {
+    if (any(is.na(q21[[i]]))) {
+      warning(sum(is.na(q21[[i]])), " evaluation(s) of log_prob() on the warp-transformed proposal draws produced NA nd have been replaced by -Inf.", call. = FALSE)
+      q21[[i]][is.na(q21[[i]])] <- -Inf
+    }
   }
   if(verbose) {
-    print("summary(q12): (log_dens of proposal for transformed posterior samples)")
+    print("summary(q12): (log_dens of proposal for posterior samples)")
     print(summary(q12))
     print("summary(q22): (log_dens of proposal for generated samples)")
-    print(summary(q22))
-    print("summary(q11): (log_dens of posterior for transformed posterior samples)")
+    print(lapply(q22, summary))
+    print("summary(q11): (log_dens of posterior for posterior samples)")
     print(summary(q11))
     print("summary(q21): (log_dens of posterior for generated samples)")
-    print(summary(q21))
+    print(lapply(q21, summary))
   }
 
+  logml <- numeric(repetitions)
+  niter <- numeric(repetitions)
   # run iterative updating scheme to compute log of marginal likelihood
-  tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-                               r0 = r0, tol = tol, L = L, method = "warp3",
-                               maxiter = maxiter, silent = silent)
-  logml <- tmp$logml
-  niter <- tmp$niter
-
-  out <- list(logml = logml, niter = niter, method = "warp3", q11 = q11,
-              q12 = q12, q21 = q21, q22 = q22)
+  for (i in seq_len(repetitions)) {
+    tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
+                                 r0 = r0, tol = tol, L = L, method = "warp3",
+                                 maxiter = maxiter, silent = silent)
+    logml[i] <- tmp$logml
+    niter[i] <- tmp$niter
+  }
+  if (repetitions == 1) {
+    out <- list(logml = logml, niter = niter, method = "warp3", q11 = q11,
+                q12 = q12, q21 = q21[[1]], q22 = q22[[1]])
+    class(out) <- "bridge"
+  } else if (repetitions > 1) {
+    out <- list(logml = logml, niter = niter, method = "warp3", repetitions = repetitions)
+    class(out) <- "bridge_list"
+  }
 
   return(out)
 
@@ -443,6 +474,7 @@
 #' @param data data object which is used in \code{log_posterior}.
 #' @param lb named vector with lower bounds for parameters.
 #' @param ub named vector with upper bounds for parameters.
+#' @param repetitions number of repetitions.
 #' @param method either \code{"normal"} or \code{"warp3"}.
 #' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems ((e.g., Windows)) \code{\link{makeCluster}} is used and further arguments specified below will be used.
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).
@@ -464,7 +496,7 @@
 #'
 #' On other OSes (e.g., Windows), things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 #' }
-#' @return a list of class \code{"bridge"} with components:
+#' @return if \code{repetitions = 1}, returns a list of class \code{"bridge"} with components:
 #' \itemize{
 #'  \item \code{logml}: estimate of log marginal likelihood.
 #'  \item \code{niter}: number of iterations of the iterative updating scheme.
@@ -473,6 +505,13 @@
 #'  \item \code{q12}: log proposal evaluations for posterior samples.
 #'  \item \code{q21}: log_posterior evaluations for samples from proposal.
 #'  \item \code{q22}: log proposal evaluations for samples from proposal.
+#' }
+#' if \code{repetitions > 1}, returns a list of class \code{"bridge_list"} with components:
+#' \itemize{
+#'  \item \code{logml}: numeric vector with estimates of log marginal likelihood.
+#'  \item \code{niter}: numeric vector with number of iterations of the iterative updating scheme for each repetition.
+#'  \item \code{method}: bridge sampling method that was used to obtain the estimates.
+#'  \item \code{repetitions}: number of repetitions.
 #' }
 #' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) uses code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 #' @references
@@ -491,21 +530,21 @@
 #' @importFrom stringr str_sub
 #' @importFrom stats qnorm pnorm dnorm median cov var
 bridge_sampler <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                           lb = NULL, ub = NULL, method = "normal", cores = 1,
-                           packages = NULL, varlist = NULL, envir = .GlobalEnv,
-                           rcppFile = NULL, maxiter = 1000,
+                           lb = NULL, ub = NULL, repetitions = 1, method = "normal",
+                           cores = 1, packages = NULL, varlist = NULL,
+                           envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
                            silent = FALSE, verbose = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
 
   out <- do.call(what = paste0(".bridge.sampler.", method),
                  args = list(samples = samples, log_posterior = log_posterior,
-                             "..." = ..., data = data, lb = lb, ub = ub, cores = cores,
+                             "..." = ..., data = data, lb = lb, ub = ub,
+                             repetitions = repetitions, cores = cores,
                              packages = packages, varlist = varlist, envir = envir,
                              rcppFile = rcppFile, maxiter = maxiter,
                              silent = silent, verbose = verbose,
                              r0 = 0.5, tol = 1e-10))
-  class(out) <- "bridge"
   return(out)
 
 }
@@ -517,6 +556,16 @@ print.bridge <- function(x, ...) {
   cat("Bridge sampling estimate of the log marginal likelihood: ",
       round(x$logml, 5), "\nEstimate obtained in ", x$niter,
       " iterations via method \"", x$method, "\".", sep = "")
+}
+
+#' @method print bridge_list
+#' @export
+print.bridge_list <- function(x, ...) {
+
+  cat("Median of ", x$repetitions,  " bridge sampling estimates of the log marginal likelihood: ",
+      round(median(x$logml), 5), "\nRange of estimates: ", round(range(x$logml)[1], 5), " to ",
+      round(range(x$logml)[2], 5),
+      "\nInterquartile range: ", round(stats::IQR(x$logml), 5), "\nMethod: ", x$method, sep = "")
 }
 
 

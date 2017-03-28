@@ -5,13 +5,15 @@
 \title{Marginal likelihood for an object of class \code{stanfit}}
 \usage{
 stan_bridge_sampler(stanfit_data = NULL, stanfit_model = stanfit_data,
-  method = "normal", cores = 1, maxiter = 1000, silent = FALSE,
-  verbose = FALSE)
+  repetitions = 1, method = "normal", cores = 1, maxiter = 1000,
+  silent = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{stanfit_data}{an object of class \code{"stanfit"} that contains the posterior samples.}
 
 \item{stanfit_model}{an object of class \code{"stanfit"} with the same model as \code{stanfit_data}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{stanfit_data}. In case \code{stanfit_data} was compiled on another computer with a different OS or setup, \code{stanfit_data} usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{stanfit_data} is loaded).}
+
+\item{repetitions}{number of repetitions.}
 
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
