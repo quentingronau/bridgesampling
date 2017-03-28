@@ -13,6 +13,17 @@
     without samples if the one with samples was compiled in a different 
     session/pc. See new vignettes for examples.
     
+  o Added repetitions argument to bridge sampler functions which allows to
+    compute independent bridge sample estimates (based on the same posterior
+    samples). bridge_sampler() now returns object of class "bridge" for 
+    calculations with repetitions = 1, but an object of class "bridge_list" if
+    repetitions > 1, the latter contains the full list of estimates (but no q 
+    vectors). 
+  
+  o renamed compute_post_prob() to post_prob(), which is now a generic function.
+  
+  o added new generic function logml() which returns 
+    
   o Multicore computations (i.e., cors > 1) on Unix-like systen (e.g., Mac OS, 
     Linux) are now performed with forking via parallel::mcapply().
   

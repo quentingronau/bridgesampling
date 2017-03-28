@@ -127,16 +127,16 @@ test_that("bridge sampler matches anlytical value normal example", {
   expect_is(bf, "numeric")
 
   # without prior_prob
-  post1 <- compute_post_prob(bridge_normal, bridge_warp3, bridge_normal_c, bridge_warp3_c)
+  post1 <- post_prob(bridge_normal, bridge_warp3, bridge_normal_c, bridge_warp3_c)
   expect_equal(sum(post1), 1)
 
   # with prior_prob
-  post2 <- compute_post_prob(bridge_normal, bridge_warp3, bridge_normal_c,
+  post2 <- post_prob(bridge_normal, bridge_warp3, bridge_normal_c,
                              bridge_warp3_c, prior_prob = c(0.2, 0.1, 0.25, 0.45))
   expect_equal(sum(post2), 1)
 
   # with incorrect prior_prob
-  expect_error(compute_post_prob(bridge_normal, bridge_warp3, bridge_normal_c,
+  expect_error(post_prob(bridge_normal, bridge_warp3, bridge_normal_c,
                                  bridge_warp3_c, prior_prob = c(0.2, 0.1, 0.25, 0.55)),
                "do not sum to one")
 
