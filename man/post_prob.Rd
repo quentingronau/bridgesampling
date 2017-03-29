@@ -3,24 +3,32 @@
 \name{post_prob}
 \alias{post_prob}
 \alias{post_prob.bridge}
+\alias{post_prob.bridge_list}
 \alias{post_prob.default}
 \title{Posterior Model Probabilities from Marginal Likelihoods}
 \usage{
-post_prob(x, ..., prior_prob)
+post_prob(x, ..., prior_prob = NULL, model_names = NULL)
 
-\method{post_prob}{bridge}(x, ..., prior_prob)
+\method{post_prob}{bridge}(x, ..., prior_prob = NULL, model_names = NULL)
 
-\method{post_prob}{default}(x, ..., prior_prob)
+\method{post_prob}{bridge_list}(x, ..., prior_prob = NULL,
+  model_names = NULL)
+
+\method{post_prob}{default}(x, ..., prior_prob = NULL, model_names = NULL)
 }
 \arguments{
-\item{x}{Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. The default method simply assumes all passed objects are numeric log marginal likelihoods (e.g., from \code{\link{logml}}).}
+\item{x}{Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that all passed objects are numeric log marginal likelihoods (e.g., from \code{\link{logml}}) and will throw an error otherwise.}
 
 \item{...}{further objects of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Or numeric values for the default method.}
 
-\item{prior_prob}{numeric vector with prior model probabilities. If omitted, a uniform prior is used (i.e., all models are equally likely a priori).}
+\item{prior_prob}{numeric vector with prior model probabilities. If omitted, a uniform prior is used (i.e., all models are equally likely a priori). The default \code{NULL} correspond to equal prior model weights.}
+
+\item{model_names}{If \code{NULL} (the default) will use model names derived from deparsing the call. Otherwise will use the passed values as model names.}
 }
 \value{
-Numeric vector with posterior model probabilities (with names derived from the input).
+For the default method and the method for \code{"bridge"} objects, a named numeric vector with posterior model probabilities (i.e., which sums to one).
+
+For the method for \code{"bridge_list"} objects, a matrix consisting of posterior model probabilities where each row sums to one and gives the model probabilities for one set of logmls. The (named) columns correspond to the models and the number of rows is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
 }
 \description{
 Generic function that computes posterior model probabilities from marginal likelihoods
@@ -46,7 +54,26 @@ post_prob(H0, H1, H2)
 post_prob(H0$logml, H1$logml, H2$logml)
 post_prob(c(H0$logml, H1$logml, H2$logml))
 post_prob(H0$logml, c(H1$logml, H2$logml))
+post_prob(H0$logml, c(H1$logml, H2$logml), model_names = c("H0", "H1", "H2"))
 
+
+### with bridge list elements:
+H0L <- structure(list(logml = c(-20.8088381186739, -20.8072772698116,
+-20.808454454621, -20.8083419072281, -20.8087870541247, -20.8084887398113,
+-20.8086023582344, -20.8079083169745, -20.8083048489095, -20.8090050811436
+), niter = c(4, 4, 4, 4, 4, 4, 4, 4, 4, 4), method = "normal",
+    repetitions = 10), .Names = c("logml", "niter", "method",
+"repetitions"), class = "bridge_list")
+
+H1L <- structure(list(logml = c(-17.961665507006, -17.9611290723151,
+-17.9607509604499, -17.9608629535992, -17.9602093576442, -17.9600223300432,
+-17.9610157118017, -17.9615557696561, -17.9608437034849, -17.9606743200309
+), niter = c(4, 4, 4, 4, 4, 4, 4, 4, 3, 4), method = "normal",
+    repetitions = 10), .Names = c("logml", "niter", "method",
+"repetitions"), class = "bridge_list")
+
+post_prob(H1L, H0L)
+post_prob(H1L, H0L, H0) # last element recycled with warning.
 
 }
 \author{

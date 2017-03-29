@@ -20,7 +20,10 @@
     repetitions > 1, the latter contains the full list of estimates (but no q 
     vectors). 
   
-  o renamed compute_post_prob() to post_prob(), which is now a generic function.
+  o Renamed compute_post_prob() to post_prob(), which is now a generic function
+    with methods for bridge objects. The default method allows just logml 
+    values. For "bridge_list" objects (i.e., with repetitions > 1) a matrix of 
+    posterior probabilities with rows for each repetition is returned. 
   
   o added new generic function logml() which returns 
     
