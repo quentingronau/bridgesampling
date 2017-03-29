@@ -56,8 +56,8 @@ post_prob.bridge_list <- function(x, ..., prior_prob = NULL, model_names = NULL)
     warning("Not all objects provide ", max(len), " logmls. Some values are recycled.", call. = FALSE)
     logml <- lapply(logml, function(x) rep(x, length.out = max(len)))
   }
-  t(apply(as.matrix(as.data.frame(logml)), 1, function(x)
-    .post_prob_calc(logml=x, model_names = model_names, prior_prob=prior_prob)))
+  t(apply(as.data.frame(logml), 1, .post_prob_calc,
+          model_names = model_names, prior_prob=prior_prob))
 }
 
 #' @rdname post_prob
