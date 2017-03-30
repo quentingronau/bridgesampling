@@ -1,5 +1,5 @@
 
-context('stan_bridge_sampler multicore works for one-parameter model.')
+context('bridge_sampler.stanfit multicore works for one-parameter model.')
 
 
 test_that("stan_bridge_sampler", {
@@ -39,7 +39,7 @@ test_that("stan_bridge_sampler", {
                           control = list(adapt_delta = 0.95))
     )
     ######### bridge sampling ###########
-    H0 <- stan_bridge_sampler(stanfitH0, cores = 2, silent = TRUE)
+    H0 <- bridge_sampler(stanfitH0, cores = 2, silent = TRUE)
 
   }
 })

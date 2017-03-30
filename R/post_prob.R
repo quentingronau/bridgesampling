@@ -12,7 +12,7 @@
 #' @author Quentin F. Gronau and Henrik Singmann
 #' @note For realistic examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
 #' @example examples/example.post_prob.R
-#'
+#' @importFrom methods is
 post_prob <- function (x, ..., prior_prob = NULL, model_names = NULL) {
    UseMethod("post_prob", x)
 }

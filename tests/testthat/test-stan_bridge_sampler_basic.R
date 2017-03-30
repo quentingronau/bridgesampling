@@ -1,5 +1,5 @@
 
-context('stan_bridge_sampler works.')
+context('bridge_sampler.stanfit works.')
 
 
 ### H0: mu = 0
@@ -64,19 +64,19 @@ test_that("stan_bridge_sampler", {
                                                       beta = beta),
                              iter = 3500, warmup = 500, chains = 4, show_messages = FALSE))
     expect_is(
-    H0_bridge_norm <- stan_bridge_sampler(stanobjectH0, method = "normal", silent = TRUE)
+    H0_bridge_norm <- bridge_sampler(stanobjectH0, method = "normal", silent = TRUE)
     , "bridge")
 
     expect_is(
-      H0_bridge_norm_rep <- stan_bridge_sampler(stanobjectH0, method = "normal", repetitions = 2, silent = TRUE)
+      H0_bridge_norm_rep <-bridge_sampler(stanobjectH0, method = "normal", repetitions = 2, silent = TRUE)
       , "bridge_list")
 
     expect_is(
-    H0_bridge_warp3 <- stan_bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE)
+    H0_bridge_warp3 <- bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE)
     , "bridge")
 
     expect_is(
-      H0_bridge_warp3_rep <- stan_bridge_sampler(stanobjectH0, method = "warp3", repetitions = 2, silent = TRUE)
+      H0_bridge_warp3_rep <- bridge_sampler(stanobjectH0, method = "warp3", repetitions = 2, silent = TRUE)
       , "bridge_list")
 
     expect_equal(H0_bridge_norm$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
@@ -142,11 +142,11 @@ test_that("stan_bridge_sampler in multicore", {
                                                       beta = beta),
                              iter = 2500, warmup = 500, chains = 4, show_messages = FALSE))
     expect_is(
-    H0_bridge_norm <- stan_bridge_sampler(stanobjectH0, method = "normal", silent = TRUE, cores = 2)
+    H0_bridge_norm <- bridge_sampler(stanobjectH0, method = "normal", silent = TRUE, cores = 2)
     , "bridge")
 
     expect_is(
-    H0_bridge_warp3 <- stan_bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE, cores = 2)
+    H0_bridge_warp3 <- bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE, cores = 2)
     , "bridge")
 
     expect_equal(H0_bridge_norm$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
