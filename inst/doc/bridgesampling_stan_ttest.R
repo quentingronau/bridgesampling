@@ -54,9 +54,9 @@ stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n, r = 1/sqrt(2)),
 
 ## ------------------------------------------------------------------------
 set.seed(12345)
-H0 <- stan_bridge_sampler(stanfitH0, silent = TRUE)
+H0 <- bridge_sampler(stanfitH0, silent = TRUE)
 print(H0)
-H1 <- stan_bridge_sampler(stanfitH1, silent = TRUE)
+H1 <- bridge_sampler(stanfitH1, silent = TRUE)
 print(H1)
 
 ## ------------------------------------------------------------------------
@@ -66,7 +66,7 @@ print(error_measures(H1)$percentage)
 
 ## ------------------------------------------------------------------------
 # compute Bayes factor
-BF10 <- compute_bf(H1, H0)
+BF10 <- bf(H1, H0)
 print(BF10)
 
 ## ---- message=FALSE------------------------------------------------------
@@ -97,13 +97,13 @@ stanfitHplus <- sampling(stanmodelHplus, data = list(y = y, n = n, r = 1/sqrt(2)
                          control = list(adapt_delta = .99))
 
 ## ------------------------------------------------------------------------
-Hplus <- stan_bridge_sampler(stanfitHplus, silent = TRUE)
+Hplus <- bridge_sampler(stanfitHplus, silent = TRUE)
 print(Hplus)
 print(error_measures(Hplus)$percentage)
 
 ## ------------------------------------------------------------------------
 # compute Bayes factor
-BFplus0 <- compute_bf(Hplus, H0)
+BFplus0 <- bf(Hplus, H0)
 print(BFplus0)
 
 ## ------------------------------------------------------------------------

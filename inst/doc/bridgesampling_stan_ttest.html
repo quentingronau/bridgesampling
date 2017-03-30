@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-03-25" />
+<meta name="date" content="2017-03-30" />
 
 <title>Bayesian One-Sample T-Test (Stan)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Bayesian One-Sample T-Test (Stan)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-03-25</em></h4>
+<h4 class="date"><em>2017-03-30</em></h4>
 
 
 <div id="TOC">
@@ -154,15 +154,15 @@ stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmod
 </div>
 <div id="computing-the-log-marginal-likelihoods" class="section level2">
 <h2>Computing the (Log) Marginal Likelihoods</h2>
-<p>Computing the (log) marginal likelihoods via the <code>stan_bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contains all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
+<p>Computing the (log) marginal likelihoods via the <code>bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contains all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
-H0 &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+H0 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H0)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -20.80989. 
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -20.80989
 ## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">H1 &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">H1 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H1)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.96253. 
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.96253
 ## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
@@ -173,9 +173,9 @@ H0 &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(sta
 </div>
 <div id="computing-the-bayes-factor" class="section level2">
 <h2>Computing the Bayes Factor</h2>
-<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>compute_bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{10}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the alternative versus the null hypothesis:</p>
+<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{10}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the alternative versus the null hypothesis:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
-BF10 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(H1, H0)
+BF10 &lt;-<span class="st"> </span><span class="kw">bf</span>(H1, H0)
 <span class="kw">print</span>(BF10)</code></pre></div>
 <pre><code>## [1] 17.24211</code></pre>
 <p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>
@@ -215,15 +215,15 @@ stanfitHplus &lt;-<span class="st"> </span><span class="kw">sampling</span>(stan
                          <span class="dt">iter =</span> <span class="dv">30000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>,
                          <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))</code></pre></div>
 <p>The (log) marginal likelihood is then obtained as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hplus &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitHplus, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hplus &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitHplus, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(Hplus)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.27114. 
-## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.27114
+## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(Hplus)$percentage)</code></pre></div>
 <pre><code>## [1] &quot;0.134%&quot;</code></pre>
 <p>The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can be computed as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
-BFplus0 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(Hplus, H0)
+BFplus0 &lt;-<span class="st"> </span><span class="kw">bf</span>(Hplus, H0)
 <span class="kw">print</span>(BFplus0)</code></pre></div>
 <pre><code>## [1] 34.42364</code></pre>
 <p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>

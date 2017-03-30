@@ -129,11 +129,11 @@ print(error_measures(H1.bridge)$percentage)
 ```
 
 ## Bayesian Model Comparison
-To compare the null model and the alternative model, we can compute the Bayes factor by using the `compute_bf` function.
+To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
 In our case, we compute $\text{BF}_{01}$, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:
 ```{r}
 # compute Bayes factor
-BF01 <- compute_bf(H0.bridge, H1.bridge)
+BF01 <- bf(H0.bridge, H1.bridge)
 print(BF01)
 ```
 In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the `post_prob` function:

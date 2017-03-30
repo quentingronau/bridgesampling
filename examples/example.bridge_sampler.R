@@ -174,7 +174,7 @@ print(error_measures(H0.bridge)$percentage)
 print(error_measures(H1.bridge)$percentage)
 
 # compute Bayes factor
-BF01 <- compute_bf(H0.bridge, H1.bridge)
+BF01 <- bf(H0.bridge, H1.bridge)
 print(BF01)
 
 # compute posterior model probabilities (assuming equal prior model probabilities)

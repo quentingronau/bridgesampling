@@ -110,14 +110,14 @@ stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
 ```
 
 ## Computing the (Log) Marginal Likelihoods
-Computing the (log) marginal likelihoods via the `stan_bridge_sampler` function is now easy: we only need to pass the `stanfit` objects which contains all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
+Computing the (log) marginal likelihoods via the `bridge_sampler` function is now easy: we only need to pass the `stanfit` objects which contains all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
 ```{r}
 # compute log marginal likelihood via bridge sampling for H0
-H0.bridge <- stan_bridge_sampler(stanfitH0, silent = TRUE)
+H0.bridge <- bridge_sampler(stanfitH0, silent = TRUE)
 print(H0.bridge)
 
 # compute log marginal likelihood via bridge sampling for H1
-H1.bridge <- stan_bridge_sampler(stanfitH1, silent = TRUE)
+H1.bridge <- bridge_sampler(stanfitH1, silent = TRUE)
 print(H1.bridge)
 ```
 
@@ -129,22 +129,22 @@ print(error_measures(H1.bridge)$percentage)
 ```
 
 ## Bayesian Model Comparison
-To compare the null model and the alternative model, we can compute the Bayes factor by using the `compute_bf` function.
+To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
 In our case, we compute $\text{BF}_{01}$, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:
 ```{r}
 # compute Bayes factor
-BF01 <- compute_bf(H0.bridge, H1.bridge)
+BF01 <- bf(H0.bridge, H1.bridge)
 print(BF01)
 ```
-In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the `compute_post_prob` function:
+In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the `post_prob` function:
 ```{r}
 # compute posterior model probabilities (assuming equal prior model probabilities)
-post1 <- compute_post_prob(H0.bridge, H1.bridge)
+post1 <- post_prob(H0.bridge, H1.bridge)
 print(post1)
 ```
 When the argument `prior_prob` is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the `prior_prob` argument to specify different prior model probabilities:
 ```{r}
 # compute posterior model probabilities (using user-specified prior model probabilities)
-post2 <- compute_post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
+post2 <- post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
 ```

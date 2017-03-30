@@ -101,11 +101,11 @@ print(error_measures(H1)$percentage)
 ```
 
 ## Computing the Bayes Factor
-To compare the null model and the alternative model, we can compute the Bayes factor by using the `compute_bf` function.
+To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
 In our case, we compute $\text{BF}_{10}$, that is, the Bayes factor which quantifies how much more likely the data are under the alternative versus the null hypothesis:
 ```{r}
 # compute Bayes factor
-BF10 <- compute_bf(H1, H0)
+BF10 <- bf(H1, H0)
 print(BF10)
 ```
 We can compare the bridge sampling result to the `BayesFactor` package result:
@@ -150,7 +150,7 @@ print(error_measures(Hplus)$percentage)
 The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can be computed as follows:
 ```{r}
 # compute Bayes factor
-BFplus0 <- compute_bf(Hplus, H0)
+BFplus0 <- bf(Hplus, H0)
 print(BFplus0)
 ```
 

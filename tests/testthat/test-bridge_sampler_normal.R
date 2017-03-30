@@ -31,10 +31,13 @@ test_that("bridge sampler matches anlytical value normal example", {
                                    data = NULL, lb = lb, ub = ub,
                                    method = "warp3", silent = TRUE, repetitions = 2)
 
+
   expect_equal(bridge_normal$logml, expected = rep(log(2*pi), length(bridge_normal$logml)), tolerance = 0.01)
   expect_equal(bridge_warp3$logml, expected = rep(log(2*pi), length(bridge_warp3$logml)), tolerance = 0.01)
   expect_equal(bridge_normal_c$logml, expected = rep(log(2*pi), length(bridge_normal_c$logml)), tolerance = 0.01)
   expect_equal(bridge_warp3_c$logml, expected = rep(log(2*pi), length(bridge_warp3_c$logml)), tolerance = 0.01)
+
+  expect_equal(bf(bridge_object1 = bridge_normal, bridge_object2 = bridge_warp3), expected = rep(1, 2), tolerance = 0.1)
 
   # check repetitions = 1
   bridge_normal <- bridge_sampler(samples = x, log_posterior = log_density,
@@ -122,8 +125,8 @@ test_that("bridge sampler matches anlytical value normal example", {
 
   expect_error(error_measures(bridge_warp3), "not implemented for warp3")
 
-  ### these are meant to check the compute_bf and compute_post_prob functions and not as a meaningful comparisons
-  bf <- compute_bf(bridge_object1 = bridge_normal, bridge_object2 = bridge_warp3)
+  ### these are meant to check the bf and post_prob functions and not as a meaningful comparisons
+  bf <- bf(bridge_object1 = bridge_normal, bridge_object2 = bridge_warp3)
   expect_is(bf, "numeric")
 
   # without prior_prob

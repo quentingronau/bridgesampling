@@ -81,11 +81,11 @@ stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
 
 ## ------------------------------------------------------------------------
 # compute log marginal likelihood via bridge sampling for H0
-H0.bridge <- stan_bridge_sampler(stanfitH0, silent = TRUE)
+H0.bridge <- bridge_sampler(stanfitH0, silent = TRUE)
 print(H0.bridge)
 
 # compute log marginal likelihood via bridge sampling for H1
-H1.bridge <- stan_bridge_sampler(stanfitH1, silent = TRUE)
+H1.bridge <- bridge_sampler(stanfitH1, silent = TRUE)
 print(H1.bridge)
 
 ## ------------------------------------------------------------------------
@@ -95,16 +95,16 @@ print(error_measures(H1.bridge)$percentage)
 
 ## ------------------------------------------------------------------------
 # compute Bayes factor
-BF01 <- compute_bf(H0.bridge, H1.bridge)
+BF01 <- bf(H0.bridge, H1.bridge)
 print(BF01)
 
 ## ------------------------------------------------------------------------
 # compute posterior model probabilities (assuming equal prior model probabilities)
-post1 <- compute_post_prob(H0.bridge, H1.bridge)
+post1 <- post_prob(H0.bridge, H1.bridge)
 print(post1)
 
 ## ------------------------------------------------------------------------
 # compute posterior model probabilities (using user-specified prior model probabilities)
-post2 <- compute_post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
+post2 <- post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
 

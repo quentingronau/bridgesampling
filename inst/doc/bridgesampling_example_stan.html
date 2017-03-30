@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-03-25" />
+<meta name="date" content="2017-03-30" />
 
 <title>Hierarchical Normal Example (Stan)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Hierarchical Normal Example (Stan)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-03-25</em></h4>
+<h4 class="date"><em>2017-03-30</em></h4>
 
 
 <div id="TOC">
@@ -172,16 +172,16 @@ stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmod
 </div>
 <div id="computing-the-log-marginal-likelihoods" class="section level2">
 <h2>Computing the (Log) Marginal Likelihoods</h2>
-<p>Computing the (log) marginal likelihoods via the <code>stan_bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contains all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
+<p>Computing the (log) marginal likelihoods via the <code>bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contains all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H0</span>
-H0.bridge &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+H0.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H0.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53568. 
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53568
 ## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
-H1.bridge &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H1.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.80008. 
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.80008
 ## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
@@ -192,20 +192,20 @@ H1.bridge &lt;-<span class="st"> </span><span class="kw">stan_bridge_sampler</sp
 </div>
 <div id="bayesian-model-comparison" class="section level2">
 <h2>Bayesian Model Comparison</h2>
-<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>compute_bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{01}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:</p>
+<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{01}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
-BF01 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(H0.bridge, H1.bridge)
+BF01 &lt;-<span class="st"> </span><span class="kw">bf</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(BF01)</code></pre></div>
 <pre><code>## [1] 1.302656</code></pre>
-<p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>compute_post_prob</code> function:</p>
+<p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>post_prob</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (assuming equal prior model probabilities)</span>
-post1 &lt;-<span class="st"> </span><span class="kw">compute_post_prob</span>(H0.bridge, H1.bridge)
+post1 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(post1)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
 ## 0.5657188 0.4342812</code></pre>
 <p>When the argument <code>prior_prob</code> is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the <code>prior_prob</code> argument to specify different prior model probabilities:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (using user-specified prior model probabilities)</span>
-post2 &lt;-<span class="st"> </span><span class="kw">compute_post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
+post2 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
 <span class="kw">print</span>(post2)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
 ## 0.6614741 0.3385259</code></pre>

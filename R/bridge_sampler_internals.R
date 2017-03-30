@@ -468,7 +468,7 @@
 
 ######### for stanfit method ########
 
-# taken fron rstan:
+# taken from rstan:
 .rstan_relist <- function (x, skeleton) {
   lst <- utils::relist(x, skeleton)
   for (i in seq_along(skeleton)) dim(lst[[i]]) <- dim(skeleton[[i]])
