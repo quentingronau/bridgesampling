@@ -5,31 +5,33 @@
 \alias{bf.bridge}
 \alias{bf.bridge_list}
 \alias{bf.default}
-\title{Bayes Factor from Marginal Likelihoods}
+\title{Bayes Factor(s) from Marginal Likelihoods}
 \usage{
-bf(bridge_object1, bridge_object2, log = FALSE)
+bf(x1, x2, log = FALSE)
 
-\method{bf}{bridge}(bridge_object1, bridge_object2, log = FALSE)
+\method{bf}{bridge}(x1, x2, log = FALSE)
 
-\method{bf}{bridge_list}(bridge_object1, bridge_object2, log = FALSE)
+\method{bf}{bridge_list}(x1, x2, log = FALSE)
 
-\method{bf}{default}(bridge_object1, bridge_object2, log = FALSE)
+\method{bf}{default}(x1, x2, log = FALSE)
 }
 \arguments{
-\item{bridge_object1}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
+\item{x1}{Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x1} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.}
 
-\item{bridge_object2}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
+\item{x2}{Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x2} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.}
 
 \item{log}{Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.}
 }
 \value{
-Value of the Bayes factor (scalar).
+For the default method and the method for \code{"bridge"} objects, the (scalar) value of the Bayes factor in favor of the model associated with \code{x1}.
+
+For the method for \code{"bridge_list"} objects, a numeric vector consisting of Bayes factors where each element gives the Bayes factor for one set of logmls in favor of the model associated with \code{x1}. The length of this vector is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
 }
 \description{
-Computes the Bayes factor for a model comparison between two models.
+Generic function that computes Bayes factor(s) from marginal likelihoods
 }
 \details{
-Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{bridge_object1} over the model associated with \code{bridge_object2}.
+Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{x1} over the model associated with \code{x2}.
 }
 \note{
 For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
