@@ -1,11 +1,12 @@
 
-context('bridge_sampler.stanfit multicore works for one-parameter model.')
+context('Stan Bridge Sampler Bugs')
 
 
-test_that("stan_bridge_sampler", {
+test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
 
   skip_on_cran()
   skip_on_travis()
+  skip_on_os("windows")
 
   if (require(rstan)) {
     set.seed(12345)
