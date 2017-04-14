@@ -235,6 +235,14 @@
     parallel::stopCluster(cl)
     }
   }
+  if (any(is.infinite(q11))) {
+    warning(sum(is.infinite(q11)), " of the ", length(q11)," log_prob() evaluations on the posterior draws produced -Inf/Inf.", call. = FALSE)
+  }
+  for (i in seq_len(repetitions)) {
+    if (any(is.infinite(q21[[i]]))) {
+      warning(sum(is.infinite(q21[[i]])), " of the ", length(q21[[i]])," log_prob() evaluations on the proposal draws produced -Inf/Inf.", call. = FALSE)
+    }
+  }
   if (any(is.na(q11))) {
     warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the posterior draws produced NA and have been replaced by -Inf.", call. = FALSE)
     q11[is.na(q11)] <- -Inf
@@ -335,7 +343,6 @@
                       .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                                      gen_samples[[i]] %*% t(L), transTypes, lb, ub)))
     }
-
   } else if (cores > 1) {
         if ( .Platform$OS.type == "unix") {
       split1a <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub), cores=cores)
@@ -422,6 +429,14 @@
         }
 
   }
+  if (any(is.infinite(q11))) {
+    warning(sum(is.infinite(q11)), " of the ", length(q11)," log_prob() evaluations on the warp-transformed posterior draws produced -Inf/Inf.", call. = FALSE)
+  }
+  for (i in seq_len(repetitions)) {
+    if (any(is.infinite(q21[[i]]))) {
+      warning(sum(is.infinite(q21[[i]])), " of the ", length(q21[[i]])," log_prob() evaluations on the warp-transformed proposal draws produced -Inf/Inf.", call. = FALSE)
+    }
+  }
   if (any(is.na(q11))) {
     warning(sum(is.na(q11)), " evaluation(s) of log_prob() on the warp-transformed posterior draws produced NA and have been replaced by -Inf.", call. = FALSE)
     q11[is.na(q11)] <- -Inf
@@ -488,5 +503,5 @@
 }
 
 .stan_log_posterior <- function(s.row, data) {
-  tryCatch(rstan::log_prob(object = data$stanfit, upars = s.row), error = function(e) NA)
+  tryCatch(rstan::log_prob(object = data$stanfit, upars = s.row), error = function(e) -Inf)
 }
