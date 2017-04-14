@@ -39,3 +39,13 @@ test_that("bridge sampler print method correctly displayed", {
   expect_output(print(bridge_warp3), "Median of")
 
 })
+
+test_that("prints with NAs with warning.", {
+  bridge_o <- structure(list(logml = c(4291.14352476047, 4293.29076119542,
+4291.96372581169, 4293.02187182362, NA, NA, 4290.9761730488,
+4293.32075269401, 4293.5762219227, 4294.02761288449), niter = c(104,
+16, 52, 8, 1000, 1000, 167, 16, 21, 44), method = "normal", repetitions = 10), .Names = c("logml",
+"niter", "method", "repetitions"), class = "bridge_list")
+
+  expect_warning(print(bridge_o), "NA")
+})

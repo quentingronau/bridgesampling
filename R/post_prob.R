@@ -89,11 +89,15 @@ post_prob.default <- function(x, ..., prior_prob = NULL, model_names = NULL) {
   if(length(logml) != length(prior_prob))
     stop("Number of objects/logml-values needs to match number of elements in prior_prob.", call. = FALSE)
 
-  post_prob <- as.numeric(e^logml*prior_prob / sum(e^logml*prior_prob))
+  if(any(is.na(logml))) {
+    post_prob <- rep(NA_real_, length(logml))
+    warning("NAs in logml values. No posterior probabilities calculated.", call. = FALSE)
+  } else {
+    post_prob <- as.numeric(e^logml*prior_prob / sum(e^logml*prior_prob))
+    if(!isTRUE(all.equal(sum(post_prob), 1)))
+      warning("Posterior model probabilities do not sum to one.", call. = FALSE)
+  }
   names(post_prob) <- make.unique(as.character(model_names))
-
-  if(!isTRUE(all.equal(sum(post_prob), 1)))
-    warning("Posterior model probabilities do not sum to one.", call. = FALSE)
 
   return(post_prob)
 

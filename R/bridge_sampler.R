@@ -155,12 +155,13 @@ print.bridge <- function(x, ...) {
 
 #' @method print bridge_list
 #' @export
-print.bridge_list <- function(x, ...) {
+print.bridge_list <- function(x, na.rm = TRUE, ...) {
 
   cat("Median of ", x$repetitions,  " bridge sampling estimates of the log marginal likelihood: ",
-      round(median(x$logml), 5), "\nRange of estimates: ", round(range(x$logml)[1], 5), " to ",
-      round(range(x$logml)[2], 5),
-      "\nInterquartile range: ", round(stats::IQR(x$logml), 5), "\nMethod: ", x$method, sep = "")
+      round(median(x$logml, na.rm = na.rm), 5), "\nRange of estimates: ", round(range(x$logml, na.rm=na.rm)[1], 5), " to ",
+      round(range(x$logml, na.rm = na.rm)[2], 5),
+      "\nInterquartile range: ", round(stats::IQR(x$logml, na.rm = na.rm), 5), "\nMethod: ", x$method, sep = "")
+  if (any(is.na(x$logml))) warning(sum(is.na(x$logml))," bridge sampling estimate(s) are NAs.", call. = FALSE)
 }
 
 

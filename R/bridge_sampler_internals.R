@@ -138,8 +138,11 @@
     numi <- as.numeric( e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r) )
     deni <- as.numeric( 1/(s1 * e^(l1 - lstar) + s2 * r) )
 
-    if (any(is.infinite(numi)) || any(is.infinite(deni)))
-      stop("Infinite value in iterative scheme. Try rerunning with more samples.", call. = FALSE)
+    if (any(is.infinite(numi)) || any(is.infinite(deni))) {
+      warning("Infinite value in iterative scheme, returning NA./n Try rerunning with more samples.", call. = FALSE)
+      return(list(logml = NA, niter = i))
+
+    }
 
     r <- (n.1/n.2) * sum(numi)/sum(deni)
     i <- i + 1
@@ -148,8 +151,11 @@
 
   logml <- log(r) + lstar
 
-  if (i >= maxiter)
-    stop("logml could not be estimated within maxiter")
+  if (i >= maxiter) {
+    warning("logml could not be estimated within maxiter, returning NA.", call. = FALSE)
+    return(list(logml = NA, niter = i-1))
+  }
+
 
   return(list(logml = logml, niter = i-1))
 
