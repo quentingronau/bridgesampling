@@ -103,7 +103,8 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
                                 ...) {
 
   # convert samples into matrix
-  ex <- extract(samples, permuted = FALSE)
+  if (!requireNamespace("rstan")) stop("package rstan required")
+  ex <- rstan::extract(samples, permuted = FALSE)
   skeleton <- .create_skeleton(stanfit_model@model_pars, stanfit_model@par_dims)
   upars <- apply(ex, 1:2, FUN = function(theta) {
     rstan::unconstrain_pars(stanfit_model, .rstan_relist(theta, skeleton))

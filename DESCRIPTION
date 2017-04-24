@@ -11,9 +11,10 @@ Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
              person("Jonah", "Gabry", role = "ctb"), person("Ben", "Goodrich", 
              role = c("ctb")))
 Depends: R (>= 3.0.0)
-Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel, scales, rstan, 
+Imports: mvtnorm, Matrix, Brobdingnag, stringr, coda, parallel, scales,  
          utils, methods
-Suggests: testthat, Rcpp, RcppEigen, R2jags, knitr, rmarkdown, R.rsp, BayesFactor
+Suggests: testthat, Rcpp, RcppEigen, R2jags, knitr, rmarkdown, R.rsp, BayesFactor, 
+          rstan
 Description: Provides functions for estimating marginal likelihoods, Bayes factors,
              posterior model probabilities, and normalizing constants in general,
              via different versions of bridge sampling (Meng & Wong, 1996,
