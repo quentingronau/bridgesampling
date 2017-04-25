@@ -94,7 +94,6 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
 }
 
 
-#' @import rstan
 #' @rdname bridge_sampler
 #' @export
 bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
