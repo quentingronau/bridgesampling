@@ -7,9 +7,37 @@
 
   Significant User Visible Changes and New Features
 
-  o  
+  o Added stan_bridge_sampler(), which allows one to obtain the marginal 
+    likelihood directly from a fitted stanfit object that contains posterior 
+    samples. Note that it may be necessary to compile a new stanfit object 
+    without samples if the one with samples was compiled in a different 
+    session/pc. See new vignettes for examples.
+    
+  o Added repetitions argument to bridge sampler functions which allows to
+    compute independent bridge sample estimates (based on the same posterior
+    samples). bridge_sampler() now returns object of class "bridge" for 
+    calculations with repetitions = 1, but an object of class "bridge_list" if
+    repetitions > 1, the latter contains the full list of estimates (but no q 
+    vectors). 
+  
+  o Renamed compute_post_prob() to post_prob(), which is now a generic function
+    with methods for bridge objects. The default method allows just logml 
+    values. For "bridge_list" objects (i.e., with repetitions > 1) a matrix of 
+    posterior probabilities with rows for each repetition is returned. 
+  
+  o added new generic function logml() which returns 
+    
+  o Multicore computations (i.e., cors > 1) on Unix-like systen (e.g., Mac OS, 
+    Linux) are now performed with forking via parallel::mcapply().
   
   Bugfixes
 
-  o  
+  o compute_post_prob() now works even when exp(logml) initially returns Inf
+    (solution works via brobdingnag).
+    
+  o Bridge sampler more robust due to various small improvements and produces
+    more informative error messages should it fail. 
+    
+  o If log_prob() returns NA, these values are replaced with -Inf on the log 
+    scale (which assumes a likelihood of 0). With warning.
 

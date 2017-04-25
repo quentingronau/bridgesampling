@@ -14,11 +14,10 @@ test_that("bridge sampler matches anlytical value normal example", {
   log_density <- function(s, data) {
     -.5*t(s)%*%s
   }
-
+  assign("log_density", log_density, envir = .GlobalEnv)
   lb <- rep(-Inf, 2)
   ub <- rep(Inf, 2)
   names(lb) <- names(ub) <- colnames(x)
-
   bridge_normal <- bridge_sampler(samples = x, log_posterior = log_density,
                                   data = NULL, lb = lb, ub = ub,
                                   method = "normal", cores = 2, silent = TRUE)
@@ -29,7 +28,6 @@ test_that("bridge sampler matches anlytical value normal example", {
                                     data = NULL, lb = lb, ub = ub,
                                     method = "normal", cores = 2, silent = TRUE,
                                     envir = sys.frame(sys.nframe()))
-  # ls.str(envir = sys.frame(sys.nframe()))
   bridge_warp3_c <- bridge_sampler(samples = x, log_posterior = "log_density",
                                    data = NULL, lb = lb, ub = ub,
                                    method = "warp3", cores = 2, silent = TRUE,
@@ -47,6 +45,7 @@ test_that("bridge sampler matches anlytical value normal example", {
   log_density <- function(s, data, ...) {
     -.5*t(s - mu) %*% (s - mu)
   }
+  assign("log_density", log_density, envir = .GlobalEnv)
 
   lb <- rep(-Inf, 2)
   ub <- rep(Inf, 2)

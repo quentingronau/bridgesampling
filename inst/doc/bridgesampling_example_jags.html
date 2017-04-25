@@ -12,9 +12,9 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-03-23" />
+<meta name="date" content="2017-03-30" />
 
-<title>Hierarchical Normal Example</title>
+<title>Hierarchical Normal Example (Jags)</title>
 
 
 
@@ -68,9 +68,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">Hierarchical Normal Example</h1>
+<h1 class="title toc-ignore">Hierarchical Normal Example (Jags)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-03-23</em></h4>
+<h4 class="date"><em>2017-03-30</em></h4>
 
 
 <div id="TOC">
@@ -84,7 +84,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 </div>
 
-<p>In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model.</p>
+<p>In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model implemented in <code>Jags</code>. This vignette uses the same models and data as the <a href="bridgesampling_example_stan.html"><code>Stan</code> vignette</a>.</p>
 <div id="model-and-data" class="section level2">
 <h2>Model and Data</h2>
 <p>The model that we will use assumes that each of the <span class="math inline">\(n\)</span> observations <span class="math inline">\(y_i\)</span> (where <span class="math inline">\(i\)</span> indexes the observation, <span class="math inline">\(i = 1,2,...,n\)</span>) is normally distributed with corresponding mean <span class="math inline">\(\theta_i\)</span> and a common known variance <span class="math inline">\(\sigma^2\)</span>: <span class="math inline">\(y_i \sim \mathcal{N}(\theta_i, \sigma^2)\)</span>. Each <span class="math inline">\(\theta_i\)</span> is drawn from a normal group-level distribution with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\tau^2\)</span>: <span class="math inline">\(\theta_i \sim \mathcal{N}(\mu, \tau^2)\)</span>. For the group-level mean <span class="math inline">\(\mu\)</span>, we use a normal prior distribution of the form <span class="math inline">\(\mathcal{N}(\mu_0, \tau^2_0)\)</span>. For the group-level variance <span class="math inline">\(\tau^2\)</span>, we use an inverse-gamma prior of the form <span class="math inline">\(\text{Inv-Gamma}(\alpha, \beta)\)</span>. We will use <code>Jags</code> to fit the model which parametrizes the normal distribution in terms of the precision (i.e., one over the variance). Consequently, we implement this inverse-gamma prior on <span class="math inline">\(\tau^2\)</span> by placing a gamma prior of the form <span class="math inline">\(\text{Gamma}(\alpha, \beta)\)</span> on the precision; we call this precision parameter <code>invTau2</code> in the code.</p>
@@ -232,14 +232,14 @@ H0.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<
                             <span class="dt">log_posterior =</span> log_posterior_H0, <span class="dt">lb =</span> lb_H0,
                             <span class="dt">ub =</span> ub_H0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H0.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53312. 
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53312
 ## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
 H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<span class="dt">samples =</span> samples_H1, <span class="dt">data =</span> data_H1,
                             <span class="dt">log_posterior =</span> log_posterior_H1, <span class="dt">lb =</span> lb_H1,
                             <span class="dt">ub =</span> ub_H1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H1.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79545. 
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79545
 ## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
@@ -250,20 +250,20 @@ H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<
 </div>
 <div id="bayesian-model-comparison" class="section level2">
 <h2>Bayesian Model Comparison</h2>
-<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>compute_bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{01}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:</p>
+<p>To compare the null model and the alternative model, we can compute the Bayes factor by using the <code>bf</code> function. In our case, we compute <span class="math inline">\(\text{BF}_{01}\)</span>, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
-BF01 &lt;-<span class="st"> </span><span class="kw">compute_bf</span>(H0.bridge, H1.bridge)
+BF01 &lt;-<span class="st"> </span><span class="kw">bf</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(BF01)</code></pre></div>
 <pre><code>## [1] 1.29995</code></pre>
-<p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>compute_post_prob</code> function:</p>
+<p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>post_prob</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (assuming equal prior model probabilities)</span>
-post1 &lt;-<span class="st"> </span><span class="kw">compute_post_prob</span>(H0.bridge, H1.bridge)
+post1 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(post1)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
 ## 0.5652079 0.4347921</code></pre>
 <p>When the argument <code>prior_prob</code> is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the <code>prior_prob</code> argument to specify different prior model probabilities:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (using user-specified prior model probabilities)</span>
-post2 &lt;-<span class="st"> </span><span class="kw">compute_post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
+post2 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
 <span class="kw">print</span>(post2)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
 ## 0.6610083 0.3389917</code></pre>

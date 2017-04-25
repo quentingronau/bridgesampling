@@ -2,19 +2,28 @@
 % Please edit documentation in R/bridge_sampler.R
 \name{bridge_sampler}
 \alias{bridge_sampler}
+\alias{bridge_sampler.matrix}
+\alias{bridge_sampler.stanfit}
 \title{Log Marginal Likelihood via Bridge Sampling}
 \usage{
-bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
-  lb = NULL, ub = NULL, method = "normal", cores = 1, packages = NULL,
-  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-  silent = FALSE)
+bridge_sampler(samples, ...)
+
+\method{bridge_sampler}{matrix}(samples = NULL, log_posterior = NULL, ...,
+  data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, packages = NULL, varlist = NULL,
+  envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000, silent = FALSE,
+  verbose = FALSE)
+
+\method{bridge_sampler}{stanfit}(samples = NULL, stanfit_model = samples,
+  repetitions = 1, method = "normal", cores = 1, maxiter = 1000,
+  silent = FALSE, verbose = FALSE, ...)
 }
 \arguments{
-\item{samples}{matrix with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}).}
+\item{samples}{a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}) or a fitted \code{stanfit} object with posterior samples.}
+
+\item{...}{additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} method.}
 
 \item{log_posterior}{function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.}
-
-\item{...}{additional arguments passed to \code{log_posterior}.}
 
 \item{data}{data object which is used in \code{log_posterior}.}
 
@@ -22,24 +31,30 @@ bridge_sampler(samples = NULL, log_posterior = NULL, ..., data = NULL,
 
 \item{ub}{named vector with upper bounds for parameters.}
 
+\item{repetitions}{number of repetitions.}
+
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
-\item{cores}{number of cores used for evaluating \code{log_posterior}.}
+\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems ((e.g., Windows)) \code{\link{makeCluster}} is used and further arguments specified below will be used.}
 
-\item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1}).}
+\item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).}
 
-\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.}
+\item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.}
 
-\item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
+\item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 
 \item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).}
 
 \item{maxiter}{maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.}
 
 \item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.}
+
+\item{verbose}{Boolean. Should internal debug information be printed to console? Default is FALSE.}
+
+\item{stanfit_model}{for the \code{stanfit} method, an additional object of class \code{"stanfit"} with the same model as \code{samples}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{samples}. In case \code{samples} was compiled in a different R session or on another computer with a different OS or setup, the \code{samples} model usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{samples} is loaded).}
 }
 \value{
-a list of class \code{"bridge"} with components:
+if \code{repetitions = 1}, returns a list of class \code{"bridge"} with components:
 \itemize{
  \item \code{logml}: estimate of log marginal likelihood.
  \item \code{niter}: number of iterations of the iterative updating scheme.
@@ -48,6 +63,13 @@ a list of class \code{"bridge"} with components:
  \item \code{q12}: log proposal evaluations for posterior samples.
  \item \code{q21}: log_posterior evaluations for samples from proposal.
  \item \code{q22}: log proposal evaluations for samples from proposal.
+}
+if \code{repetitions > 1}, returns a list of class \code{"bridge_list"} with components:
+\itemize{
+ \item \code{logml}: numeric vector with estimates of log marginal likelihood.
+ \item \code{niter}: numeric vector with number of iterations of the iterative updating scheme for each repetition.
+ \item \code{method}: bridge sampling method that was used to obtain the estimates.
+ \item \code{repetitions}: number of repetitions.
 }
 }
 \description{
@@ -58,13 +80,16 @@ Bridge sampling is implemented as described in Meng and Wong (1996, see equation
 
   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
 
-  Note that currently, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter.
-  Furthermore, constraints that depend on multiple parameters of the model are not supported. This excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
+  Note that for the \code{matrix} method, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. This usually excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
+
+  However, if the retransformations are part of the model itself and the \code{log_posterior} accepts parameters on the real line and performs the appropriate Jacobian djustments, such as done for \code{stanfit} objects, such constraints are obviously possible (i.e., we currently do not know of any parameter supported within Stan that does not work with the current implementation through a \code{stanfit} object).
 
 \subsection{Parallel Computation}{
-For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument.
+On unix-like systems forking is used via \code{\link{mclapply}}. Hence elements needed for evaluation of \code{log_posterior} should be in the \code{\link{.GlobalEnv}}.
 
- For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
+On other OSes (e.g., Windows), things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
+
+Due to the way \code{rstan} currently works, parallel computations with \code{stanfit} objects only work with forking (i.e., NOT on Windows).
 }
 }
 \examples{
@@ -244,15 +269,15 @@ print(error_measures(H0.bridge)$percentage)
 print(error_measures(H1.bridge)$percentage)
 
 # compute Bayes factor
-BF01 <- compute_bf(H0.bridge, H1.bridge)
+BF01 <- bf(H0.bridge, H1.bridge)
 print(BF01)
 
 # compute posterior model probabilities (assuming equal prior model probabilities)
-post1 <- compute_post_prob(H0.bridge, H1.bridge)
+post1 <- post_prob(H0.bridge, H1.bridge)
 print(post1)
 
 # compute posterior model probabilities (using user-specified prior model probabilities)
-post2 <- compute_post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
+post2 <- post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
 
 }
@@ -268,5 +293,5 @@ Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Comp
 Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 }
 \author{
-Quentin F. Gronau
+Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 }

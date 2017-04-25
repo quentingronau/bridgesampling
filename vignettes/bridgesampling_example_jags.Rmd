@@ -1,5 +1,5 @@
 ---
-title: "Hierarchical Normal Example"
+title: "Hierarchical Normal Example (Jags)"
 author: "Quentin F. Gronau"
 date: "`r Sys.Date()`"
 show_toc: true
@@ -7,12 +7,12 @@ output:
   knitr:::html_vignette:
     toc: yes
 vignette: >
-  %\VignetteIndexEntry{Hierarchical Normal Example}
+  %\VignetteIndexEntry{Hierarchical Normal Example Jags}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model.
+In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model implemented in `Jags`. This vignette uses the same models and data as the [`Stan` vignette](bridgesampling_example_stan.html).
 
 ## Model and Data
 The model that we will use assumes that each of the $n$ observations $y_i$ (where $i$ indexes the observation, $i = 1,2,...,n$) is normally distributed with corresponding mean $\theta_i$ and a common known variance $\sigma^2$: $y_i \sim \mathcal{N}(\theta_i, \sigma^2)$. Each $\theta_i$ is drawn from a normal group-level distribution with mean $\mu$ and variance $\tau^2$: $\theta_i \sim \mathcal{N}(\mu, \tau^2)$. For the group-level mean $\mu$, we use a normal prior distribution of the form $\mathcal{N}(\mu_0, \tau^2_0)$. For the group-level variance $\tau^2$, we use an inverse-gamma prior of the form $\text{Inv-Gamma}(\alpha, \beta)$. We will use `Jags` to fit the model which parametrizes the normal distribution in terms of the precision (i.e., one over the variance). Consequently, we implement this inverse-gamma prior on $\tau^2$ by placing a gamma prior of the form $\text{Gamma}(\alpha, \beta)$ on the precision; we call this precision parameter `invTau2` in the code.
@@ -194,23 +194,23 @@ print(error_measures(H1.bridge)$percentage)
 ```
 
 ## Bayesian Model Comparison
-To compare the null model and the alternative model, we can compute the Bayes factor by using the `compute_bf` function.
+To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
 In our case, we compute $\text{BF}_{01}$, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:
 ```{r}
 # compute Bayes factor
-BF01 <- compute_bf(H0.bridge, H1.bridge)
+BF01 <- bf(H0.bridge, H1.bridge)
 print(BF01)
 ```
-In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the `compute_post_prob` function:
+In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the `post_prob` function:
 ```{r}
 # compute posterior model probabilities (assuming equal prior model probabilities)
-post1 <- compute_post_prob(H0.bridge, H1.bridge)
+post1 <- post_prob(H0.bridge, H1.bridge)
 print(post1)
 ```
 When the argument `prior_prob` is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the `prior_prob` argument to specify different prior model probabilities:
 ```{r}
 # compute posterior model probabilities (using user-specified prior model probabilities)
-post2 <- compute_post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
+post2 <- post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
 ```
 
