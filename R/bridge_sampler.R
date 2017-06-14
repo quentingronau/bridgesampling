@@ -165,7 +165,9 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
 }
 
 .stan_log_posterior <- function(s.row, data) {
-  tryCatch(rstan::log_prob(object = data$stanfit, upars = s.row), error = function(e) -Inf)
+  out <- tryCatch(rstan::log_prob(object = data$stanfit, upars = s.row), error = function(e) -Inf)
+  if (is.na(out)) out <- -Inf
+  return(out)
 }
 
 
