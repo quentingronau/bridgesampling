@@ -46,12 +46,12 @@ test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
 })
 
 test_that({
-  #skip_on_cran()
+  skip_on_cran()
 
   if (require(rstan)) {
 
     #-------------------------------------------------------------------------------
-    # data (obtained from Overstall & Forster, 2010)
+    # turtle data (obtained from Overstall & Forster, 2010)
     #-------------------------------------------------------------------------------
 
     clutch <- c(1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,3,3,3,3,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,
