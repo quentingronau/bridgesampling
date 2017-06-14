@@ -45,11 +45,10 @@ test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
   }
 })
 
-test_that({
+test_that("turtle example",{
   skip_on_cran()
 
   if (require(rstan)) {
-
     #-------------------------------------------------------------------------------
     # turtle data (obtained from Overstall & Forster, 2010)
     #-------------------------------------------------------------------------------
@@ -99,7 +98,6 @@ test_that({
 
     nobs <- length(surv)
     m <- max(clutch)
-
     # sort clutches by mean birthweight
     means <- tapply(bwt, clutch, mean)
     index <- sort(means, index.return = TRUE)$ix
@@ -141,10 +139,10 @@ test_that({
         target += bernoulli_lpmf(y[i] | Phi(alpha0 + alpha1*x[i] + b[clutch[i]]));
   }"
 
-  stanobject_m1_nc <- stan(model_code = m1_code_nc,
+  tmp <- capture.output(stanobject_m1_nc <- stan(model_code = m1_code_nc,
                            data = list(y = surv, x = bwt, nobs = nobs,
                                        m = m, clutch = clutch_o),
-                           iter = 10500, warmup = 500, chains = 4)
+                           iter = 10500, warmup = 500, chains = 4))
   bs_m1_nc <- bridge_sampler(stanobject_m1_nc, method = "warp3", repetitions = 25, silent=TRUE)
 
   m0_code_nc <-
@@ -171,10 +169,10 @@ test_that({
         target += bernoulli_lpmf(y[i] | Phi(alpha0 + alpha1*x[i]));
     }"
 
-  stanobject_m0_nc <- stan(model_code = m0_code_nc,
+  tmp <- capture.output(stanobject_m0_nc <- stan(model_code = m0_code_nc,
                            data = list(y = surv, x = bwt, nobs = nobs,
                                        m = m, clutch = clutch_o),
-                           iter = 10500, warmup = 500, chains = 4)
+                           iter = 10500, warmup = 500, chains = 4))
 
   bs_m0_nc <- bridge_sampler(stanobject_m0_nc, method = "warp3", repetitions = 25, silent=TRUE)
   expect_equal(bf(bs_m0_nc, bs_m1_nc), rep(1.27, 25), tolerance = 0.02)
