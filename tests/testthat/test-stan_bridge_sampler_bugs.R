@@ -175,6 +175,6 @@ test_that("turtle example",{
                            iter = 10500, warmup = 500, chains = 4))
 
   bs_m0_nc <- bridge_sampler(stanobject_m0_nc, method = "warp3", repetitions = 25, silent=TRUE)
-  expect_equal(bf(bs_m0_nc, bs_m1_nc), rep(1.27, 25), tolerance = 0.02)
+  expect_equal(bf(bs_m0_nc, bs_m1_nc)$bf, rep(1.27, 25), tolerance = 0.02)
   }
 })

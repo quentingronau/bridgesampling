@@ -37,7 +37,7 @@ test_that("bridge sampler matches anlytical value normal example", {
   expect_equal(bridge_normal_c$logml, expected = rep(log(2*pi), length(bridge_normal_c$logml)), tolerance = 0.01)
   expect_equal(bridge_warp3_c$logml, expected = rep(log(2*pi), length(bridge_warp3_c$logml)), tolerance = 0.01)
 
-  expect_equal(bf(bridge_normal, bridge_warp3), expected = rep(1, 2), tolerance = 0.1)
+  expect_equal(bf(bridge_normal, bridge_warp3)$bf, expected = rep(1, 2), tolerance = 0.1)
 
   # check repetitions = 1
   bridge_normal <- bridge_sampler(samples = x, log_posterior = log_density,
@@ -127,7 +127,7 @@ test_that("bridge sampler matches anlytical value normal example", {
 
   ### these are meant to check the bf and post_prob functions and not as a meaningful comparisons
   bf <- bf(bridge_normal, bridge_warp3)
-  expect_is(bf, "numeric")
+  expect_is(bf$bf, "numeric")
 
   # without prior_prob
   post1 <- post_prob(bridge_normal, bridge_warp3, bridge_normal_c, bridge_warp3_c)
