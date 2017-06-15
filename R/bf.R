@@ -71,7 +71,7 @@ bf.default <- function(x1, x2, log = FALSE) {
   return(out)
 }
 
-######## Methods for bridge_bf objects:
+######## Methods for bf objects:
 
 #' @method print bridge
 #' @export
