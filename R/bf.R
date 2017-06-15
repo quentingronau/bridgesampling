@@ -27,7 +27,10 @@ bf <- function(x1, x2, log = FALSE) {
 #' @rdname bf
 #' @export
 bf.bridge <- function(x1, x2, log = FALSE) {
-  .bf_calc(logml(x1), logml(x2), log = log)
+  bf <- .bf_calc(logml(x1), logml(x2), log = log)
+  out <- list(bf = bf, log = log)
+  class(out) <- "bf_bridge"
+  return(out)
 }
 
 
@@ -36,6 +39,8 @@ bf.bridge <- function(x1, x2, log = FALSE) {
 bf.bridge_list <- function(x1, x2, log = FALSE) {
   logml1 <- x1$logml
   logml2 <- x2$logml
+  median1 <- median(logml1, na.rm = TRUE)
+  median2 <- median(logml2, na.rm = TRUE)
   len1 <- length(logml1)
   len2 <- length(logml2)
   max_len <- max(c(len1, len2))
@@ -44,7 +49,11 @@ bf.bridge_list <- function(x1, x2, log = FALSE) {
     logml1 <- rep(logml1, length.out = max_len)
     logml2 <- rep(logml2, length.out = max_len)
   }
-  .bf_calc(logml1, logml2, log = log)
+  bf <- .bf_calc(logml1, logml2, log = log)
+  bf_median_based <- .bf_calc(median1, median2, log = log)
+  out <- list(bf = bf, bf_median_based = bf_median_based, log = log)
+  class(out) <- "bf_bridge_list"
+  return(out)
 }
 
 #' @rdname bf
@@ -56,5 +65,48 @@ bf.default <- function(x1, x2, log = FALSE) {
   if (length(x1) > 1 || length(x2) > 1) {
     stop("Both logmls need to be scalar values.", call. = FALSE)
   }
-  .bf_calc(x1, x2, log = log)
+  bf <- .bf_calc(x1, x2, log = log)
+  out <- list(bf = bf, log = log)
+  class(out) <- "bf_default"
+  return(out)
+}
+
+######## Methods for bridge_bf objects:
+
+#' @method print bridge
+#' @export
+print.bf_bridge <- function(x, ...) {
+  if (x$log) {
+    cat("The estimated log Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+  } else if (! x$log) {
+    cat("The estimated Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+  }
+}
+
+#' @method print bridge_list
+#' @export
+print.bf_bridge_list <- function(x, na.rm = TRUE,...) {
+  if (x$log) {
+    cat("The estimated log Bayes factor (based on the medians of the log marginal likelihood estimates) is equal to: ",
+        round(x$bf_median_based, 5), "\nRange of estimates: ", round(range(x$bf, na.rm=na.rm)[1], 5), " to ",
+        round(range(x$bf, na.rm = na.rm)[2], 5),
+        "\nInterquartile range: ", round(stats::IQR(x$bf, na.rm = na.rm), 5), sep = "")
+    if (any(is.na(x$bf))) warning(sum(is.na(x$bf))," log Bayes factor estimate(s) are NAs.", call. = FALSE)
+  } else if (! x$log) {
+    cat("The estimated Bayes factor (based on the medians of the log marginal likelihood estimates) is equal to: ",
+        round(x$bf_median_based, 5), "\nRange of estimates: ", round(range(x$bf, na.rm=na.rm)[1], 5), " to ",
+        round(range(x$bf, na.rm = na.rm)[2], 5),
+        "\nInterquartile range: ", round(stats::IQR(x$bf, na.rm = na.rm), 5), sep = "")
+    if (any(is.na(x$bf))) warning(sum(is.na(x$bf))," Bayes factor estimate(s) are NAs.", call. = FALSE)
+  }
+}
+
+#' @method print
+#' @export
+print.bf_default <- function(x, ...) {
+  if (x$log) {
+    cat("The log Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+  } else if (! x$log) {
+    cat("The Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+  }
 }
