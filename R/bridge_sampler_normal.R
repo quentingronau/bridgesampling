@@ -11,7 +11,7 @@
 
   # split samples for proposal/iterative scheme
   nr <- nrow(samples)
-  samples4fit_index <- seq_len(nr) %% 2 == TRUE # split samples in even/odd
+  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2)) # split samples in two parts
   samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
   samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
   n_post <- nrow(samples_4_iter)
