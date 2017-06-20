@@ -5,9 +5,26 @@
 #' @param x2 Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x2} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.
 #' @param log Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.
 #' @details Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{x1} over the model associated with \code{x2}.
-#' @return For the default method and the method for \code{"bridge"} objects, the (scalar) value of the Bayes factor in favor of the model associated with \code{x1}.
+#' @return For the default method returns a list of class \code{"bf_default"} with components:
+#' \itemize{
+#'  \item \code{bf}: (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2}.
+#'  \item \code{log}: Boolean which indicates whether \code{bf} corresponds to the log Bayes factor.
+#' }
 #'
-#' For the method for \code{"bridge_list"} objects, a numeric vector consisting of Bayes factors where each element gives the Bayes factor for one set of logmls in favor of the model associated with \code{x1}. The length of this vector is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
+#'
+#' For the method for \code{"bridge"} objects returns a list of class \code{"bf_bridge"} with components:
+#' \itemize{
+#'  \item \code{bf}:  (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2}.
+#'  \item \code{log}: Boolean which indicates whether \code{bf} corresponds to the log Bayes factor.
+#' }
+#'
+#'
+#' For the method for \code{"bridge_list"} objects returns a list of class \code{"bf_bridge_list"} with components:
+#' \itemize{
+#'  \item \code{bf}:  a numeric vector consisting of Bayes factors where each element gives the Bayes factor for one set of logmls in favor of the model associated with \code{x1} over the model associated with \code{x2}. The length of this vector is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
+#'  \item \code{bf_median_based} (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2} that is based on the median values of the logml estimates.
+#'  \item \code{log}: Boolean which indicates whether \code{bf} corresponds to the log Bayes factor.
+#' }
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
 #' @references
@@ -73,7 +90,7 @@ bf.default <- function(x1, x2, log = FALSE) {
 
 ######## Methods for bf objects:
 
-#' @method print bridge
+#' @method print bf_bridge
 #' @export
 print.bf_bridge <- function(x, ...) {
   if (x$log) {
@@ -83,7 +100,7 @@ print.bf_bridge <- function(x, ...) {
   }
 }
 
-#' @method print bridge_list
+#' @method print bf_bridge_list
 #' @export
 print.bf_bridge_list <- function(x, na.rm = TRUE,...) {
   if (x$log) {
@@ -101,7 +118,7 @@ print.bf_bridge_list <- function(x, na.rm = TRUE,...) {
   }
 }
 
-#' @method print
+#' @method print bf_default
 #' @export
 print.bf_default <- function(x, ...) {
   if (x$log) {

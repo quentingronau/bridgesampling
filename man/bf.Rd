@@ -23,9 +23,26 @@ bf(x1, x2, log = FALSE)
 \item{log}{Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.}
 }
 \value{
-For the default method and the method for \code{"bridge"} objects, the (scalar) value of the Bayes factor in favor of the model associated with \code{x1}.
+For the default method returns a list of class \code{"bf_default"} with components:
+\itemize{
+ \item \code{bf}: (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2}.
+ \item \code{log}: Boolean which indicates whether \code{bf} corresponds to the log Bayes factor.
+}
 
-For the method for \code{"bridge_list"} objects, a numeric vector consisting of Bayes factors where each element gives the Bayes factor for one set of logmls in favor of the model associated with \code{x1}. The length of this vector is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
+
+For the method for \code{"bridge"} objects returns a list of class \code{"bf_bridge"} with components:
+\itemize{
+ \item \code{bf}:  (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2}.
+ \item \code{log}: Boolean which indicates whether \code{bf} corresponds to the log Bayes factor.
+}
+
+
+For the method for \code{"bridge_list"} objects returns a list of class \code{"bf_bridge_list"} with components:
+\itemize{
+ \item \code{bf}:  a numeric vector consisting of Bayes factors where each element gives the Bayes factor for one set of logmls in favor of the model associated with \code{x1} over the model associated with \code{x2}. The length of this vector is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
+ \item \code{bf_median_based} (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2} that is based on the median values of the logml estimates.
+ \item \code{log}: Boolean which indicates whether \code{bf} corresponds to the log Bayes factor.
+}
 }
 \description{
 Generic function that computes Bayes factor(s) from marginal likelihoods
