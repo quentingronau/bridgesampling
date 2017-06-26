@@ -1,4 +1,4 @@
-#' Generic function that computes Bayes factor(s) from marginal likelihoods
+#' Generic function that computes Bayes factor(s) from marginal likelihoods.
 #' @export
 #' @title Bayes Factor(s) from Marginal Likelihoods
 #' @param x1 Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x1} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.
@@ -22,7 +22,7 @@
 #' For the method for \code{"bridge_list"} objects returns a list of class \code{"bf_bridge_list"} with components:
 #' \itemize{
 #'  \item \code{bf}:  a numeric vector consisting of Bayes factors where each element gives the Bayes factor for one set of logmls in favor of the model associated with \code{x1} over the model associated with \code{x2}. The length of this vector is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
-#'  \item \code{bf_median_based} (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2} that is based on the median values of the logml estimates.
+#'  \item \code{bf_median_based}: (scalar) value of the Bayes factor in favor of the model associated with \code{x1} over the model associated with \code{x2} that is based on the median values of the logml estimates.
 #'  \item \code{log}: Boolean which indicates whether \code{bf} corresponds to the log Bayes factor.
 #' }
 #' @author Quentin F. Gronau

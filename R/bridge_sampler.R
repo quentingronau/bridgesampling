@@ -10,7 +10,7 @@
 #' @param ub named vector with upper bounds for parameters.
 #' @param repetitions number of repetitions.
 #' @param method either \code{"normal"} or \code{"warp3"}.
-#' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems ((e.g., Windows)) \code{\link{makeCluster}} is used and further arguments specified below will be used.
+#' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems (e.g., Windows) \code{\link{makeCluster}} is used and further arguments specified below will be used.
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).
 #' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
 #' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.

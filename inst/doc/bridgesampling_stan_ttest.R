@@ -1,4 +1,6 @@
 ## ------------------------------------------------------------------------
+library(bridgesampling)
+
 # Sleep data from t.test example
 data(sleep)
 
@@ -46,10 +48,10 @@ stanmodelH1 <- stan_model(model_code = stancodeH1, model_name="stanmodel")
 ## ---- message = FALSE, results='hide', warning=FALSE---------------------
 # fit models
 stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n),
-                      iter = 20000, warmup = 1000, chains = 4,
+                      iter = 20000, warmup = 1000, chains = 4, cores = 1,
                          control = list(adapt_delta = .99))
 stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n, r = 1/sqrt(2)),
-                      iter = 20000, warmup = 1000, chains = 4,
+                      iter = 20000, warmup = 1000, chains = 4, cores = 1,
                          control = list(adapt_delta = .99))
 
 ## ------------------------------------------------------------------------

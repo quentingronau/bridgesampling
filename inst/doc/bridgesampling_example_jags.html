@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-03-30" />
+<meta name="date" content="2017-06-26" />
 
 <title>Hierarchical Normal Example (Jags)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Hierarchical Normal Example (Jags)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-03-30</em></h4>
+<h4 class="date"><em>2017-06-26</em></h4>
 
 
 <div id="TOC">
@@ -232,14 +232,14 @@ H0.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<
                             <span class="dt">log_posterior =</span> log_posterior_H0, <span class="dt">lb =</span> lb_H0,
                             <span class="dt">ub =</span> ub_H0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H0.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53312
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53369
 ## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
 H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<span class="dt">samples =</span> samples_H1, <span class="dt">data =</span> data_H1,
                             <span class="dt">log_posterior =</span> log_posterior_H1, <span class="dt">lb =</span> lb_H1,
                             <span class="dt">ub =</span> ub_H1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H1.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79545
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79636
 ## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
@@ -254,19 +254,19 @@ H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BF01 &lt;-<span class="st"> </span><span class="kw">bf</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(BF01)</code></pre></div>
-<pre><code>## [1] 1.29995</code></pre>
+<pre><code>## The estimated Bayes factor is equal to: 1.3004</code></pre>
 <p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>post_prob</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (assuming equal prior model probabilities)</span>
 post1 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(post1)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
-## 0.5652079 0.4347921</code></pre>
+## 0.5652925 0.4347075</code></pre>
 <p>When the argument <code>prior_prob</code> is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the <code>prior_prob</code> argument to specify different prior model probabilities:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (using user-specified prior model probabilities)</span>
 post2 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
 <span class="kw">print</span>(post2)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
-## 0.6610083 0.3389917</code></pre>
+## 0.6610854 0.3389146</code></pre>
 </div>
 
 <script type="text/javascript">

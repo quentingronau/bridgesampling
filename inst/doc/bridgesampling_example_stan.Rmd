@@ -46,7 +46,7 @@ beta <- 1
 ```
 
 ## Specifying the Models
-Next, we implement the models in `Stan`. Note that to use the `stan_bridge_sampler` function, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
+Next, we implement the models in `Stan`. Note that to compute the (log) marginal likelihood for a `Stan` model, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
 ```{r, message = FALSE, results='hide',warnings = FALSE}
 library(rstan)
 
@@ -100,13 +100,13 @@ Now we can fit the null and the alternative model in `Stan`. One usually require
 stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                alpha = alpha,
                                                beta = beta),
-                      iter = 50000, warmup = 1000, chains = 3)
+                      iter = 50000, warmup = 1000, chains = 3, cores = 1)
 stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
                                                mu0 = mu0,
                                                tau20 = tau20,
                                                alpha = alpha,
                                                beta = beta),
-                      iter = 50000, warmup = 1000, chains = 3)
+                      iter = 50000, warmup = 1000, chains = 3, cores = 1)
 ```
 
 ## Computing the (Log) Marginal Likelihoods

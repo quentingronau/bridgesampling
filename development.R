@@ -7,4 +7,4 @@ test()
 
 roxygen2::roxygenize()
 
-# build_vignettes()
+build_vignettes()

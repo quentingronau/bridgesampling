@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-03-30" />
+<meta name="date" content="2017-06-26" />
 
 <title>Bayesian One-Sample T-Test (Stan)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Bayesian One-Sample T-Test (Stan)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-03-30</em></h4>
+<h4 class="date"><em>2017-06-26</em></h4>
 
 
 <div id="TOC">
@@ -86,7 +86,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 </div>
 
-<p>In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in <code>Stan</code> using the <code>stan_bridge_sampler</code> function. This approach has the advantage that the user only needs to pass the fitted <code>stanfit</code> object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the <code>BayesFactor</code> package (Morey &amp; Rouder, 2015).</p>
+<p>In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in <code>Stan</code>. This approach has the advantage that the user only needs to pass the fitted <code>stanfit</code> object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the <code>BayesFactor</code> package (Morey &amp; Rouder, 2015).</p>
 <div id="model" class="section level2">
 <h2>Model</h2>
 <p>The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. The model is then reparametrized in terms of the standardized effect size <span class="math inline">\(\delta = \mu/\sigma\)</span>. For the standardized effect size, a Cauchy prior with location zero and scale <span class="math inline">\(r = 1/\sqrt{2}\)</span> is used. For the variance <span class="math inline">\(\sigma^2\)</span>, Jeffreys’s prior is used: <span class="math inline">\(p(\sigma^2) \propto 1/\sigma^2\)</span>.</p>
@@ -95,7 +95,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="data" class="section level2">
 <h2>Data</h2>
 <p>In this example, we will analyze the <code>sleep</code> data set from the <code>t.test</code> example. This data set shows the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients. These data can be analyzed via a one-sample t-test by first computing the difference scores and then conducting the t-test using these difference scores as data. The difference scores are calculated as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Sleep data from t.test example</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bridgesampling)
+
+<span class="co"># Sleep data from t.test example</span>
 <span class="kw">data</span>(sleep)
 
 <span class="co"># compute difference scores</span>
@@ -104,7 +106,7 @@ n &lt;-<span class="st"> </span><span class="kw">length</span>(y)</code></pre></
 </div>
 <div id="specifying-the-models" class="section level2">
 <h2>Specifying the Models</h2>
-<p>Next, we implement the models in <code>Stan</code>. Note that to use the <code>stan_bridge_sampler</code> function, we need to specify the model in a certain way. Instad of using <code>&quot;~&quot;</code> signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the <code>&quot;~&quot;</code> sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing <code>y ~ normal(mu, sigma)</code> we would need to write <code>target += normal_lpdf(y | mu, sigma)</code>. The models can then be specified and compiled as follows (note that it is necessary to install <code>rstan</code> for this):</p>
+<p>Next, we implement the models in <code>Stan</code>. Note that to compute the (log) marginal likelihood for a <code>Stan</code> model, we need to specify the model in a certain way. Instad of using <code>&quot;~&quot;</code> signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the <code>&quot;~&quot;</code> sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing <code>y ~ normal(mu, sigma)</code> we would need to write <code>target += normal_lpdf(y | mu, sigma)</code>. The models can then be specified and compiled as follows (note that it is necessary to install <code>rstan</code> for this):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
 
 <span class="co"># models</span>
@@ -146,10 +148,10 @@ stanmodelH1 &lt;-<span class="st"> </span><span class="kw">stan_model</span>(<sp
 <p>Now we can fit the null and the alternative model in <code>Stan</code>. One usually requires a larger number of posterior samples for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples for these simple models.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># fit models</span>
 stanfitH0 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH0, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n),
-                      <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>,
+                      <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>, <span class="dt">cores =</span> <span class="dv">1</span>,
                          <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))
 stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH1, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n, <span class="dt">r =</span> <span class="dv">1</span>/<span class="kw">sqrt</span>(<span class="dv">2</span>)),
-                      <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>,
+                      <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>, <span class="dt">cores =</span> <span class="dv">1</span>,
                          <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))</code></pre></div>
 </div>
 <div id="computing-the-log-marginal-likelihoods" class="section level2">
@@ -158,18 +160,18 @@ stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmod
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
 H0 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H0)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -20.80989
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -20.80934
 ## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">H1 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H1)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.96253
-## Estimate obtained in 5 iterations via method &quot;normal&quot;.</code></pre>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.96239
+## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
 <span class="kw">print</span>(<span class="kw">error_measures</span>(H0)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.0462%&quot;</code></pre>
+<pre><code>## [1] &quot;0.0459%&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.0645%&quot;</code></pre>
+<pre><code>## [1] &quot;0.0664%&quot;</code></pre>
 </div>
 <div id="computing-the-bayes-factor" class="section level2">
 <h2>Computing the Bayes Factor</h2>
@@ -177,7 +179,7 @@ H0 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BF10 &lt;-<span class="st"> </span><span class="kw">bf</span>(H1, H0)
 <span class="kw">print</span>(BF10)</code></pre></div>
-<pre><code>## [1] 17.24211</code></pre>
+<pre><code>## The estimated Bayes factor is equal to: 17.23518</code></pre>
 <p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(BayesFactor)
 <span class="kw">print</span>(<span class="kw">ttestBF</span>(y))</code></pre></div>
@@ -192,7 +194,7 @@ BF10 &lt;-<span class="st"> </span><span class="kw">bf</span>(H1, H0)
 </div>
 <div id="one-sided-test" class="section level2">
 <h2>One-sided Test</h2>
-<p>We can also conduct one-sided tests. For instance, we could test the hypothesis that the effect size is positive versus the null hypothesis. Since we already fitted the null model and computed its marginal likelihood, we only need to slightly adjust the alternative model to reflect the directed hypothesis. To achieve this, we need to truncate the Cauchy prior distribution for <span class="math inline">\(\delta\)</span> at zero and then renormalize the (log) density. This is easily achieved via the <code>Stan</code> function <code>cauchy_lccdf</code> which corresponds to the complementary cumulative distribution function of the Cauchy distribution. Thus, <code>cauchy_lccdf(0 | 0, r)</code> gives us the area greater than zero which is required for renormalizing the truncated Cauchy prior. The model can then be specified and fitted as follows:</p>
+<p>We can also conduct one-sided tests. For instance, we could test the hypothesis that the effect size is positive versus the null hypothesis. Since we already fitted the null model and computed its marginal likelihood, we only need to slightly adjust the alternative model to reflect the directed hypothesis. To achieve this, we need to truncate the Cauchy prior distribution for <span class="math inline">\(\delta\)</span> at zero and then renormalize the (log) density. This is easily achieved via the <code>Stan</code> function <code>cauchy_lccdf</code> which corresponds to the log of the complementary cumulative distribution function of the Cauchy distribution. Thus, <code>cauchy_lccdf(0 | 0, r)</code> gives us the log of the area greater than zero which is required for renormalizing the truncated Cauchy prior. The model can then be specified and fitted as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stancodeHplus &lt;-<span class="st"> '</span>
 <span class="st">data {</span>
 <span class="st">  int&lt;lower=1&gt; n; // number of observations</span>
@@ -217,7 +219,7 @@ stanfitHplus &lt;-<span class="st"> </span><span class="kw">sampling</span>(stan
 <p>The (log) marginal likelihood is then obtained as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hplus &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitHplus, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(Hplus)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.27114
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.27132
 ## Estimate obtained in 4 iterations via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(Hplus)$percentage)</code></pre></div>
 <pre><code>## [1] &quot;0.134%&quot;</code></pre>
@@ -225,7 +227,7 @@ stanfitHplus &lt;-<span class="st"> </span><span class="kw">sampling</span>(stan
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BFplus0 &lt;-<span class="st"> </span><span class="kw">bf</span>(Hplus, H0)
 <span class="kw">print</span>(BFplus0)</code></pre></div>
-<pre><code>## [1] 34.42364</code></pre>
+<pre><code>## The estimated Bayes factor is equal to: 34.39867</code></pre>
 <p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">ttestBF</span>(y, <span class="dt">nullInterval =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="ot">Inf</span>)))</code></pre></div>
 <pre><code>## Bayes factor analysis

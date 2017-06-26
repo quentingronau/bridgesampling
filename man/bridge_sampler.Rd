@@ -35,7 +35,7 @@ bridge_sampler(samples, ...)
 
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
-\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems ((e.g., Windows)) \code{\link{makeCluster}} is used and further arguments specified below will be used.}
+\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems (e.g., Windows) \code{\link{makeCluster}} is used and further arguments specified below will be used.}
 
 \item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).}
 
@@ -82,7 +82,7 @@ Bridge sampling is implemented as described in Meng and Wong (1996, see equation
 
   Note that for the \code{matrix} method, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. This usually excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
-  However, if the retransformations are part of the model itself and the \code{log_posterior} accepts parameters on the real line and performs the appropriate Jacobian djustments, such as done for \code{stanfit} objects, such constraints are obviously possible (i.e., we currently do not know of any parameter supported within Stan that does not work with the current implementation through a \code{stanfit} object).
+  However, if the retransformations are part of the model itself and the \code{log_posterior} accepts parameters on the real line and performs the appropriate Jacobian adjustments, such as done for \code{stanfit} objects, such constraints are obviously possible (i.e., we currently do not know of any parameter supported within Stan that does not work with the current implementation through a \code{stanfit} object).
 
 \subsection{Parallel Computation}{
 On unix-like systems forking is used via \code{\link{mclapply}}. Hence elements needed for evaluation of \code{log_posterior} should be in the \code{\link{.GlobalEnv}}.

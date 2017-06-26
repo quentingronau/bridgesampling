@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
   
-In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in `Stan` using the `stan_bridge_sampler` function. This approach has the advantage that the user only needs to pass the fitted `stanfit` object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the `BayesFactor` package (Morey & Rouder, 2015).
+In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in `Stan`. This approach has the advantage that the user only needs to pass the fitted `stanfit` object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the `BayesFactor` package (Morey & Rouder, 2015).
   
 ## Model
 The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean $\mu$ and variance $\sigma^2$. The model is then reparametrized in terms of the standardized effect size $\delta = \mu/\sigma$. For the standardized effect size, a Cauchy prior with location zero and scale $r = 1/\sqrt{2}$ is used. For the variance $\sigma^2$, Jeffreys's prior is used: $p(\sigma^2) \propto 1/\sigma^2$.
@@ -23,6 +23,8 @@ In this example, we are interested in comparing the null model $\mathcal{H}_0$, 
 In this example, we will analyze the `sleep` data set from the `t.test` example. This data set shows the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients. These data can be analyzed via a one-sample t-test by first computing the difference scores and then conducting the t-test using these difference scores as data. The difference scores are calculated as follows:
   
 ```{r}
+library(bridgesampling)
+
 # Sleep data from t.test example
 data(sleep)
 
@@ -32,7 +34,7 @@ n <- length(y)
 ```
 
 ## Specifying the Models
-Next, we implement the models in `Stan`. Note that to use the `stan_bridge_sampler` function, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
+Next, we implement the models in `Stan`. Note that to compute the (log) marginal likelihood for a `Stan` model, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
 ```{r, message = FALSE, results='hide'}
 library(rstan)
 
@@ -76,10 +78,10 @@ Now we can fit the null and the alternative model in `Stan`. One usually require
 ```{r, message = FALSE, results='hide', warning=FALSE}
 # fit models
 stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n),
-                      iter = 20000, warmup = 1000, chains = 4,
+                      iter = 20000, warmup = 1000, chains = 4, cores = 1,
                          control = list(adapt_delta = .99))
 stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n, r = 1/sqrt(2)),
-                      iter = 20000, warmup = 1000, chains = 4,
+                      iter = 20000, warmup = 1000, chains = 4, cores = 1,
                          control = list(adapt_delta = .99))
 ```
 
@@ -116,7 +118,7 @@ print(ttestBF(y))
 
 ## One-sided Test
 We can also conduct one-sided tests. For instance, we could test the hypothesis that the effect size is positive versus the null hypothesis.
-Since we already fitted the null model and computed its marginal likelihood, we only need to slightly adjust the alternative model to reflect the directed hypothesis. To achieve this, we need to truncate the Cauchy prior distribution for $\delta$ at zero and then renormalize the (log) density. This is easily achieved via the `Stan` function `cauchy_lccdf` which corresponds to the complementary cumulative distribution function of the Cauchy distribution. Thus, `cauchy_lccdf(0 | 0, r)` gives us the area greater than zero which is required for renormalizing the truncated Cauchy prior. The model can then be specified and fitted as follows:
+Since we already fitted the null model and computed its marginal likelihood, we only need to slightly adjust the alternative model to reflect the directed hypothesis. To achieve this, we need to truncate the Cauchy prior distribution for $\delta$ at zero and then renormalize the (log) density. This is easily achieved via the `Stan` function `cauchy_lccdf` which corresponds to the log of the complementary cumulative distribution function of the Cauchy distribution. Thus, `cauchy_lccdf(0 | 0, r)` gives us the log of the area greater than zero which is required for renormalizing the truncated Cauchy prior. The model can then be specified and fitted as follows:
 ```{r, message = FALSE, results='hide', warnings = FALSE}
 stancodeHplus <- '
 data {

@@ -71,13 +71,13 @@ stanmodelH1 <- stan_model(model_code = stancodeH1, model_name="stanmodel")
 stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                alpha = alpha,
                                                beta = beta),
-                      iter = 50000, warmup = 1000, chains = 3)
+                      iter = 50000, warmup = 1000, chains = 3, cores = 1)
 stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
                                                mu0 = mu0,
                                                tau20 = tau20,
                                                alpha = alpha,
                                                beta = beta),
-                      iter = 50000, warmup = 1000, chains = 3)
+                      iter = 50000, warmup = 1000, chains = 3, cores = 1)
 
 ## ------------------------------------------------------------------------
 # compute log marginal likelihood via bridge sampling for H0
