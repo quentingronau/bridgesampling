@@ -1,9 +1,9 @@
 #' Computes log marginal likelihood via bridge sampling.
 #' @title Log Marginal Likelihood via Bridge Sampling
 #' @name bridge_sampler
-#' @param samples a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}) or a fitted \code{stanfit} object with posterior samples.
+#' @param samples a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}), a fitted \code{stanfit} object with posterior samples, or a \code{stanreg} object.
 #' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.
-#' @param ... additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} method.
+#' @param ... additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} and \code{stanreg} methods.
 #' @param data data object which is used in \code{log_posterior}.
 #' @param stanfit_model for the \code{stanfit} method, an additional object of class \code{"stanfit"} with the same model as \code{samples}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{samples}. In case \code{samples} was compiled in a different R session or on another computer with a different OS or setup, the \code{samples} model usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{samples} is loaded).
 #' @param lb named vector with lower bounds for parameters.
@@ -24,14 +24,14 @@
 #'
 #'   Note that for the \code{matrix} method, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. This usually excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 #'
-#'   However, if the retransformations are part of the model itself and the \code{log_posterior} accepts parameters on the real line and performs the appropriate Jacobian adjustments, such as done for \code{stanfit} objects, such constraints are obviously possible (i.e., we currently do not know of any parameter supported within Stan that does not work with the current implementation through a \code{stanfit} object).
+#'   However, if the retransformations are part of the model itself and the \code{log_posterior} accepts parameters on the real line and performs the appropriate Jacobian adjustments, such as done for \code{stanfit} and \code{stanreg} objects, such constraints are obviously possible (i.e., we currently do not know of any parameter supported within Stan that does not work with the current implementation through a \code{stanfit} object).
 #'
 #' \subsection{Parallel Computation}{
 #' On unix-like systems forking is used via \code{\link{mclapply}}. Hence elements needed for evaluation of \code{log_posterior} should be in the \code{\link{.GlobalEnv}}.
 #'
 #' On other OSes (e.g., Windows), things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 #'
-#' Due to the way \code{rstan} currently works, parallel computations with \code{stanfit} objects only work with forking (i.e., NOT on Windows).
+#' Due to the way \code{rstan} currently works, parallel computations with \code{stanfit} and \code{stanreg} objects only work with forking (i.e., NOT on Windows).
 #' }
 #' @return if \code{repetitions = 1}, returns a list of class \code{"bridge"} with components:
 #' \itemize{
@@ -144,6 +144,49 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
 
 }
 
+#' @rdname bridge_sampler
+#' @export
+#' @importFrom utils read.csv
+bridge_sampler.stanreg <-
+  function(samples, repetitions = 1, method = "normal", cores = 1, 
+           maxiter = 1000, silent = FALSE, verbose = FALSE, ...) {
+    df <- eval(samples$call$diagnostic_file)
+    if (is.null(df))
+      stop("the 'diagnostic_file' option must be specified in the call to ", 
+           samples$stan_function, " to use the 'bridge_sampler'")
+    sf <- samples$stanfit
+    chains <- ncol(sf)
+    if (chains > 1) df <- sapply(1:chains, FUN = function(j)
+      sub("\\.csv$", paste0("_", j, ".csv"), df))
+    samples <- do.call(rbind, args = lapply(df, FUN = function(f) {
+      d <- read.csv(f, comment.char = "#")
+      excl <- c("lp__", "accept_stat__", "stepsize__" ,"treedepth__", 
+                "n_leapfrog__", "divergent__", "energy__")
+      d <- d[,!(colnames(d) %in% excl), drop = FALSE]
+      as.matrix(d[, 1:rstan::get_num_upars(sf), drop = FALSE])
+    }))
+    lb <- rep(-Inf, ncol(samples))
+    ub <- rep( Inf, ncol(samples))
+    names(lb) <- names(ub) <- colnames(samples)
+    
+    if (cores == 1) {
+      bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
+                                      data = list(stanfit = sf), lb = lb, ub = ub,
+                                      repetitions = repetitions, method = method, cores = cores,
+                                      packages = "rstan", maxiter = maxiter, silent = silent,
+                                      verbose = verbose)
+    } else {
+      bridge_output <- bridge_sampler(samples = samples,
+                                      log_posterior = .stan_log_posterior,
+                                      data = list(stanfit = sf), lb = lb, ub = ub,
+                                      repetitions = repetitions, varlist = "stanfit",
+                                      envir = sys.frame(sys.nframe()), method = method,
+                                      cores = cores, packages = "rstan", maxiter = maxiter,
+                                      silent = silent, verbose = verbose)
+    }
+    return(bridge_output)
+  }
+
 ######### tools for stanfit method ########
 # taken from rstan:
 .rstan_relist <- function (x, skeleton) {
@@ -192,5 +235,3 @@ print.bridge_list <- function(x, na.rm = TRUE, ...) {
       "\nInterquartile range: ", round(stats::IQR(x$logml, na.rm = na.rm), 5), "\nMethod: ", x$method, sep = "")
   if (any(is.na(x$logml))) warning(sum(is.na(x$logml))," bridge sampling estimate(s) are NAs.", call. = FALSE)
 }
-
-

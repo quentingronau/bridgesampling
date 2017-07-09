@@ -121,8 +121,8 @@ test_that("turtle example",{
       transformed parameters {
         vector[m] b;
         real<lower = 0> sigma = sqrt(sigma2);
-        real alpha0 = sqrt(10)*alpha0_raw;
-        real alpha1 = sqrt(10)*alpha1_raw;
+        real alpha0 = sqrt(10.0)*alpha0_raw;
+        real alpha1 = sqrt(10.0)*alpha1_raw;
         b = b_raw*sigma;
       }
       model {
@@ -156,8 +156,8 @@ test_that("turtle example",{
       real alpha1_raw;
     }
     transformed parameters {
-      real alpha0 = sqrt(10)*alpha0_raw;
-      real alpha1 = sqrt(10)*alpha1_raw;
+      real alpha0 = sqrt(10.0)*alpha0_raw;
+      real alpha1 = sqrt(10.0)*alpha1_raw;
     }
     model {
       // priors

@@ -4,6 +4,7 @@
 \alias{bridge_sampler}
 \alias{bridge_sampler.matrix}
 \alias{bridge_sampler.stanfit}
+\alias{bridge_sampler.stanreg}
 \title{Log Marginal Likelihood via Bridge Sampling}
 \usage{
 bridge_sampler(samples, ...)
@@ -17,11 +18,15 @@ bridge_sampler(samples, ...)
 \method{bridge_sampler}{stanfit}(samples = NULL, stanfit_model = samples,
   repetitions = 1, method = "normal", cores = 1, maxiter = 1000,
   silent = FALSE, verbose = FALSE, ...)
+
+\method{bridge_sampler}{stanreg}(samples, repetitions = 1,
+  method = "normal", cores = 1, maxiter = 1000, silent = FALSE,
+  verbose = FALSE, ...)
 }
 \arguments{
-\item{samples}{a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}) or a fitted \code{stanfit} object with posterior samples.}
+\item{samples}{a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}), a fitted \code{stanfit} object with posterior samples, or a \code{stanreg} object.}
 
-\item{...}{additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} method.}
+\item{...}{additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} and \code{stanreg} methods.}
 
 \item{log_posterior}{function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.}
 
@@ -82,14 +87,14 @@ Bridge sampling is implemented as described in Meng and Wong (1996, see equation
 
   Note that for the \code{matrix} method, the lower and upper bound of a parameter cannot be a function of the bounds of another parameter. Furthermore, constraints that depend on multiple parameters of the model are not supported. This usually excludes, for example, parameters that constitute a covariance matrix or sets of parameters that need to sum to one.
 
-  However, if the retransformations are part of the model itself and the \code{log_posterior} accepts parameters on the real line and performs the appropriate Jacobian adjustments, such as done for \code{stanfit} objects, such constraints are obviously possible (i.e., we currently do not know of any parameter supported within Stan that does not work with the current implementation through a \code{stanfit} object).
+  However, if the retransformations are part of the model itself and the \code{log_posterior} accepts parameters on the real line and performs the appropriate Jacobian adjustments, such as done for \code{stanfit} and \code{stanreg} objects, such constraints are obviously possible (i.e., we currently do not know of any parameter supported within Stan that does not work with the current implementation through a \code{stanfit} object).
 
 \subsection{Parallel Computation}{
 On unix-like systems forking is used via \code{\link{mclapply}}. Hence elements needed for evaluation of \code{log_posterior} should be in the \code{\link{.GlobalEnv}}.
 
 On other OSes (e.g., Windows), things can get more complicated. For normal parallel computation, the \code{log_posterior} function can be passed as both function and function name. If the latter, it needs to exist in the environment specified in the \code{envir} argument. For parallel computation when using an \code{Rcpp} function, \code{log_posterior} can only be passed as the function name (i.e., character). This function needs to result from calling \code{sourceCpp} on the file specified in \code{rcppFile}.
 
-Due to the way \code{rstan} currently works, parallel computations with \code{stanfit} objects only work with forking (i.e., NOT on Windows).
+Due to the way \code{rstan} currently works, parallel computations with \code{stanfit} and \code{stanreg} objects only work with forking (i.e., NOT on Windows).
 }
 }
 \examples{
@@ -283,6 +288,9 @@ print(post2)
 }
 
 }
+\author{
+Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
+}
 \references{
 Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
 
@@ -292,6 +300,4 @@ Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Comp
 
 Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 }
-\author{
-Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
-}
+
