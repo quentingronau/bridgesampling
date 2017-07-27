@@ -5,7 +5,7 @@ language: R
 sudo: true
 cache: packages
 r:
-  - devel
+  - release
 r_binary_packages:
   - rjags
 r_build_args: --compact-vignettes="gs+qpdf"
