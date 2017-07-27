@@ -10,4 +10,15 @@ addons:
   apt:
     packages:
       - jags
+ r_binary_packages:
+   - rstan
+   - BayesFactor
+   - Matrix
+   - coda
+   - rstanarm
+   - testthat
+   - rmarkdown
+   - knitr
+   - stringr
+   - mvtnorm
 r_build_args: --compact-vignettes="gs+qpdf"
