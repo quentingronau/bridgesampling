@@ -12,10 +12,8 @@ addons:
       - jags
 r_binary_packages:
    - rstan
-   - BayesFactor
    - Matrix
    - coda
-   - rstanarm
    - testthat
    - rmarkdown
    - knitr
