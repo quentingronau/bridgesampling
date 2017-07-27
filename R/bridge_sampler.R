@@ -88,7 +88,7 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
                              packages = packages, varlist = varlist, envir = envir,
                              rcppFile = rcppFile, maxiter = maxiter,
                              silent = silent, verbose = verbose,
-                             r0 = 0.5, tol = 1e-10))
+                             r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
   return(out)
 
 }
@@ -148,11 +148,11 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
 #' @export
 #' @importFrom utils read.csv
 bridge_sampler.stanreg <-
-  function(samples, repetitions = 1, method = "normal", cores = 1, 
+  function(samples, repetitions = 1, method = "normal", cores = 1,
            maxiter = 1000, silent = FALSE, verbose = FALSE, ...) {
     df <- eval(samples$call$diagnostic_file)
     if (is.null(df))
-      stop("the 'diagnostic_file' option must be specified in the call to ", 
+      stop("the 'diagnostic_file' option must be specified in the call to ",
            samples$stan_function, " to use the 'bridge_sampler'")
     sf <- samples$stanfit
     chains <- ncol(sf)
@@ -160,7 +160,7 @@ bridge_sampler.stanreg <-
       sub("\\.csv$", paste0("_", j, ".csv"), df))
     samples <- do.call(rbind, args = lapply(df, FUN = function(f) {
       d <- read.csv(f, comment.char = "#")
-      excl <- c("lp__", "accept_stat__", "stepsize__" ,"treedepth__", 
+      excl <- c("lp__", "accept_stat__", "stepsize__" ,"treedepth__",
                 "n_leapfrog__", "divergent__", "energy__")
       d <- d[,!(colnames(d) %in% excl), drop = FALSE]
       as.matrix(d[, 1:rstan::get_num_upars(sf), drop = FALSE])
@@ -168,7 +168,7 @@ bridge_sampler.stanreg <-
     lb <- rep(-Inf, ncol(samples))
     ub <- rep( Inf, ncol(samples))
     names(lb) <- names(ub) <- colnames(samples)
-    
+
     if (cores == 1) {
       bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
                                       data = list(stanfit = sf), lb = lb, ub = ub,
@@ -222,7 +222,7 @@ print.bridge <- function(x, ...) {
 
   cat("Bridge sampling estimate of the log marginal likelihood: ",
       round(x$logml, 5), "\nEstimate obtained in ", x$niter,
-      " iterations via method \"", x$method, "\".", sep = "")
+      " iteration(s) via method \"", x$method, "\".", sep = "")
 }
 
 #' @method print bridge_list

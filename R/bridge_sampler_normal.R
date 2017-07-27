@@ -2,7 +2,7 @@
 .bridge.sampler.normal <- function(samples, log_posterior, ..., data, lb, ub,
                                    cores, repetitions, packages, varlist, envir,
                                    rcppFile, maxiter, silent, verbose,
-                                   r0, tol) {
+                                   r0, tol1, tol2) {
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
@@ -113,11 +113,25 @@
   # run iterative updating scheme to compute log of marginal likelihood
   for (i in seq_len(repetitions)) {
     tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
-                                 r0 = r0, tol = tol, L = NULL, method = "normal",
-                                 maxiter = maxiter, silent = silent)
+                                 r0 = r0, tol = tol1, L = NULL, method = "normal",
+                                 maxiter = maxiter, silent = silent, criterion = "r")
+    if (is.na(tmp$logml)) {
+      warning("logml could not be estimated within maxiter, rerunning with adjusted starting value. \nEstimate might be more variable than usual.", call. = FALSE)
+      lr <- length(tmp$r_vals)
+      # use geometric mean as starting value
+      r0_2 <- sqrt(tmp$r_vals[lr - 1]*tmp$r_vals[lr])
+      tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
+                                   r0 = r0_2, tol = tol2, L = NULL, method = "normal",
+                                   maxiter = maxiter, silent = silent,
+                                   criterion = "logml")
+    }
+
     logml[i] <- tmp$logml
     niter[i] <- tmp$niter
+    if (niter[i] == maxiter)
+      warning("logml could not be estimated within maxiter, returning NA.", call. = FALSE)
   }
+
   if (repetitions == 1) {
     out <- list(logml = logml, niter = niter, method = "normal", q11 = q11,
                 q12 = q12, q21 = q21[[1]], q22 = q22[[1]])

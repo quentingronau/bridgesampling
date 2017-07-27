@@ -104,8 +104,9 @@
   }
   out
 }
+
 .run.iterative.scheme <- function(q11, q12, q21, q22, r0, tol, L,
-                                  method, maxiter, silent) {
+                                  method, maxiter, silent, criterion) {
 
   ### run iterative updating scheme (using "optimal" bridge function,
   ### see Meng & Wong, 1996)
@@ -123,18 +124,22 @@
   n.2 <- length(l2)
   s1 <- n.1/(n.1 + n.2)
   s2 <- n.2/(n.1 + n.2)
-  rold <- -100
   r <- r0
-  i <- 1
+  r_vals <- r
+  logml <- log(r) + lstar
+  logml_vals <-  logml
+  criterion_val <- 1 + tol
 
   e <- as.brob( exp(1) )
+  i <- 1
 
-  while (i <= maxiter && abs((r - rold)/r) > tol) {
+  while (i <= maxiter && criterion_val > tol) {
 
     if (! silent)
       cat(paste0("Iteration: ", i, "\n"))
 
     rold <- r
+    logmlold <- logml
     numi <- as.numeric( e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r) )
     deni <- as.numeric( 1/(s1 * e^(l1 - lstar) + s2 * r) )
 
@@ -145,17 +150,18 @@
     }
 
     r <- (n.1/n.2) * sum(numi)/sum(deni)
+    r_vals <- c(r_vals, r)
+    logml <- log(r) + lstar
+    logml_vals <- c(logml_vals, logml)
+    criterion_val <- switch(criterion, "r" = abs((r - rold)/r),
+                            "logml" = abs((logml - logmlold)/logml))
     i <- i + 1
 
   }
 
-  logml <- log(r) + lstar
-
   if (i >= maxiter) {
-    warning("logml could not be estimated within maxiter, returning NA.", call. = FALSE)
-    return(list(logml = NA, niter = i-1))
+    return(list(logml = NA, niter = i-1, r_vals = r_vals))
   }
-
 
   return(list(logml = logml, niter = i-1))
 
