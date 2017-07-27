@@ -10,7 +10,4 @@ addons:
   apt:
     packages:
       - jags
-r_binary_packages:
-  - rjags
-  - R2jags
 r_build_args: --compact-vignettes="gs+qpdf"
