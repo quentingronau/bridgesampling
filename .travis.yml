@@ -6,6 +6,10 @@ sudo: true
 cache: packages
 r:
   - release
+addons:
+  apt:
+    packages:
+      - jags
 r_binary_packages:
   - rjags
   - R2jags
