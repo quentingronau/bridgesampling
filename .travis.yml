@@ -7,5 +7,6 @@ cache: packages
 r:
   - release
 r_binary_packages:
-  - rjags, R2jags
+  - rjags
+  - R2jags
 r_build_args: --compact-vignettes="gs+qpdf"
