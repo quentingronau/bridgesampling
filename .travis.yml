@@ -10,7 +10,7 @@ addons:
   apt:
     packages:
       - jags
- r_binary_packages:
+r_binary_packages:
    - rstan
    - BayesFactor
    - Matrix
