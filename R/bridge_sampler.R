@@ -81,9 +81,26 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
 
   # see Meng & Wong (1996), equation 4.1
 
+  # transform parameters to real line
+  tmp <- .transform2Real(samples, lb, ub)
+  theta_t <- tmp$theta_t
+  transTypes <- tmp$transTypes
+
+  # split samples for proposal/iterative scheme
+  nr <- nrow(samples)
+  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2)) # split samples in two parts
+  samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
+  samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
+  #n_post <- nrow(samples_4_iter)
+
   out <- do.call(what = paste0(".bridge.sampler.", method),
-                 args = list(samples = samples, log_posterior = log_posterior,
-                             "..." = ..., data = data, lb = lb, ub = ub,
+                 args = list(samples_4_fit = samples_4_fit,
+                             samples_4_iter = samples_4_iter,
+                             neff = NULL,
+                             log_posterior = log_posterior,
+                             "..." = ..., data = data,
+                             lb = lb, ub = ub,
+                             transTypes = transTypes,
                              repetitions = repetitions, cores = cores,
                              packages = packages, varlist = varlist, envir = envir,
                              rcppFile = rcppFile, maxiter = maxiter,
