@@ -1,7 +1,11 @@
 
 .bridge.sampler.normal <- function(
-  samples_4_fit, # matrix with already transformed samples for fitting the proposal (rows are samples)
-  samples_4_iter, # matrix with already transformed samples for the iterative scheme (rows are samples)
+  samples_4_fit, # matrix with already transformed samples for fitting the
+                 # proposal (rows are samples), colnames are "trans_x" where
+                 # x is the parameter name
+  samples_4_iter, # matrix with already transformed samples for the
+                  # iterative scheme (rows are samples), colnames are "trans_x"
+                  # where x is the parameter name
   neff, # effective sample size of samples_4_iter (i.e., already transformed samples), scalar
   log_posterior,
   ...,
