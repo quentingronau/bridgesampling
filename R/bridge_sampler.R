@@ -109,13 +109,62 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
 
 }
 
+#' @rdname bridge_sampler
+#' @export
+bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
+                                     lb = NULL, ub = NULL, repetitions = 1, method = "normal",
+                                     cores = 1, packages = NULL, varlist = NULL,
+                                     envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+                                     silent = FALSE, verbose = FALSE) {
+
+  # split samples in two parts
+  nr <- nrow(samples[[1]])
+  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2))
+  samples_4_fit_tmp <- samples[samples4fit_index,,drop=FALSE]
+  samples_4_fit_tmp <- do.call("rbind", samples_4_fit_tmp)
+
+  # compute effective sample size
+  samples_4_iter_tmp <- mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], mcmc))
+  neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
+    warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+    return(NULL)
+  })
+
+  # convert to matrix
+  samples_4_iter_tmp <- do.call("rbind", samples_4_iter_tmp)
+
+  # transform parameters to real line
+  tmp <- .transform2Real(samples_4_fit_tmp, lb, ub)
+  samples_4_fit <- tmp$theta_t
+  tmp2 <- .transform2Real(samples_4_iter_tmp, lb, ub)
+  samples_4_iter <- tmp2$theta_t
+  transTypes <- tmp2$transTypes
+
+  # run bridge sampling
+  out <- do.call(what = paste0(".bridge.sampler.", method),
+                 args = list(samples_4_fit = samples_4_fit,
+                             samples_4_iter = samples_4_iter,
+                             neff = NULL,
+                             log_posterior = log_posterior,
+                             "..." = ..., data = data,
+                             lb = lb, ub = ub,
+                             transTypes = transTypes,
+                             repetitions = repetitions, cores = cores,
+                             packages = packages, varlist = varlist, envir = envir,
+                             rcppFile = rcppFile, maxiter = maxiter,
+                             silent = silent, verbose = verbose,
+                             r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
+
+  return(out)
+
+}
 
 #' @rdname bridge_sampler
 #' @export
 bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
-                                repetitions = 1, method = "normal", cores = 1,
-                                maxiter = 1000, silent = FALSE, verbose = FALSE,
-                                ...) {
+                                   repetitions = 1, method = "normal", cores = 1,
+                                   maxiter = 1000, silent = FALSE, verbose = FALSE,
+                                   ...) {
 
   # convert samples into matrix
   if (!requireNamespace("rstan")) stop("package rstan required")
