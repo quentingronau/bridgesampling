@@ -126,34 +126,67 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
     rstan::unconstrain_pars(stanfit_model, .rstan_relist(theta, skeleton))
   })
 
-  if (length(dim(upars)) == 3) {
-    samples <- apply(upars, 1, rbind)
-  } else if (length(dim(upars)) == 2) {
-    samples <- as.matrix(as.vector(upars))
+  if (length(dim(upars)) == 2) { # for one parameter models
+    dim(upars) <- c(1, dim(upars))
   }
 
-  # prepare lb and ub
-  colnames(samples) <- paste0("x", seq_len(ncol(samples)))
-  lb <- rep(-Inf, ncol(samples))
-  ub <- rep(Inf, ncol(samples))
-  names(lb) <- names(ub) <- colnames(samples)
+  nr <- dim(upars)[2]
+  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2)) # split samples in two parts
+  samples_4_fit <- apply(upars[,samples4fit_index,,drop=FALSE], 1, rbind)
 
-  #browser()
+  samples_4_iter_stan <- upars[,!samples4fit_index,,drop=FALSE]
+  samples_4_iter_tmp <- vector("list", dim(upars)[3])
+  for (i in seq_along(samples_4_iter_tmp)) {
+    samples_4_iter_tmp[[i]] <- coda::as.mcmc(t(samples_4_iter_stan[,,i]))
+  }
+  samples_4_iter_tmp <- coda::as.mcmc.list(samples_4_iter_tmp)
+  neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
+    warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+    return(NULL)
+  })
+  samples_4_iter <- apply(samples_4_iter_stan, 1, rbind)
+
+  parameters <- paste0("x", (seq_len(dim(upars)[1])))
+
+  transTypes <- rep("unbounded", length(parameters))
+  names(transTypes) <- parameters
+
+  # prepare lb and ub
+  lb <- rep(-Inf, length(parameters))
+  ub <- rep(Inf, length(parameters))
+  names(lb) <- names(ub) <- parameters
+
+  colnames(samples_4_iter) <- paste0("trans_", parameters)
+  colnames(samples_4_fit) <- paste0("trans_", parameters)
+
   # run bridge sampling
   if (cores == 1) {
-    bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
-                                    data = list(stanfit = stanfit_model), lb = lb, ub = ub,
-                                    repetitions = repetitions, method = method, cores = cores,
-                                    packages = "rstan", maxiter = maxiter, silent = silent,
-                                    verbose = verbose)
+    bridge_output <- do.call(what = paste0(".bridge.sampler.", method),
+                             args = list(samples_4_fit = samples_4_fit,
+                                         samples_4_iter = samples_4_iter,
+                                         neff = neff,
+                                         log_posterior = .stan_log_posterior,
+                                         data = list(stanfit = stanfit_model),
+                                         lb = lb, ub = ub,
+                                         transTypes = transTypes,
+                                         repetitions = repetitions, cores = cores,
+                                         packages = "rstan", maxiter = maxiter, silent = silent,
+                                         verbose = verbose,
+                                         r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
   } else {
-    bridge_output <- bridge_sampler(samples = samples,
-                                    log_posterior = .stan_log_posterior,
-                                    data = list(stanfit = stanfit_model), lb = lb, ub = ub,
-                                    repetitions = repetitions, varlist = "stanfit",
-                                    envir = sys.frame(sys.nframe()), method = method,
-                                    cores = cores, packages = "rstan", maxiter = maxiter,
-                                    silent = silent, verbose = verbose)
+    bridge_output <- do.call(what = paste0(".bridge.sampler.", method),
+                             args = list(samples_4_fit = samples_4_fit,
+                                         samples_4_iter = samples_4_iter,
+                                         neff = neff,
+                                         log_posterior = .stan_log_posterior,
+                                         data = list(stanfit = stanfit_model),
+                                         lb = lb, ub = ub,
+                                         transTypes = transTypes,
+                                         repetitions = repetitions, varlist = "stanfit",
+                                         envir = sys.frame(sys.nframe()),
+                                         cores = cores, packages = "rstan", maxiter = maxiter,
+                                         silent = silent, verbose = verbose,
+                                         r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
   }
 
   return(bridge_output)
