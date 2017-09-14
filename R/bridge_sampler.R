@@ -91,7 +91,6 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
   samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2)) # split samples in two parts
   samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
   samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
-  #n_post <- nrow(samples_4_iter)
 
   out <- do.call(what = paste0(".bridge.sampler.", method),
                  args = list(samples_4_fit = samples_4_fit,

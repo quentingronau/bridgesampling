@@ -1,19 +1,29 @@
 
-.bridge.sampler.normal <- function(samples, log_posterior, ..., data, lb, ub,
-                                   cores, repetitions, packages, varlist, envir,
-                                   rcppFile, maxiter, silent, verbose,
-                                   r0, tol1, tol2) {
+.bridge.sampler.normal <- function(
+  samples_4_fit, # matrix with already transformed samples for fitting the proposal (rows are samples)
+  samples_4_iter, # matrix with already transformed samples for the iterative scheme (rows are samples)
+  neff, # effective sample size of samples_4_iter (i.e., already transformed samples), scalar
+  log_posterior,
+  ...,
+  data,
+  lb, ub,
+  transTypes, # types of transformations for the different parameters (named character vector)
+  cores,
+  repetitions,
+  packages,
+  varlist,
+  envir,
+  rcppFile,
+  maxiter,
+  silent,
+  verbose,
+  r0,
+  tol1,
+  tol2) {
 
-  # transform parameters to real line
-  tmp <- .transform2Real(samples, lb, ub)
-  theta_t <- tmp$theta_t
-  transTypes <- tmp$transTypes
+  if (is.null(neff))
+    neff <- nrow(samples_4_iter)
 
-  # split samples for proposal/iterative scheme
-  nr <- nrow(samples)
-  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2)) # split samples in two parts
-  samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
-  samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
   n_post <- nrow(samples_4_iter)
 
   # get mean & covariance matrix and generate samples from proposal
