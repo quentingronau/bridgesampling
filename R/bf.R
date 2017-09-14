@@ -4,6 +4,7 @@
 #' @param x1 Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x1} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.
 #' @param x2 Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x2} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.
 #' @param log Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.
+#' @param ... currently not used here, but can be used by other methods.
 #' @details Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{x1} over the model associated with \code{x2}.
 #' @return For the default method returns a list of class \code{"bf_default"} with components:
 #' \itemize{
@@ -30,13 +31,13 @@
 #' @references
 #' Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association}, 90(430), 773-795. \url{http://dx.doi.org/10.1080/01621459.1995.10476572}
 #' @importFrom methods is
-bf <- function(x1, x2, log = FALSE) {
+bf <- function(x1, x2, log = FALSE, ...) {
   UseMethod("bf", x1)
 }
 
 #' @rdname bf
 #' @export
-bayes_factor <- function(x1, x2, log = FALSE) {
+bayes_factor <- function(x1, x2, log = FALSE, ...) {
   bf(x1, x2, log=log)
 }
 
@@ -49,7 +50,7 @@ bayes_factor <- function(x1, x2, log = FALSE) {
 
 #' @rdname bf
 #' @export
-bf.bridge <- function(x1, x2, log = FALSE) {
+bf.bridge <- function(x1, x2, log = FALSE, ...) {
   bf <- .bf_calc(logml(x1), logml(x2), log = log)
   out <- list(bf = bf, log = log)
   class(out) <- "bf_bridge"
@@ -59,7 +60,7 @@ bf.bridge <- function(x1, x2, log = FALSE) {
 
 #' @rdname bf
 #' @export
-bf.bridge_list <- function(x1, x2, log = FALSE) {
+bf.bridge_list <- function(x1, x2, log = FALSE, ...) {
   logml1 <- x1$logml
   logml2 <- x2$logml
   median1 <- median(logml1, na.rm = TRUE)
@@ -81,7 +82,7 @@ bf.bridge_list <- function(x1, x2, log = FALSE) {
 
 #' @rdname bf
 #' @export
-bf.default <- function(x1, x2, log = FALSE) {
+bf.default <- function(x1, x2, log = FALSE, ...) {
   if (!is.numeric(c(x1, x2))) {
     stop("logml values need to be numeric", call. = FALSE)
   }

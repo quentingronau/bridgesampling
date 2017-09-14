@@ -8,15 +8,15 @@
 \alias{bf.default}
 \title{Bayes Factor(s) from Marginal Likelihoods}
 \usage{
-bf(x1, x2, log = FALSE)
+bf(x1, x2, log = FALSE, ...)
 
-bayes_factor(x1, x2, log = FALSE)
+bayes_factor(x1, x2, log = FALSE, ...)
 
-\method{bf}{bridge}(x1, x2, log = FALSE)
+\method{bf}{bridge}(x1, x2, log = FALSE, ...)
 
-\method{bf}{bridge_list}(x1, x2, log = FALSE)
+\method{bf}{bridge_list}(x1, x2, log = FALSE, ...)
 
-\method{bf}{default}(x1, x2, log = FALSE)
+\method{bf}{default}(x1, x2, log = FALSE, ...)
 }
 \arguments{
 \item{x1}{Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x1} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.}
@@ -24,6 +24,8 @@ bayes_factor(x1, x2, log = FALSE)
 \item{x2}{Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x2} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.}
 
 \item{log}{Boolean. If \code{TRUE}, the function returns the log of the Bayes factor. Default is \code{FALSE}.}
+
+\item{...}{currently not used here, but can be used by other methods.}
 }
 \value{
 For the default method returns a list of class \code{"bf_default"} with components:
