@@ -11,6 +11,7 @@
 #' @param repetitions number of repetitions.
 #' @param method either \code{"normal"} or \code{"warp3"}.
 #' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems (e.g., Windows) \code{\link{makeCluster}} is used and further arguments specified below will be used.
+#' @param use_neff Boolean which determines whether the effective sample size is used in the optimal bridge function. Default is TRUE. If FALSE, the number of samples is used instead.
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).
 #' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
 #' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
@@ -75,7 +76,7 @@ bridge_sampler <- function (samples, ...) {
 #' @rdname bridge_sampler
 bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
                            lb = NULL, ub = NULL, repetitions = 1, method = "normal",
-                           cores = 1, packages = NULL, varlist = NULL,
+                           cores = 1, use_neff = TRUE, packages = NULL, varlist = NULL,
                            envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
                            silent = FALSE, verbose = FALSE) {
 
@@ -92,10 +93,20 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
   samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
   samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
 
+  # compute effective sample size
+  if (use_neff) {
+    neff <- tryCatch(median(coda::effectiveSize(coda::mcmc(samples_4_iter))), error = function(e) {
+      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+      return(NULL)
+    })
+  } else {
+    neff <- NULL
+  }
+
   out <- do.call(what = paste0(".bridge.sampler.", method),
                  args = list(samples_4_fit = samples_4_fit,
                              samples_4_iter = samples_4_iter,
-                             neff = NULL,
+                             neff = neff,
                              log_posterior = log_posterior,
                              "..." = ..., data = data,
                              lb = lb, ub = ub,
@@ -112,10 +123,10 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
 #' @rdname bridge_sampler
 #' @export
 bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                                     lb = NULL, ub = NULL, repetitions = 1, method = "normal",
-                                     cores = 1, packages = NULL, varlist = NULL,
-                                     envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-                                     silent = FALSE, verbose = FALSE) {
+                                     lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
+                                     method = "normal", cores = 1, packages = NULL,
+                                     varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+                                     maxiter = 1000, silent = FALSE, verbose = FALSE) {
 
   # split samples in two parts
   nr <- nrow(samples[[1]])
@@ -124,11 +135,15 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
   samples_4_fit_tmp <- do.call("rbind", samples_4_fit_tmp)
 
   # compute effective sample size
-  samples_4_iter_tmp <- coda::mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], coda::mcmc))
-  neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
-    warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
-    return(NULL)
-  })
+  if (use_neff) {
+    samples_4_iter_tmp <- coda::mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], coda::mcmc))
+    neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
+      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+      return(NULL)
+    })
+  } else {
+    neff <- NULL
+  }
 
   # convert to matrix
   samples_4_iter_tmp <- do.call("rbind", samples_4_iter_tmp)
@@ -163,8 +178,8 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
 #' @export
 bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
                                    repetitions = 1, method = "normal", cores = 1,
-                                   maxiter = 1000, silent = FALSE, verbose = FALSE,
-                                   ...) {
+                                   use_neff = TRUE, maxiter = 1000, silent = FALSE,
+                                   verbose = FALSE, ...) {
 
   # convert samples into matrix
   if (!requireNamespace("rstan")) stop("package rstan required")
@@ -189,10 +204,16 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
     samples_4_iter_tmp[[i]] <- coda::as.mcmc(t(samples_4_iter_stan[,,i]))
   }
   samples_4_iter_tmp <- coda::as.mcmc.list(samples_4_iter_tmp)
-  neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
-    warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
-    return(NULL)
-  })
+
+  if (use_neff) {
+    neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
+      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+      return(NULL)
+    })
+  } else {
+    neff <- NULL
+  }
+
   samples_4_iter <- apply(samples_4_iter_stan, 1, rbind)
 
   parameters <- paste0("x", (seq_len(dim(upars)[1])))
@@ -247,7 +268,8 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
 #' @importFrom utils read.csv
 bridge_sampler.stanreg <-
   function(samples, repetitions = 1, method = "normal", cores = 1,
-           maxiter = 1000, silent = FALSE, verbose = FALSE, ...) {
+           use_neff = TRUE, maxiter = 1000, silent = FALSE,
+           verbose = FALSE, ...) {
     df <- eval(samples$call$diagnostic_file)
     if (is.null(df))
       stop("the 'diagnostic_file' option must be specified in the call to ",
@@ -272,7 +294,8 @@ bridge_sampler.stanreg <-
       bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
                                       data = list(stanfit = sf), lb = lb, ub = ub,
                                       repetitions = repetitions, method = method, cores = cores,
-                                      packages = "rstan", maxiter = maxiter, silent = silent,
+                                      use_neff = use_neff, packages = "rstan",
+                                      maxiter = maxiter, silent = silent,
                                       verbose = verbose)
     } else {
       bridge_output <- bridge_sampler(samples = samples,
@@ -280,7 +303,8 @@ bridge_sampler.stanreg <-
                                       data = list(stanfit = sf), lb = lb, ub = ub,
                                       repetitions = repetitions, varlist = "stanfit",
                                       envir = sys.frame(sys.nframe()), method = method,
-                                      cores = cores, packages = "rstan", maxiter = maxiter,
+                                      cores = cores, use_neff = use_neff,
+                                      packages = "rstan", maxiter = maxiter,
                                       silent = silent, verbose = verbose)
     }
     return(bridge_output)
