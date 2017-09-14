@@ -106,7 +106,8 @@
 }
 
 .run.iterative.scheme <- function(q11, q12, q21, q22, r0, tol, L,
-                                  method, maxiter, silent, criterion) {
+                                  method, maxiter, silent,
+                                  criterion, neff) {
 
   ### run iterative updating scheme (using "optimal" bridge function,
   ### see Meng & Wong, 1996)
@@ -122,8 +123,8 @@
   lstar <- median(l1)
   n.1 <- length(l1)
   n.2 <- length(l2)
-  s1 <- n.1/(n.1 + n.2)
-  s2 <- n.2/(n.1 + n.2)
+  s1 <- neff/(neff + n.2)
+  s2 <- n.2/(neff + n.2)
   r <- r0
   r_vals <- r
   logml <- log(r) + lstar

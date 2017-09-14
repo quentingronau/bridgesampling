@@ -124,7 +124,8 @@
   for (i in seq_len(repetitions)) {
     tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
                                  r0 = r0, tol = tol1, L = NULL, method = "normal",
-                                 maxiter = maxiter, silent = silent, criterion = "r")
+                                 maxiter = maxiter, silent = silent,
+                                 criterion = "r", neff = neff)
     if (is.na(tmp$logml)) {
       warning("logml could not be estimated within maxiter, rerunning with adjusted starting value. \nEstimate might be more variable than usual.", call. = FALSE)
       lr <- length(tmp$r_vals)
@@ -133,7 +134,7 @@
       tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
                                    r0 = r0_2, tol = tol2, L = NULL, method = "normal",
                                    maxiter = maxiter, silent = silent,
-                                   criterion = "logml")
+                                   criterion = "logml", neff = neff)
     }
 
     logml[i] <- tmp$logml
