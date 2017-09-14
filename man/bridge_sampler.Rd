@@ -2,21 +2,19 @@
 % Please edit documentation in R/bridge_sampler.R
 \name{bridge_sampler}
 \alias{bridge_sampler}
-\alias{bridge_sampler.matrix}
+\alias{bridge_sampler.stanfit}
 \alias{bridge_sampler.mcmc.list}
+\alias{bridge_sampler.matrix}
+\alias{bridge_sampler.stanreg}
 \alias{bridge_sampler.rjags}
 \alias{bridge_sampler.runjags}
-\alias{bridge_sampler.stanfit}
-\alias{bridge_sampler.stanreg}
 \title{Log Marginal Likelihood via Bridge Sampling}
 \usage{
 bridge_sampler(samples, ...)
 
-\method{bridge_sampler}{matrix}(samples = NULL, log_posterior = NULL, ...,
-  data = NULL, lb = NULL, ub = NULL, repetitions = 1,
-  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
-  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-  silent = FALSE, verbose = FALSE)
+\method{bridge_sampler}{stanfit}(samples = NULL, stanfit_model = samples,
+  repetitions = 1, method = "normal", cores = 1, use_neff = TRUE,
+  maxiter = 1000, silent = FALSE, verbose = FALSE, ...)
 
 \method{bridge_sampler}{mcmc.list}(samples = NULL, log_posterior = NULL,
   ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
@@ -24,30 +22,48 @@ bridge_sampler(samples, ...)
   varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
   silent = FALSE, verbose = FALSE)
 
-\method{bridge_sampler}{rjags}(samples = NULL, log_posterior = NULL, ...,
-  data = NULL, lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
-  method = "normal", cores = 1, packages = NULL, varlist = NULL,
-  envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000, silent = FALSE,
-  verbose = FALSE)
-
-\method{bridge_sampler}{runjags}(samples = NULL, log_posterior = NULL, ...,
-  data = NULL, lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
-  method = "normal", cores = 1, packages = NULL, varlist = NULL,
-  envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000, silent = FALSE,
-  verbose = FALSE)
-
-\method{bridge_sampler}{stanfit}(samples = NULL, stanfit_model = samples,
-  repetitions = 1, method = "normal", cores = 1, use_neff = TRUE,
-  maxiter = 1000, silent = FALSE, verbose = FALSE, ...)
+\method{bridge_sampler}{matrix}(samples = NULL, log_posterior = NULL, ...,
+  data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+  silent = FALSE, verbose = FALSE)
 
 \method{bridge_sampler}{stanreg}(samples, repetitions = 1,
   method = "normal", cores = 1, use_neff = TRUE, maxiter = 1000,
   silent = FALSE, verbose = FALSE, ...)
+
+\method{bridge_sampler}{rjags}(samples = NULL, log_posterior = NULL, ...,
+  data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+  silent = FALSE, verbose = FALSE)
+
+\method{bridge_sampler}{runjags}(samples = NULL, log_posterior = NULL, ...,
+  data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+  silent = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{samples}{a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}), a fitted \code{stanfit} object with posterior samples, or a \code{stanreg} object.}
+\item{samples}{an \code{mcmc.list} object, a fitted \code{stanfit} object, a \code{stanreg} object, an \code{rjags} object, a \code{runjags} object, or a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub})  with posterior samples.}
 
 \item{...}{additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} and \code{stanreg} methods.}
+
+\item{stanfit_model}{for the \code{stanfit} method, an additional object of class \code{"stanfit"} with the same model as \code{samples}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{samples}. In case \code{samples} was compiled in a different R session or on another computer with a different OS or setup, the \code{samples} model usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{samples} is loaded).}
+
+\item{repetitions}{number of repetitions.}
+
+\item{method}{either \code{"normal"} or \code{"warp3"}.}
+
+\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems (e.g., Windows) \code{\link{makeCluster}} is used and further arguments specified below will be used.}
+
+\item{use_neff}{Boolean which determines whether the effective sample size is used in the optimal bridge function. Default is TRUE. If FALSE, the number of samples is used instead. If \code{samples} is a \code{matrix}, it is assumed that the \code{matrix} contains the samples of one chain in order. If \code{samples} come from more than one chain, we recommend to use an \code{mcmc.list} object for optimal performance.}
+
+\item{maxiter}{maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.}
+
+\item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.}
+
+\item{verbose}{Boolean. Should internal debug information be printed to console? Default is FALSE.}
 
 \item{log_posterior}{function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.}
 
@@ -57,14 +73,6 @@ bridge_sampler(samples, ...)
 
 \item{ub}{named vector with upper bounds for parameters.}
 
-\item{repetitions}{number of repetitions.}
-
-\item{method}{either \code{"normal"} or \code{"warp3"}.}
-
-\item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems (e.g., Windows) \code{\link{makeCluster}} is used and further arguments specified below will be used.}
-
-\item{use_neff}{Boolean which determines whether the effective sample size is used in the optimal bridge function. Default is TRUE. If FALSE, the number of samples is used instead.}
-
 \item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).}
 
 \item{varlist}{character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.}
@@ -72,14 +80,6 @@ bridge_sampler(samples, ...)
 \item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 
 \item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).}
-
-\item{maxiter}{maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.}
-
-\item{silent}{Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.}
-
-\item{verbose}{Boolean. Should internal debug information be printed to console? Default is FALSE.}
-
-\item{stanfit_model}{for the \code{stanfit} method, an additional object of class \code{"stanfit"} with the same model as \code{samples}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{samples}. In case \code{samples} was compiled in a different R session or on another computer with a different OS or setup, the \code{samples} model usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{samples} is loaded).}
 }
 \value{
 if \code{repetitions = 1}, returns a list of class \code{"bridge"} with components:
@@ -120,6 +120,13 @@ On other OSes (e.g., Windows), things can get more complicated. For normal paral
 Due to the way \code{rstan} currently works, parallel computations with \code{stanfit} and \code{stanreg} objects only work with forking (i.e., NOT on Windows).
 }
 }
+\section{Warning}{
+
+Note, the results depend strongly on the parameter priors. Therefore, it is strongly adviced to think carefully about the priors before calculatng marginal likelihoods. For example, the prior choices implemented in \pkg{rstanarm} or \pkg{brms} might not be optimal from a testing point of view. We recommend to use priors that have been chosen from a testing and not a purely estimation perspective.
+
+In addition to thinking more about the priors, the number of posterior samples usually needs to be larger than for estimation.
+}
+
 \examples{
 ## ------------------------------------------------------------------------
 ## Example 1: Estimating the Normalizing Constant of a Two-Dimensional

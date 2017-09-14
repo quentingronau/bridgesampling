@@ -1,7 +1,7 @@
 #' Computes log marginal likelihood via bridge sampling.
 #' @title Log Marginal Likelihood via Bridge Sampling
 #' @name bridge_sampler
-#' @param samples a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}), a fitted \code{stanfit} object with posterior samples, or a \code{stanreg} object.
+#' @param samples an \code{mcmc.list} object, a fitted \code{stanfit} object, a \code{stanreg} object, an \code{rjags} object, a \code{runjags} object, or a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub})  with posterior samples.
 #' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.
 #' @param ... additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} and \code{stanreg} methods.
 #' @param data data object which is used in \code{log_posterior}.
@@ -11,7 +11,7 @@
 #' @param repetitions number of repetitions.
 #' @param method either \code{"normal"} or \code{"warp3"}.
 #' @param cores number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems (e.g., Windows) \code{\link{makeCluster}} is used and further arguments specified below will be used.
-#' @param use_neff Boolean which determines whether the effective sample size is used in the optimal bridge function. Default is TRUE. If FALSE, the number of samples is used instead.
+#' @param use_neff Boolean which determines whether the effective sample size is used in the optimal bridge function. Default is TRUE. If FALSE, the number of samples is used instead. If \code{samples} is a \code{matrix}, it is assumed that the \code{matrix} contains the samples of one chain in order. If \code{samples} come from more than one chain, we recommend to use an \code{mcmc.list} object for optimal performance.
 #' @param packages character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).
 #' @param varlist character vector with names of variables needed for evaluating \code{log_posterior} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). These objects need to exist in \code{envir}.
 #' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
@@ -51,6 +51,10 @@
 #'  \item \code{method}: bridge sampling method that was used to obtain the estimates.
 #'  \item \code{repetitions}: number of repetitions.
 #' }
+#' @section Warning:
+#' Note, the results depend strongly on the parameter priors. Therefore, it is strongly adviced to think carefully about the priors before calculatng marginal likelihoods. For example, the prior choices implemented in \pkg{rstanarm} or \pkg{brms} might not be optimal from a testing point of view. We recommend to use priors that have been chosen from a testing and not a purely estimation perspective.
+#'
+#' In addition to thinking more about the priors, the number of posterior samples usually needs to be larger than for estimation.
 #' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 #' @references
 #' Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
@@ -70,161 +74,6 @@
 #' @export
 bridge_sampler <- function (samples, ...) {
    UseMethod("bridge_sampler", samples)
-}
-
-#' @export
-#' @rdname bridge_sampler
-bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                           lb = NULL, ub = NULL, repetitions = 1, method = "normal",
-                           cores = 1, use_neff = TRUE, packages = NULL, varlist = NULL,
-                           envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-                           silent = FALSE, verbose = FALSE) {
-
-  # see Meng & Wong (1996), equation 4.1
-
-  # transform parameters to real line
-  tmp <- .transform2Real(samples, lb, ub)
-  theta_t <- tmp$theta_t
-  transTypes <- tmp$transTypes
-
-  # split samples for proposal/iterative scheme
-  nr <- nrow(samples)
-  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2)) # split samples in two parts
-  samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
-  samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
-
-  # compute effective sample size
-  if (use_neff) {
-    neff <- tryCatch(median(coda::effectiveSize(coda::mcmc(samples_4_iter))), error = function(e) {
-      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
-      return(NULL)
-    })
-  } else {
-    neff <- NULL
-  }
-
-  out <- do.call(what = paste0(".bridge.sampler.", method),
-                 args = list(samples_4_fit = samples_4_fit,
-                             samples_4_iter = samples_4_iter,
-                             neff = neff,
-                             log_posterior = log_posterior,
-                             "..." = ..., data = data,
-                             lb = lb, ub = ub,
-                             transTypes = transTypes,
-                             repetitions = repetitions, cores = cores,
-                             packages = packages, varlist = varlist, envir = envir,
-                             rcppFile = rcppFile, maxiter = maxiter,
-                             silent = silent, verbose = verbose,
-                             r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
-  return(out)
-
-}
-
-#' @rdname bridge_sampler
-#' @export
-bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                                     lb = NULL, ub = NULL, repetitions = 1,
-                                     method = "normal", cores = 1, use_neff = TRUE,
-                                     packages = NULL, varlist = NULL, envir = .GlobalEnv,
-                                     rcppFile = NULL, maxiter = 1000, silent = FALSE,
-                                     verbose = FALSE) {
-
-  # split samples in two parts
-  nr <- nrow(samples[[1]])
-  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2))
-  samples_4_fit_tmp <- samples[samples4fit_index,,drop=FALSE]
-  samples_4_fit_tmp <- do.call("rbind", samples_4_fit_tmp)
-
-  # compute effective sample size
-  if (use_neff) {
-    samples_4_iter_tmp <- coda::mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], coda::mcmc))
-    neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
-      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
-      return(NULL)
-    })
-  } else {
-    neff <- NULL
-  }
-
-  # convert to matrix
-  samples_4_iter_tmp <- do.call("rbind", samples_4_iter_tmp)
-
-  # transform parameters to real line
-  tmp <- .transform2Real(samples_4_fit_tmp, lb, ub)
-  samples_4_fit <- tmp$theta_t
-  tmp2 <- .transform2Real(samples_4_iter_tmp, lb, ub)
-  samples_4_iter <- tmp2$theta_t
-  transTypes <- tmp2$transTypes
-
-  # run bridge sampling
-  out <- do.call(what = paste0(".bridge.sampler.", method),
-                 args = list(samples_4_fit = samples_4_fit,
-                             samples_4_iter = samples_4_iter,
-                             neff = NULL,
-                             log_posterior = log_posterior,
-                             "..." = ..., data = data,
-                             lb = lb, ub = ub,
-                             transTypes = transTypes,
-                             repetitions = repetitions, cores = cores,
-                             packages = packages, varlist = varlist, envir = envir,
-                             rcppFile = rcppFile, maxiter = maxiter,
-                             silent = silent, verbose = verbose,
-                             r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
-
-  return(out)
-
-}
-
-#' @rdname bridge_sampler
-#' @export
-bridge_sampler.rjags <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                                 lb = NULL, ub = NULL, repetitions = 1,
-                                 method = "normal", cores = 1, use_neff = TRUE,
-                                 packages = NULL, varlist = NULL,
-                                 envir = .GlobalEnv, rcppFile = NULL,
-                                 maxiter = 1000, silent = FALSE, verbose = FALSE) {
-
-
-  # convert to mcmc.list
-  cn <- colnames(samples$BUGSoutput$sims.matrix)
-  samples <- coda::as.mcmc(samples)
-  samples <- samples[,cn != "deviance"]
-
-  # run bridge sampling
-  out <- bridge_sampler(samples = samples, log_posterior = log_posterior, ...,
-                        data = data, lb = lb, ub = ub, repetitions = repetitions,
-                        method = method, cores = cores, use_neff = use_neff,
-                        packages = packages, varlist = varlist, envir = envir,
-                        rcppFile = rcppFile, maxiter = maxiter, silent = silent,
-                        verbose = verbose)
-
-  return(out)
-
-}
-
-#' @rdname bridge_sampler
-#' @export
-bridge_sampler.runjags <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                                   lb = NULL, ub = NULL, repetitions = 1,
-                                   method = "normal", cores = 1, use_neff = TRUE,
-                                   packages = NULL, varlist = NULL,
-                                   envir = .GlobalEnv, rcppFile = NULL,
-                                   maxiter = 1000, silent = FALSE, verbose = FALSE) {
-
-
-  # convert to mcmc.list
-  samples <- coda::as.mcmc.list(samples)
-
-  # run bridge sampling
-  out <- bridge_sampler(samples = samples, log_posterior = log_posterior, ...,
-                        data = data, lb = lb, ub = ub, repetitions = repetitions,
-                        method = method, cores = cores, use_neff = use_neff,
-                        packages = packages, varlist = varlist, envir = envir,
-                        rcppFile = rcppFile, maxiter = maxiter, silent = silent,
-                        verbose = verbose)
-
-  return(out)
-
 }
 
 #' @rdname bridge_sampler
@@ -318,6 +167,109 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
 
 #' @rdname bridge_sampler
 #' @export
+bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
+                                     lb = NULL, ub = NULL, repetitions = 1,
+                                     method = "normal", cores = 1, use_neff = TRUE,
+                                     packages = NULL, varlist = NULL, envir = .GlobalEnv,
+                                     rcppFile = NULL, maxiter = 1000, silent = FALSE,
+                                     verbose = FALSE) {
+
+  # split samples in two parts
+  nr <- nrow(samples[[1]])
+  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2))
+  samples_4_fit_tmp <- samples[samples4fit_index,,drop=FALSE]
+  samples_4_fit_tmp <- do.call("rbind", samples_4_fit_tmp)
+
+  # compute effective sample size
+  if (use_neff) {
+    samples_4_iter_tmp <- coda::mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], coda::mcmc))
+    neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
+      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+      return(NULL)
+    })
+  } else {
+    neff <- NULL
+  }
+
+  # convert to matrix
+  samples_4_iter_tmp <- do.call("rbind", samples_4_iter_tmp)
+
+  # transform parameters to real line
+  tmp <- .transform2Real(samples_4_fit_tmp, lb, ub)
+  samples_4_fit <- tmp$theta_t
+  tmp2 <- .transform2Real(samples_4_iter_tmp, lb, ub)
+  samples_4_iter <- tmp2$theta_t
+  transTypes <- tmp2$transTypes
+
+  # run bridge sampling
+  out <- do.call(what = paste0(".bridge.sampler.", method),
+                 args = list(samples_4_fit = samples_4_fit,
+                             samples_4_iter = samples_4_iter,
+                             neff = NULL,
+                             log_posterior = log_posterior,
+                             "..." = ..., data = data,
+                             lb = lb, ub = ub,
+                             transTypes = transTypes,
+                             repetitions = repetitions, cores = cores,
+                             packages = packages, varlist = varlist, envir = envir,
+                             rcppFile = rcppFile, maxiter = maxiter,
+                             silent = silent, verbose = verbose,
+                             r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
+
+  return(out)
+
+}
+
+#' @export
+#' @rdname bridge_sampler
+bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
+                           lb = NULL, ub = NULL, repetitions = 1, method = "normal",
+                           cores = 1, use_neff = TRUE, packages = NULL, varlist = NULL,
+                           envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+                           silent = FALSE, verbose = FALSE) {
+
+  # see Meng & Wong (1996), equation 4.1
+
+  # transform parameters to real line
+  tmp <- .transform2Real(samples, lb, ub)
+  theta_t <- tmp$theta_t
+  transTypes <- tmp$transTypes
+
+  # split samples for proposal/iterative scheme
+  nr <- nrow(samples)
+  samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2)) # split samples in two parts
+  samples_4_fit <- theta_t[samples4fit_index, ,drop = FALSE]
+  samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
+
+  # compute effective sample size
+  if (use_neff) {
+    neff <- tryCatch(median(coda::effectiveSize(coda::mcmc(samples_4_iter))), error = function(e) {
+      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+      return(NULL)
+    })
+  } else {
+    neff <- NULL
+  }
+
+  out <- do.call(what = paste0(".bridge.sampler.", method),
+                 args = list(samples_4_fit = samples_4_fit,
+                             samples_4_iter = samples_4_iter,
+                             neff = neff,
+                             log_posterior = log_posterior,
+                             "..." = ..., data = data,
+                             lb = lb, ub = ub,
+                             transTypes = transTypes,
+                             repetitions = repetitions, cores = cores,
+                             packages = packages, varlist = varlist, envir = envir,
+                             rcppFile = rcppFile, maxiter = maxiter,
+                             silent = silent, verbose = verbose,
+                             r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
+  return(out)
+
+}
+
+#' @rdname bridge_sampler
+#' @export
 #' @importFrom utils read.csv
 bridge_sampler.stanreg <-
   function(samples, repetitions = 1, method = "normal", cores = 1,
@@ -361,7 +313,60 @@ bridge_sampler.stanreg <-
                                       silent = silent, verbose = verbose)
     }
     return(bridge_output)
-  }
+}
+
+#' @rdname bridge_sampler
+#' @export
+bridge_sampler.rjags <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
+                                 lb = NULL, ub = NULL, repetitions = 1,
+                                 method = "normal", cores = 1, use_neff = TRUE,
+                                 packages = NULL, varlist = NULL,
+                                 envir = .GlobalEnv, rcppFile = NULL,
+                                 maxiter = 1000, silent = FALSE, verbose = FALSE) {
+
+
+  # convert to mcmc.list
+  cn <- colnames(samples$BUGSoutput$sims.matrix)
+  samples <- coda::as.mcmc(samples)
+  samples <- samples[,cn != "deviance"]
+
+  # run bridge sampling
+  out <- bridge_sampler(samples = samples, log_posterior = log_posterior, ...,
+                        data = data, lb = lb, ub = ub, repetitions = repetitions,
+                        method = method, cores = cores, use_neff = use_neff,
+                        packages = packages, varlist = varlist, envir = envir,
+                        rcppFile = rcppFile, maxiter = maxiter, silent = silent,
+                        verbose = verbose)
+
+  return(out)
+
+}
+
+#' @rdname bridge_sampler
+#' @export
+bridge_sampler.runjags <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
+                                   lb = NULL, ub = NULL, repetitions = 1,
+                                   method = "normal", cores = 1, use_neff = TRUE,
+                                   packages = NULL, varlist = NULL,
+                                   envir = .GlobalEnv, rcppFile = NULL,
+                                   maxiter = 1000, silent = FALSE, verbose = FALSE) {
+
+
+  # convert to mcmc.list
+  samples <- coda::as.mcmc.list(samples)
+
+  # run bridge sampling
+  out <- bridge_sampler(samples = samples, log_posterior = log_posterior, ...,
+                        data = data, lb = lb, ub = ub, repetitions = repetitions,
+                        method = method, cores = cores, use_neff = use_neff,
+                        packages = packages, varlist = varlist, envir = envir,
+                        rcppFile = rcppFile, maxiter = maxiter, silent = silent,
+                        verbose = verbose)
+
+  return(out)
+
+}
+
 
 ######### tools for stanfit method ########
 # taken from rstan:
