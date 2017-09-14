@@ -51,6 +51,28 @@ test_that("bridge sampler matches analytical value", {
 
     }
 
+    getSamplesModelH1_runjags <- function(data, niter = 12000, nburnin = 2000,
+                                          nchains = 3) {
+
+      model <- "
+      model {
+      for (i in 1:n) {
+      theta[i] ~ dnorm(mu, invTau2)
+      y[i] ~ dnorm(theta[i], 1/sigma2)
+      }
+      mu ~ dnorm(mu0, 1/tau20)
+      invTau2 ~ dgamma(alpha, beta)
+      tau2 <- 1/invTau2
+      }"
+
+      s <- suppressWarnings(run.jags(model = model, data = data,
+                                     monitor = c("theta", "mu", "invTau2"),
+                                     n.chains = 3, burnin = 2000,
+                                     sample = 10000, silent.jags = TRUE))
+      return(s)
+
+    }
+
     ### get posterior samples ###
 
     # create data list for Jags
@@ -59,6 +81,7 @@ test_that("bridge sampler matches analytical value", {
 
     # fit model
     samples_H1 <- getSamplesModelH1(data_H1)
+    samples_runjags <- getSamplesModelH1_runjags(data_H1)
 
     ### function for evaluating the unnormalized posterior on log scale ###
     log_posterior_H1 <- function(samples.row, data) {
@@ -83,6 +106,7 @@ test_that("bridge sampler matches analytical value", {
     samples1 <- coda::as.mcmc(samples_H1)
     samples1 <- samples1[,cn != "deviance"]
 
+    # mcmc.list
     bridge_normal <- bridge_sampler(samples = samples1, log_posterior = log_posterior_H1,
                                     data = data_H1, lb = lb_H1, ub = ub_H1,
                                     method = "normal", silent = TRUE, repetitions = 2)
@@ -97,6 +121,38 @@ test_that("bridge sampler matches analytical value", {
                                      data = data_H1, lb = lb_H1, ub = ub_H1,
                                      method = "warp3", silent = TRUE, repetitions = 2,
                                      cores = 2)
+
+    # rjags
+    bridge_normal_j <- bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
+                                    data = data_H1, lb = lb_H1, ub = ub_H1,
+                                    method = "normal", silent = TRUE, repetitions = 2)
+    bridge_warp3_j <- bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
+                                   data = data_H1, lb = lb_H1, ub = ub_H1,
+                                   method = "warp3", silent = TRUE, repetitions = 2)
+    bridge_normal_jm <- bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
+                                      data = data_H1, lb = lb_H1, ub = ub_H1,
+                                      method = "normal", silent = TRUE, repetitions = 2,
+                                      cores = 2)
+    bridge_warp3_jm <- bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
+                                     data = data_H1, lb = lb_H1, ub = ub_H1,
+                                     method = "warp3", silent = TRUE, repetitions = 2,
+                                     cores = 2)
+
+    # runjags
+    bridge_normal_r <- bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
+                                      data = data_H1, lb = lb_H1, ub = ub_H1,
+                                      method = "normal", silent = TRUE, repetitions = 2)
+    bridge_warp3_r <- bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
+                                     data = data_H1, lb = lb_H1, ub = ub_H1,
+                                     method = "warp3", silent = TRUE, repetitions = 2)
+    bridge_normal_rm <- bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
+                                       data = data_H1, lb = lb_H1, ub = ub_H1,
+                                       method = "normal", silent = TRUE, repetitions = 2,
+                                       cores = 2)
+    bridge_warp3_rm <- bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
+                                      data = data_H1, lb = lb_H1, ub = ub_H1,
+                                      method = "warp3", silent = TRUE, repetitions = 2,
+                                      cores = 2)
 
     # "exact" ml
     mH1 <- function(data, rel.tol = 1e-10) {
@@ -133,6 +189,18 @@ test_that("bridge sampler matches analytical value", {
     expect_equal(bridge_warp3$logml, expected = rep(exact_logml, length(bridge_warp3$logml)), tolerance = 0.01)
     expect_equal(bridge_normal_m$logml, expected = rep(exact_logml, length(bridge_normal_m$logml)), tolerance = 0.01)
     expect_equal(bridge_warp3_m$logml, expected = rep(exact_logml, length(bridge_warp3_m$logml)), tolerance = 0.01)
+
+    expect_equal(class(samples_H1), expected = "rjags")
+    expect_equal(bridge_normal_j$logml, expected = rep(exact_logml, length(bridge_normal_j$logml)), tolerance = 0.01)
+    expect_equal(bridge_warp3_j$logml, expected = rep(exact_logml, length(bridge_warp3_j$logml)), tolerance = 0.01)
+    expect_equal(bridge_normal_jm$logml, expected = rep(exact_logml, length(bridge_normal_jm$logml)), tolerance = 0.01)
+    expect_equal(bridge_warp3_jm$logml, expected = rep(exact_logml, length(bridge_warp3_jm$logml)), tolerance = 0.01)
+
+    expect_equal(class(samples_runjags), expected = "runjags")
+    expect_equal(bridge_normal_r$logml, expected = rep(exact_logml, length(bridge_normal_r$logml)), tolerance = 0.01)
+    expect_equal(bridge_warp3_r$logml, expected = rep(exact_logml, length(bridge_warp3_r$logml)), tolerance = 0.01)
+    expect_equal(bridge_normal_rm$logml, expected = rep(exact_logml, length(bridge_normal_rm$logml)), tolerance = 0.01)
+    expect_equal(bridge_warp3_rm$logml, expected = rep(exact_logml, length(bridge_warp3_rm$logml)), tolerance = 0.01)
 
   }
 

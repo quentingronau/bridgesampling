@@ -26,10 +26,9 @@ Computes approximate error measures for marginal likelihood bridge sampling esti
 \note{
 For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
 }
-\author{
-Quentin F. Gronau
-}
 \references{
 Fruehwirth-Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. \emph{The Econometrics Journal}, 7, 143-167. \url{http://dx.doi.org/10.1111/j.1368-423X.2004.00125.x}
 }
-
+\author{
+Quentin F. Gronau
+}

@@ -79,4 +79,3 @@ post_prob(H1L, H0L, H0) # last element recycled with warning.
 \author{
 Quentin F. Gronau and Henrik Singmann
 }
-

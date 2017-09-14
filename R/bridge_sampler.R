@@ -123,10 +123,11 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
 #' @rdname bridge_sampler
 #' @export
 bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                                     lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
-                                     method = "normal", cores = 1, packages = NULL,
-                                     varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
-                                     maxiter = 1000, silent = FALSE, verbose = FALSE) {
+                                     lb = NULL, ub = NULL, repetitions = 1,
+                                     method = "normal", cores = 1, use_neff = TRUE,
+                                     packages = NULL, varlist = NULL, envir = .GlobalEnv,
+                                     rcppFile = NULL, maxiter = 1000, silent = FALSE,
+                                     verbose = FALSE) {
 
   # split samples in two parts
   nr <- nrow(samples[[1]])
@@ -169,6 +170,56 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
                              rcppFile = rcppFile, maxiter = maxiter,
                              silent = silent, verbose = verbose,
                              r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
+
+  return(out)
+
+}
+
+#' @rdname bridge_sampler
+#' @export
+bridge_sampler.rjags <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
+                                 lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
+                                 method = "normal", cores = 1, packages = NULL,
+                                 varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+                                 maxiter = 1000, silent = FALSE, verbose = FALSE) {
+
+
+  # convert to mcmc.list
+  cn <- colnames(samples$BUGSoutput$sims.matrix)
+  samples <- coda::as.mcmc(samples)
+  samples <- samples[,cn != "deviance"]
+
+  # run bridge sampling
+  out <- bridge_sampler(samples = samples, log_posterior = log_posterior, ...,
+                        data = data, lb = lb, ub = ub, repetitions = repetitions,
+                        method = method, cores = cores, use_neff = use_neff,
+                        packages = packages, varlist = varlist, envir = envir,
+                        rcppFile = rcppFile, maxiter = maxiter, silent = silent,
+                        verbose = verbose)
+
+  return(out)
+
+}
+
+#' @rdname bridge_sampler
+#' @export
+bridge_sampler.runjags <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
+                                   lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
+                                   method = "normal", cores = 1, packages = NULL,
+                                   varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+                                   maxiter = 1000, silent = FALSE, verbose = FALSE) {
+
+
+  # convert to mcmc.list
+  samples <- coda::as.mcmc.list(samples)
+
+  # run bridge sampling
+  out <- bridge_sampler(samples = samples, log_posterior = log_posterior, ...,
+                        data = data, lb = lb, ub = ub, repetitions = repetitions,
+                        method = method, cores = cores, use_neff = use_neff,
+                        packages = packages, varlist = varlist, envir = envir,
+                        rcppFile = rcppFile, maxiter = maxiter, silent = silent,
+                        verbose = verbose)
 
   return(out)
 

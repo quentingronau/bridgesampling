@@ -3,6 +3,9 @@
 \name{bridge_sampler}
 \alias{bridge_sampler}
 \alias{bridge_sampler.matrix}
+\alias{bridge_sampler.mcmc.list}
+\alias{bridge_sampler.rjags}
+\alias{bridge_sampler.runjags}
 \alias{bridge_sampler.stanfit}
 \alias{bridge_sampler.stanreg}
 \title{Log Marginal Likelihood via Bridge Sampling}
@@ -11,17 +14,35 @@ bridge_sampler(samples, ...)
 
 \method{bridge_sampler}{matrix}(samples = NULL, log_posterior = NULL, ...,
   data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+  silent = FALSE, verbose = FALSE)
+
+\method{bridge_sampler}{mcmc.list}(samples = NULL, log_posterior = NULL,
+  ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+  silent = FALSE, verbose = FALSE)
+
+\method{bridge_sampler}{rjags}(samples = NULL, log_posterior = NULL, ...,
+  data = NULL, lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, packages = NULL, varlist = NULL,
+  envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000, silent = FALSE,
+  verbose = FALSE)
+
+\method{bridge_sampler}{runjags}(samples = NULL, log_posterior = NULL, ...,
+  data = NULL, lb = NULL, use_neff = TRUE, ub = NULL, repetitions = 1,
   method = "normal", cores = 1, packages = NULL, varlist = NULL,
   envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000, silent = FALSE,
   verbose = FALSE)
 
 \method{bridge_sampler}{stanfit}(samples = NULL, stanfit_model = samples,
-  repetitions = 1, method = "normal", cores = 1, maxiter = 1000,
-  silent = FALSE, verbose = FALSE, ...)
+  repetitions = 1, method = "normal", cores = 1, use_neff = TRUE,
+  maxiter = 1000, silent = FALSE, verbose = FALSE, ...)
 
 \method{bridge_sampler}{stanreg}(samples, repetitions = 1,
-  method = "normal", cores = 1, maxiter = 1000, silent = FALSE,
-  verbose = FALSE, ...)
+  method = "normal", cores = 1, use_neff = TRUE, maxiter = 1000,
+  silent = FALSE, verbose = FALSE, ...)
 }
 \arguments{
 \item{samples}{a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub}), a fitted \code{stanfit} object with posterior samples, or a \code{stanreg} object.}
@@ -41,6 +62,8 @@ bridge_sampler(samples, ...)
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
 \item{cores}{number of cores used for evaluating \code{log_posterior}. On unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is used. Hence elements needed for evaluation should be in the \code{\link{.GlobalEnv}}. For other systems (e.g., Windows) \code{\link{makeCluster}} is used and further arguments specified below will be used.}
+
+\item{use_neff}{Boolean which determines whether the effective sample size is used in the optimal bridge function. Default is TRUE. If FALSE, the number of samples is used instead.}
 
 \item{packages}{character vector with names of packages needed for evaluating \code{log_posterior} in parallel (only relevant if \code{cores > 1} and \code{.Platform$OS.type != "unix"}).}
 
@@ -288,9 +311,6 @@ print(post2)
 }
 
 }
-\author{
-Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
-}
 \references{
 Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
 
@@ -300,4 +320,6 @@ Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Comp
 
 Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 }
-
+\author{
+Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
+}

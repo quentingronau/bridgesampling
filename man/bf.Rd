@@ -53,10 +53,9 @@ Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associate
 \note{
 For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
 }
-\author{
-Quentin F. Gronau
-}
 \references{
 Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association}, 90(430), 773-795. \url{http://dx.doi.org/10.1080/01621459.1995.10476572}
 }
-
+\author{
+Quentin F. Gronau
+}

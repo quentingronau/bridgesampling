@@ -25,4 +25,3 @@ scalar numeric
 \description{
 Generic function that returns log marginal likelihood from bridge objects. For objects of class \code{"bridge_list"}, which contains multiple log marginal likelihoods, \code{fun} is performed on the vector and its result returned.
 }
-
