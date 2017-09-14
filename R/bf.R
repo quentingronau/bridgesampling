@@ -51,6 +51,8 @@ bayes_factor <- function(x1, x2, log = FALSE, ...) {
 #' @rdname bf
 #' @export
 bf.bridge <- function(x1, x2, log = FALSE, ...) {
+  #name1 <- as.character(match.call()[[2]])
+  #name2 <- as.character(match.call()[[3]])
   bf <- .bf_calc(logml(x1), logml(x2), log = log)
   out <- list(bf = bf, log = log)
   class(out) <- "bf_bridge"
@@ -101,9 +103,9 @@ bf.default <- function(x1, x2, log = FALSE, ...) {
 #' @export
 print.bf_bridge <- function(x, ...) {
   if (x$log) {
-    cat("The estimated log Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+    cat("The estimated log Bayes factor in favor of x1 over x2 is equal to: ", round(x$bf, 5), sep = "")
   } else if (! x$log) {
-    cat("The estimated Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+    cat("The estimated Bayes factor in favor of x1 over x2 is equal to: ", round(x$bf, 5), sep = "")
   }
 }
 
@@ -111,13 +113,13 @@ print.bf_bridge <- function(x, ...) {
 #' @export
 print.bf_bridge_list <- function(x, na.rm = TRUE,...) {
   if (x$log) {
-    cat("The estimated log Bayes factor (based on the medians of the log marginal likelihood estimates) is equal to: ",
+    cat("The estimated log Bayes factor in favor of x1 over x2 (based on the medians of the log marginal likelihood estimates) is equal to: ",
         round(x$bf_median_based, 5), "\nRange of estimates: ", round(range(x$bf, na.rm=na.rm)[1], 5), " to ",
         round(range(x$bf, na.rm = na.rm)[2], 5),
         "\nInterquartile range: ", round(stats::IQR(x$bf, na.rm = na.rm), 5), sep = "")
     if (any(is.na(x$bf))) warning(sum(is.na(x$bf))," log Bayes factor estimate(s) are NAs.", call. = FALSE)
   } else if (! x$log) {
-    cat("The estimated Bayes factor (based on the medians of the log marginal likelihood estimates) is equal to: ",
+    cat("The estimated Bayes factor in favor of x1 over x2 (based on the medians of the log marginal likelihood estimates) is equal to: ",
         round(x$bf_median_based, 5), "\nRange of estimates: ", round(range(x$bf, na.rm=na.rm)[1], 5), " to ",
         round(range(x$bf, na.rm = na.rm)[2], 5),
         "\nInterquartile range: ", round(stats::IQR(x$bf, na.rm = na.rm), 5), sep = "")
@@ -129,8 +131,8 @@ print.bf_bridge_list <- function(x, na.rm = TRUE,...) {
 #' @export
 print.bf_default <- function(x, ...) {
   if (x$log) {
-    cat("The log Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+    cat("The log Bayes factor in favor of x1 over x2 is equal to: ", round(x$bf, 5), sep = "")
   } else if (! x$log) {
-    cat("The Bayes factor is equal to: ", round(x$bf, 5), sep = "")
+    cat("The Bayes factor in favor of x1 over x2 is equal to: ", round(x$bf, 5), sep = "")
   }
 }
