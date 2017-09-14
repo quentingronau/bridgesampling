@@ -52,7 +52,7 @@
 #'  \item \code{repetitions}: number of repetitions.
 #' }
 #' @section Warning:
-#' Note, the results depend strongly on the parameter priors. Therefore, it is strongly adviced to think carefully about the priors before calculatng marginal likelihoods. For example, the prior choices implemented in \pkg{rstanarm} or \pkg{brms} might not be optimal from a testing point of view. We recommend to use priors that have been chosen from a testing and not a purely estimation perspective.
+#' Note that the results depend strongly on the parameter priors. Therefore, it is strongly advised to think carefully about the priors before calculating marginal likelihoods. For example, the prior choices implemented in \pkg{rstanarm} or \pkg{brms} might not be optimal from a testing point of view. We recommend to use priors that have been chosen from a testing and not a purely estimation perspective.
 #'
 #' In addition to thinking more about the priors, the number of posterior samples usually needs to be larger than for estimation.
 #' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
