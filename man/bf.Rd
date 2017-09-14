@@ -2,12 +2,15 @@
 % Please edit documentation in R/bf.R
 \name{bf}
 \alias{bf}
+\alias{bayes_factor}
 \alias{bf.bridge}
 \alias{bf.bridge_list}
 \alias{bf.default}
 \title{Bayes Factor(s) from Marginal Likelihoods}
 \usage{
 bf(x1, x2, log = FALSE)
+
+bayes_factor(x1, x2, log = FALSE)
 
 \method{bf}{bridge}(x1, x2, log = FALSE)
 
@@ -45,7 +48,7 @@ For the method for \code{"bridge_list"} objects returns a list of class \code{"b
 }
 }
 \description{
-Generic function that computes Bayes factor(s) from marginal likelihoods.
+Generic function that computes Bayes factor(s) from marginal likelihoods. \code{bayes_factor()} is simply an alias for \code{bf()}.
 }
 \details{
 Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{x1} over the model associated with \code{x2}.
