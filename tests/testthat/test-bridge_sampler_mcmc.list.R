@@ -1,7 +1,7 @@
 
 context('test bridge_sampler mcmc.list method')
 
-test_that("bridge sampler matches anlytical value", {
+test_that("bridge sampler matches analytical value", {
 
   testthat::skip_on_cran()
   testthat::skip_on_travis()
@@ -46,7 +46,7 @@ test_that("bridge sampler matches anlytical value", {
       s <- jags(data, parameters.to.save = c("theta", "mu", "invTau2"),
                 model.file = textConnection(model),
                 n.chains = nchains, n.iter = niter,
-                n.burnin = nburnin, n.thin = 1)
+                n.burnin = nburnin, n.thin = 1, progress.bar = "none")
       return(s)
 
     }
@@ -131,8 +131,8 @@ test_that("bridge sampler matches anlytical value", {
     expect_equal(class(samples1), expected = "mcmc.list")
     expect_equal(bridge_normal$logml, expected = rep(exact_logml, length(bridge_normal$logml)), tolerance = 0.01)
     expect_equal(bridge_warp3$logml, expected = rep(exact_logml, length(bridge_warp3$logml)), tolerance = 0.01)
-    expect_equal(bridge_normal_m$logml, expected = rep(exact_logml, length(bridge_normal_c$logml)), tolerance = 0.01)
-    expect_equal(bridge_warp3_m$logml, expected = rep(exact_logml, length(bridge_warp3_c$logml)), tolerance = 0.01)
+    expect_equal(bridge_normal_m$logml, expected = rep(exact_logml, length(bridge_normal_m$logml)), tolerance = 0.01)
+    expect_equal(bridge_warp3_m$logml, expected = rep(exact_logml, length(bridge_warp3_m$logml)), tolerance = 0.01)
 
   }
 

@@ -124,7 +124,7 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
   samples_4_fit_tmp <- do.call("rbind", samples_4_fit_tmp)
 
   # compute effective sample size
-  samples_4_iter_tmp <- mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], mcmc))
+  samples_4_iter_tmp <- coda::mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], coda::mcmc))
   neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
     warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
     return(NULL)
@@ -256,16 +256,17 @@ bridge_sampler.stanreg <-
     chains <- ncol(sf)
     if (chains > 1) df <- sapply(1:chains, FUN = function(j)
       sub("\\.csv$", paste0("_", j, ".csv"), df))
-    samples <- do.call(rbind, args = lapply(df, FUN = function(f) {
+    samples_list <- lapply(df, FUN = function(f) {
       d <- read.csv(f, comment.char = "#")
       excl <- c("lp__", "accept_stat__", "stepsize__" ,"treedepth__",
                 "n_leapfrog__", "divergent__", "energy__")
       d <- d[,!(colnames(d) %in% excl), drop = FALSE]
-      as.matrix(d[, 1:rstan::get_num_upars(sf), drop = FALSE])
-    }))
-    lb <- rep(-Inf, ncol(samples))
-    ub <- rep( Inf, ncol(samples))
-    names(lb) <- names(ub) <- colnames(samples)
+      coda::as.mcmc(as.matrix(d[, 1:rstan::get_num_upars(sf), drop = FALSE]))
+    })
+    samples <- coda::as.mcmc.list(samples_list)
+    lb <- rep(-Inf, ncol(samples[[1]]))
+    ub <- rep( Inf, ncol(samples[[1]]))
+    names(lb) <- names(ub) <- colnames(samples[[1]])
 
     if (cores == 1) {
       bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
