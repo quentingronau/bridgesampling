@@ -20,5 +20,4 @@ r_binary_packages:
    - stringr
    - mvtnorm
 r_build_args: --compact-vignettes="gs+qpdf"
-install: travis_wait mvn install
 
