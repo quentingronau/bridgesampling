@@ -42,10 +42,8 @@ getSamplesModelH0 <- function(data, niter = 52000, nburnin = 2000, nchains = 3) 
             model.file = textConnection(model),
             n.chains = nchains, n.iter = niter,
             n.burnin = nburnin, n.thin = 1)
-  cn <- colnames(s$BUGSoutput$sims.matrix)
-  samples_matrix <- s$BUGSoutput$sims.matrix[ ,-which(cn == "deviance")] # cut off deviance
   
-  return(samples_matrix)
+  return(s)
   
 }
 
@@ -68,16 +66,14 @@ getSamplesModelH1 <- function(data, niter = 52000, nburnin = 2000,
             model.file = textConnection(model),
             n.chains = nchains, n.iter = niter,
             n.burnin = nburnin, n.thin = 1)
-  cn <- colnames(s$BUGSoutput$sims.matrix)
-  samples_matrix <- s$BUGSoutput$sims.matrix[ ,-which(cn == "deviance")] # cut off deviance
   
-  return(samples_matrix)
+  return(s)
   
 }
 
 ### get posterior samples ###
 
-# create data lists for Jags
+# create data lists for JAGS
 data_H0 <- list(y = y, n = length(y), alpha = alpha, beta = beta, sigma2 = sigma2)
 data_H1 <- list(y = y, n = length(y), mu0 = mu0, tau20 = tau20, alpha = alpha,
                 beta = beta, sigma2 = sigma2)
@@ -118,15 +114,19 @@ log_posterior_H1 <- function(samples.row, data) {
 
 ## ------------------------------------------------------------------------
 # specify parameter bounds H0
-lb_H0 <- rep(-Inf, ncol(samples_H0))
-ub_H0 <- rep(Inf, ncol(samples_H0))
-names(lb_H0) <- names(ub_H0) <- colnames(samples_H0)
+cn <- colnames(samples_H0$BUGSoutput$sims.matrix)
+cn <- cn[cn != "deviance"]
+lb_H0 <- rep(-Inf, length(cn))
+ub_H0 <- rep(Inf, length(cn))
+names(lb_H0) <- names(ub_H0) <- cn
 lb_H0[[ "invTau2" ]] <- 0
 
 # specify parameter bounds H1
-lb_H1 <- rep(-Inf, ncol(samples_H1))
-ub_H1 <- rep(Inf, ncol(samples_H1))
-names(lb_H1) <- names(ub_H1) <- colnames(samples_H1)
+cn <- colnames(samples_H1$BUGSoutput$sims.matrix)
+cn <- cn[cn != "deviance"]
+lb_H1 <- rep(-Inf, length(cn))
+ub_H1 <- rep(Inf, length(cn))
+names(lb_H1) <- names(ub_H1) <- cn
 lb_H1[[ "invTau2" ]] <- 0
 
 ## ------------------------------------------------------------------------
