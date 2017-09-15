@@ -29,7 +29,7 @@ print(cbind(bridge_result$logml, analytical))
 ## ------------------------------------------------------------------------
 
 # for a full description of the example, see
-vignette("bridgesampling_example")
+vignette("bridgesampling_example_jags")
 
 library(R2jags)
 
@@ -72,10 +72,8 @@ getSamplesModelH0 <- function(data, niter = 52000, nburnin = 2000, nchains = 3) 
             model.file = textConnection(model),
             n.chains = nchains, n.iter = niter,
             n.burnin = nburnin, n.thin = 1)
-  cn <- colnames(s$BUGSoutput$sims.matrix)
-  samples_matrix <- s$BUGSoutput$sims.matrix[ ,-which(cn == "deviance")] # cut off deviance
 
-  return(samples_matrix)
+  return(s)
 
 }
 
@@ -99,10 +97,8 @@ getSamplesModelH1 <- function(data, niter = 52000, nburnin = 2000,
             model.file = textConnection(model),
             n.chains = nchains, n.iter = niter,
             n.burnin = nburnin, n.thin = 1)
-  cn <- colnames(s$BUGSoutput$sims.matrix)
-  samples_matrix <- s$BUGSoutput$sims.matrix[ ,-which(cn == "deviance")] # cut off deviance
 
-  return(samples_matrix)
+  return(s)
 
 }
 
@@ -145,15 +141,19 @@ log_posterior_H1 <- function(samples.row, data) {
 }
 
 # specify parameter bounds H0
-lb_H0 <- rep(-Inf, ncol(samples_H0))
-ub_H0 <- rep(Inf, ncol(samples_H0))
-names(lb_H0) <- names(ub_H0) <- colnames(samples_H0)
+cn <- colnames(samples_H0$BUGSoutput$sims.matrix)
+cn <- cn[cn != "deviance"]
+lb_H0 <- rep(-Inf, length(cn))
+ub_H0 <- rep(Inf, length(cn))
+names(lb_H0) <- names(ub_H0) <- cn
 lb_H0[[ "invTau2" ]] <- 0
 
 # specify parameter bounds H1
-lb_H1 <- rep(-Inf, ncol(samples_H1))
-ub_H1 <- rep(Inf, ncol(samples_H1))
-names(lb_H1) <- names(ub_H1) <- colnames(samples_H1)
+cn <- colnames(samples_H1$BUGSoutput$sims.matrix)
+cn <- cn[cn != "deviance"]
+lb_H1 <- rep(-Inf, length(cn))
+ub_H1 <- rep(Inf, length(cn))
+names(lb_H1) <- names(ub_H1) <- cn
 lb_H1[[ "invTau2" ]] <- 0
 
 
@@ -184,6 +184,25 @@ print(post1)
 # compute posterior model probabilities (using user-specified prior model probabilities)
 post2 <- post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
 print(post2)
+
+}
+
+\dontrun{
+
+## ------------------------------------------------------------------------
+## Example 3: rstanarm
+## ------------------------------------------------------------------------
+library(rstanarm)
+
+# N.B.: remember to specify the diagnostic_file
+
+fit_1 <- stan_glm(mpg ~ wt + qsec + am, data = mtcars,
+                  chains = 2, cores = 2, iter = 5000,
+                  diagnostic_file = file.path(tempdir(), "df.csv"))
+bridge_1 <- bridge_sampler(fit_1)
+fit_2 <- update(fit_1, formula = . ~ . + cyl)
+bridge_2 <- bridge_sampler(fit_2, method = "warp3")
+bf(bridge_1, bridge_2)
 
 }
 

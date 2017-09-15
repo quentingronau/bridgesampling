@@ -55,6 +55,7 @@
 #' Note that the results depend strongly on the parameter priors. Therefore, it is strongly advised to think carefully about the priors before calculating marginal likelihoods. For example, the prior choices implemented in \pkg{rstanarm} or \pkg{brms} might not be optimal from a testing point of view. We recommend to use priors that have been chosen from a testing and not a purely estimation perspective.
 #'
 #' Also note that for testing, the number of posterior samples usually needs to be substantially larger than for estimation.
+#' @note To be able to use a \code{stanreg} object for \code{samples}, the user crucially needs to have specified the \code{diagnostic_file} when fitting the model in \pkg{rstanarm}.
 #' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
 #' @references
 #' Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
