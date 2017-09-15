@@ -29,6 +29,13 @@ test_that("bf print method correctly displayed", {
   expect_output(print(BF), "The estimated Bayes factor")
   expect_output(print(log_BF), "The estimated log Bayes factor")
 
+  BF2 <- bayes_factor(bridge_normal, bridge_warp3)
+  log_BF2 <- bayes_factor(bridge_normal, bridge_warp3, log = TRUE)
+
+  expect_output(print(BF2), "The estimated Bayes factor")
+  expect_output(print(log_BF2), "The estimated log Bayes factor")
+
+
   # repetitions > 1
   bridge_normal <- bridge_sampler(samples = x, log_posterior = log_density,
                                   data = NULL, lb = lb, ub = ub,

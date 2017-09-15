@@ -3,6 +3,7 @@
 \name{bf}
 \alias{bf}
 \alias{bayes_factor}
+\alias{bayes_factor.default}
 \alias{bf.bridge}
 \alias{bf.bridge_list}
 \alias{bf.default}
@@ -11,6 +12,8 @@
 bf(x1, x2, log = FALSE, ...)
 
 bayes_factor(x1, x2, log = FALSE, ...)
+
+\method{bayes_factor}{default}(x1, x2, log = FALSE, ...)
 
 \method{bf}{bridge}(x1, x2, log = FALSE, ...)
 
@@ -50,7 +53,7 @@ For the method for \code{"bridge_list"} objects returns a list of class \code{"b
 }
 }
 \description{
-Generic function that computes Bayes factor(s) from marginal likelihoods. \code{bayes_factor()} is simply an alias for \code{bf()}.
+Generic function that computes Bayes factor(s) from marginal likelihoods. \code{bayes_factor()} is simply an (S3 generic) alias for \code{bf()}.
 }
 \details{
 Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{x1} over the model associated with \code{x2}.

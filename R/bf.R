@@ -1,4 +1,4 @@
-#' Generic function that computes Bayes factor(s) from marginal likelihoods. \code{bayes_factor()} is simply an alias for \code{bf()}.
+#' Generic function that computes Bayes factor(s) from marginal likelihoods. \code{bayes_factor()} is simply an (S3 generic) alias for \code{bf()}.
 #' @export
 #' @title Bayes Factor(s) from Marginal Likelihoods
 #' @param x1 Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that \code{x1} is a single numeric log marginal likelihood (e.g., from \code{\link{logml}}) and will throw an error otherwise.
@@ -38,8 +38,16 @@ bf <- function(x1, x2, log = FALSE, ...) {
 #' @rdname bf
 #' @export
 bayes_factor <- function(x1, x2, log = FALSE, ...) {
-  bf(x1, x2, log=log)
+  UseMethod("bayes_factor", x1)
 }
+
+
+#' @rdname bf
+#' @export
+bayes_factor.default <- function(x1, x2, log = FALSE, ...) {
+  bf(x1, x2, log = FALSE, ...)
+}
+
 
 .bf_calc <- function(logml1, logml2, log) {
   bf <- logml1 - logml2
