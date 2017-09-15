@@ -45,7 +45,7 @@ bayes_factor <- function(x1, x2, log = FALSE, ...) {
 #' @rdname bf
 #' @export
 bayes_factor.default <- function(x1, x2, log = FALSE, ...) {
-  bf(x1, x2, log = FALSE, ...)
+  bf(x1, x2, log = log, ...)
 }
 
 
