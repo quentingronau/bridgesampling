@@ -124,7 +124,7 @@ Due to the way \code{rstan} currently works, parallel computations with \code{st
 
 Note that the results depend strongly on the parameter priors. Therefore, it is strongly advised to think carefully about the priors before calculating marginal likelihoods. For example, the prior choices implemented in \pkg{rstanarm} or \pkg{brms} might not be optimal from a testing point of view. We recommend to use priors that have been chosen from a testing and not a purely estimation perspective.
 
-In addition to thinking more about the priors, the number of posterior samples usually needs to be larger than for estimation.
+Also note that for testing, the number of posterior samples usually needs to be substantially larger than for estimation.
 }
 
 \examples{
