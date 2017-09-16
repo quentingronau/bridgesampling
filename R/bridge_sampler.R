@@ -181,9 +181,16 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
   samples_4_fit_tmp <- samples[samples4fit_index,,drop=FALSE]
   samples_4_fit_tmp <- do.call("rbind", samples_4_fit_tmp)
 
+  # transform parameters to real line
+  tmp <- .transform2Real(samples_4_fit_tmp, lb, ub)
+  samples_4_fit <- tmp$theta_t
+  transTypes <- tmp$transTypes
+  samples_4_iter_tmp <- lapply(samples[!samples4fit_index,,drop=FALSE],
+                               function(x) .transform2Real(x, lb = lb, ub = ub)$theta_t)
+
   # compute effective sample size
   if (use_neff) {
-    samples_4_iter_tmp <- coda::mcmc.list(lapply(samples[!samples4fit_index,,drop=FALSE], coda::mcmc))
+    samples_4_iter_tmp <- coda::mcmc.list(lapply(samples_4_iter_tmp, coda::mcmc))
     neff <- tryCatch(median(coda::effectiveSize(samples_4_iter_tmp)), error = function(e) {
       warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
       return(NULL)
@@ -193,20 +200,13 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
   }
 
   # convert to matrix
-  samples_4_iter_tmp <- do.call("rbind", samples_4_iter_tmp)
-
-  # transform parameters to real line
-  tmp <- .transform2Real(samples_4_fit_tmp, lb, ub)
-  samples_4_fit <- tmp$theta_t
-  tmp2 <- .transform2Real(samples_4_iter_tmp, lb, ub)
-  samples_4_iter <- tmp2$theta_t
-  transTypes <- tmp2$transTypes
+  samples_4_iter <- do.call("rbind", samples_4_iter_tmp)
 
   # run bridge sampling
   out <- do.call(what = paste0(".bridge.sampler.", method),
                  args = list(samples_4_fit = samples_4_fit,
                              samples_4_iter = samples_4_iter,
-                             neff = NULL,
+                             neff = neff,
                              log_posterior = log_posterior,
                              "..." = ..., data = data,
                              lb = lb, ub = ub,

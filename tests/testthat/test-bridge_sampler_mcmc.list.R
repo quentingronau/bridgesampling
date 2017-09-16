@@ -7,7 +7,7 @@ test_that("bridge sampler matches analytical value", {
   testthat::skip_on_travis()
 
   # library(bridgesampling)
-  if (require(R2jags)) {
+  if (require(R2jags) && require(runjags)) {
 
     ### generate data ###
     set.seed(12345)
@@ -65,7 +65,7 @@ test_that("bridge sampler matches analytical value", {
       tau2 <- 1/invTau2
       }"
 
-      s <- suppressWarnings(run.jags(model = model, data = data,
+      s <- suppressWarnings(runjags::run.jags(model = model, data = data,
                                      monitor = c("theta", "mu", "invTau2"),
                                      n.chains = 3, burnin = 2000,
                                      sample = 10000, silent.jags = TRUE))
