@@ -94,7 +94,7 @@ test_that("stan_bridge_sampler", {
 test_that("stan_bridge_sampler in multicore", {
   testthat::skip_on_cran()
   testthat::skip_on_travis()
-  testthat::skip_on_os("windows")
+  #testthat::skip_on_os("windows")
   if (require(rstan)) {
     set.seed(12345)
 

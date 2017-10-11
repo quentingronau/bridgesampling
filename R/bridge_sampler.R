@@ -134,6 +134,12 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
   colnames(samples_4_iter) <- paste0("trans_", parameters)
   colnames(samples_4_fit) <- paste0("trans_", parameters)
 
+  # cores > 1 only for unix:
+  if (!(.Platform$OS.type == "unix") & (cores != 1)) {
+    warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.", call. = FALSE)
+    cores <- 1L
+  }
+
   # run bridge sampling
   if (cores == 1) {
     bridge_output <- do.call(what = paste0(".bridge.sampler.", method),
@@ -297,6 +303,12 @@ bridge_sampler.stanreg <-
     lb <- rep(-Inf, ncol(samples[[1]]))
     ub <- rep( Inf, ncol(samples[[1]]))
     names(lb) <- names(ub) <- colnames(samples[[1]])
+
+    # cores > 1 only for unix:
+    if (!(.Platform$OS.type == "unix") & (cores != 1)) {
+      warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.", call. = FALSE)
+      cores <- 1L
+    }
 
     if (cores == 1) {
       bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
