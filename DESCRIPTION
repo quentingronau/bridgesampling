@@ -3,13 +3,15 @@ Type: Package
 Title: Bridge Sampling for Marginal Likelihoods and Bayes Factors
 Version: 0.3-0
 Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
-             email="Quentin.F.Gronau@gmail.com"), person(given="Henrik",
-             family="Singmann", role="aut"), person(given="Jonathan J.",
-             family="Forster", role="ctb"), person(given="Eric-Jan",
-             family="Wagenmakers", role="ths"), person(family="The JASP Team",
-             role="ctb"), person("Jiqiang", "Guo", role = "ctb"),
-             person("Jonah", "Gabry", role = "ctb"), person("Ben", "Goodrich", 
-             role = c("ctb")))
+             email="Quentin.F.Gronau@gmail.com",
+             comment=c(ORCID = "0000-0001-5510-6943")),
+             person(given="Henrik", family="Singmann", role="aut"),
+             person(given="Jonathan J.", family="Forster", role="ctb"),
+             person(given="Eric-Jan", family="Wagenmakers", role="ths"),
+             person(family="The JASP Team", role="ctb"),
+             person("Jiqiang", "Guo", role = "ctb"),
+             person("Jonah", "Gabry", role = "ctb"),
+             person("Ben", "Goodrich", role = c("ctb")))
 Depends:
     R (>= 3.0.0)
 Imports:

@@ -321,6 +321,7 @@ print(post2)
 }
 
 \dontrun{
+
 ## ------------------------------------------------------------------------
 ## Example 3: rstanarm
 ## ------------------------------------------------------------------------
@@ -340,7 +341,9 @@ bf(bridge_1, bridge_2)
 
 }
 \references{
-Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (2017). \emph{A tutorial on bridge sampling}. Manuscript submitted for publication. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
+Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (in press). A tutorial on bridge sampling. \emph{Journal of Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
+
+Gronau, Q. F., Wagenmakers, E.-J., Heck, D. W., & Matzke, D. (2017). \emph{A simple method for comparing complex models: Bayesian model comparison for hierarchical multinomial processing tree models using warp-III bridge sampling}. Manuscript submitted for publication. \url{https://psyarxiv.com/yxhfm}
 
 Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. \emph{Statistica Sinica}, 6, 831-860. \url{http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm}
 
