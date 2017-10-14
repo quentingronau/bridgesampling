@@ -23,6 +23,10 @@ This data set contains information about 244 newborn turtles from 31 different c
 
 \dontrun{
 
+################################################################################
+# BAYESIAN GENERALIZED LINEAR MIXED MODEL (PROBIT REGRESSION)
+################################################################################
+
 library(bridgesampling)
 library(rstan)
 

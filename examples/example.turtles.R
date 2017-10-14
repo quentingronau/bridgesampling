@@ -1,6 +1,10 @@
 
 \dontrun{
 
+################################################################################
+# BAYESIAN GENERALIZED LINEAR MIXED MODEL (PROBIT REGRESSION)
+################################################################################
+
 library(bridgesampling)
 library(rstan)
 
