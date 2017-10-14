@@ -75,7 +75,7 @@ transformed parameters {
       }
     }
   }
-  Omega = beta*beta' + diag_matrix(sigma2);
+  Omega = beta * beta' + diag_matrix(sigma2);
 }
 model {
   // priors
