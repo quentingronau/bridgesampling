@@ -29,7 +29,6 @@ library(bridgesampling)
 library(rstan)
 
 cores <- 4
-rstan_options(auto_write = TRUE)
 options(mc.cores = cores)
 
 data(ier)
@@ -95,7 +94,7 @@ transformed parameters {
       }
     }
   }
-  Omega = beta*beta' + diag_matrix(sigma2);
+  Omega = beta * beta' + diag_matrix(sigma2);
 }
 model {
   // priors
@@ -140,9 +139,9 @@ for (k in 1:3) {
                                        m = ncol(ier), k = k),
                            iter = 11000, warmup = 1000, chains = 4,
                            init = init_fun(nchains = 4, k = k, m = ncol(ier)),
-                           cores = 4, seed = 1)
+                           cores = cores, seed = 1)
   bridge[[k]] <- bridge_sampler(stanfit[[k]], method = "warp3",
-                                repetitions = 10, cores = 4)
+                                repetitions = 10, cores = cores)
 }
 
 # example output
@@ -152,8 +151,19 @@ print(bridge[[2]])
 # compute posterior model probabilities
 #-------------------------------------------------------------------------------
 
-post_prob(bridge[[1]], bridge[[2]], bridge[[3]],
+pp <- post_prob(bridge[[1]], bridge[[2]], bridge[[3]],
           model_names = c("k = 1", "k = 2", "k = 3"))
+pp
+
+op <- par(mar = c(6, 6, 3, 3))
+boxplot(pp, axes = FALSE,
+     ylim = c(0, 1), ylab = "",
+     xlab = "")
+axis(1, at = 1:3, labels = colnames(pp), cex.axis = 1.7)
+axis(2, cex.axis = 1.1)
+mtext("Posterior Model Probability", 2, cex = 1.5, line = 3.2)
+mtext("Number of Factors", 1, cex = 1.4, line = 3.2)
+par(op)
 
 }
 }
