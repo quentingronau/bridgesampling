@@ -87,7 +87,7 @@ stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n, r = 1/sqrt(2)),
 
 ## Computing the (Log) Marginal Likelihoods
 Computing the (log) marginal likelihoods via the `bridge_sampler` function is now easy: we only need to pass the `stanfit` objects which contains all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
-```{r}
+```{r, warning=FALSE}
 set.seed(12345)
 H0 <- bridge_sampler(stanfitH0, silent = TRUE)
 print(H0)

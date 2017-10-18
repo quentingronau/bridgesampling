@@ -54,7 +54,7 @@ stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n, r = 1/sqrt(2)),
                       iter = 20000, warmup = 1000, chains = 4, cores = 1,
                          control = list(adapt_delta = .99))
 
-## ------------------------------------------------------------------------
+## ---- warning=FALSE------------------------------------------------------
 set.seed(12345)
 H0 <- bridge_sampler(stanfitH0, silent = TRUE)
 print(H0)
