@@ -31,7 +31,7 @@ library(rstan)
 cores <- 4
 options(mc.cores = cores)
 
-data(ier)
+data("ier")
 
 #-------------------------------------------------------------------------------
 # plot data
