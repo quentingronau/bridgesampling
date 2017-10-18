@@ -2,8 +2,8 @@
 #' @title Log Marginal Likelihood via Bridge Sampling
 #' @name bridge_sampler
 #' @param samples an \code{mcmc.list} object, a fitted \code{stanfit} object, a \code{stanreg} object, an \code{rjags} object, a \code{runjags} object, or a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub})  with posterior samples.
-#' @param log_posterior function or name of function that takes a single row of \code{samples} and the \code{data} and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.
-#' @param ... additional arguments passed to \code{log_posterior} for the \code{matrix} method. Ignored for the \code{stanfit} and \code{stanreg} methods.
+#' @param log_posterior function or name of function that takes a parameter vector and the \code{data} as input and returns the log of the unnormalized posterior density (i.e., a scalar value). If the function name is passed, the function should exist in the \code{.GlobalEnv}. For special behavior if \code{cores > 1} see \code{Details}.
+#' @param ... additional arguments passed to \code{log_posterior}. Ignored for the \code{stanfit} and \code{stanreg} methods.
 #' @param data data object which is used in \code{log_posterior}.
 #' @param stanfit_model for the \code{stanfit} method, an additional object of class \code{"stanfit"} with the same model as \code{samples}, which will be used for evaluating the \code{log_posterior} (i.e., it does not need to contain any samples). The default is to use \code{samples}. In case \code{samples} was compiled in a different R session or on another computer with a different OS or setup, the \code{samples} model usually cannot be used for evaluation. In this case, one can compile the model on the current computer with \code{iter = 0} and pass it here (this usually needs to be done before \code{samples} is loaded).
 #' @param lb named vector with lower bounds for parameters.
@@ -19,7 +19,7 @@
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
 #' @param verbose Boolean. Should internal debug information be printed to console? Default is FALSE.
-#' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the column means of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (2017).
+#' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the sample mean vector of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (in press).
 #'
 #'   When \code{method = "warp3"}, the proposal distribution is a standard multivariate normal distribution and the posterior distribution is "warped" (Meng & Schilling, 2002) so that it has the same mean vector, covariance matrix, and skew as the samples. \code{method = "warp3"} takes approximately twice as long as \code{method = "normal"}.
 #'
@@ -39,9 +39,9 @@
 #'  \item \code{logml}: estimate of log marginal likelihood.
 #'  \item \code{niter}: number of iterations of the iterative updating scheme.
 #'  \item \code{method}: bridge sampling method that was used to obtain the estimate.
-#'  \item \code{q11}: log_posterior evaluations for posterior samples.
+#'  \item \code{q11}: log posterior evaluations for posterior samples.
 #'  \item \code{q12}: log proposal evaluations for posterior samples.
-#'  \item \code{q21}: log_posterior evaluations for samples from proposal.
+#'  \item \code{q21}: log posterior evaluations for samples from proposal.
 #'  \item \code{q22}: log proposal evaluations for samples from proposal.
 #' }
 #' if \code{repetitions > 1}, returns a list of class \code{"bridge_list"} with components:
@@ -56,17 +56,17 @@
 #'
 #' Also note that for testing, the number of posterior samples usually needs to be substantially larger than for estimation.
 #' @note To be able to use a \code{stanreg} object for \code{samples}, the user crucially needs to have specified the \code{diagnostic_file} when fitting the model in \pkg{rstanarm}.
-#' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich.
+#' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the \code{stanreg} method.
 #' @references
 #' Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (in press). A tutorial on bridge sampling. \emph{Journal of Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
 #'
-#'Gronau, Q. F., Wagenmakers, E.-J., Heck, D. W., & Matzke, D. (2017). \emph{A simple method for comparing complex models: Bayesian model comparison for hierarchical multinomial processing tree models using warp-III bridge sampling}. Manuscript submitted for publication. \url{https://psyarxiv.com/yxhfm}
+#'Gronau, Q. F., Wagenmakers, E.-J., Heck, D. W., & Matzke, D. (2017). \emph{A simple method for comparing complex models: Bayesian model comparison for hierarchical multinomial processing tree models using Warp-III bridge sampling}. Manuscript submitted for publication. \url{https://psyarxiv.com/yxhfm}
 #'
-#' Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. \emph{Statistica Sinica}, 6, 831-860. \url{http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm}
+#' Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants via a simple identity: A theoretical exploration. \emph{Statistica Sinica, 6}, 831-860. \url{http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm}
 #'
-#' Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Computational and Graphical Statistics}, 11(3), 552-586. \url{http://dx.doi.org/10.1198/106186002457}
+#' Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Computational and Graphical Statistics, 11(3)}, 552-586. \url{http://dx.doi.org/10.1198/106186002457}
 #'
-#'Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis}, 54, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
+#'Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis, 54}, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 #' @example examples/example.bridge_sampler.R
 #'
 #' @importFrom mvtnorm rmvnorm dmvnorm

@@ -10,7 +10,7 @@
 #'
 #' For the method for \code{"bridge_list"} objects, a matrix consisting of posterior model probabilities where each row sums to one and gives the model probabilities for one set of logmls. The (named) columns correspond to the models and the number of rows is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
 #' @author Quentin F. Gronau and Henrik Singmann
-#' @note For realistic examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
+#' @note For realistic examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}
 #' @example examples/example.post_prob.R
 #' @importFrom methods is
 post_prob <- function (x, ..., prior_prob = NULL, model_names = NULL) {

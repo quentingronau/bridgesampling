@@ -34,7 +34,7 @@ For the method for \code{"bridge_list"} objects, a matrix consisting of posterio
 Generic function that computes posterior model probabilities from marginal likelihoods.
 }
 \note{
-For realistic examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
+For realistic examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}
 }
 \examples{
 

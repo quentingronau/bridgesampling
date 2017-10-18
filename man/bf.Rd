@@ -59,10 +59,10 @@ Generic function that computes Bayes factor(s) from marginal likelihoods. \code{
 Computes the Bayes factor (Kass & Raftery, 1995) in favor of the model associated with \code{x1} over the model associated with \code{x2}.
 }
 \note{
-For examples, see \code{\link{bridge_sampler}} and the accompanying vignette: \cr \code{vignette("bridgesampling_example")}
+For examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}
 }
 \references{
-Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association}, 90(430), 773-795. \url{http://dx.doi.org/10.1080/01621459.1995.10476572}
+Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association, 90(430)}, 773-795. \url{http://dx.doi.org/10.1080/01621459.1995.10476572}
 }
 \author{
 Quentin F. Gronau
