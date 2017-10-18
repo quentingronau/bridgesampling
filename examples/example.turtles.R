@@ -8,7 +8,7 @@
 library(bridgesampling)
 library(rstan)
 
-data(turtles)
+data("turtles")
 
 #-------------------------------------------------------------------------------
 # plot data
