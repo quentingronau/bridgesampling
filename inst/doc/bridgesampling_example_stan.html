@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-10-18" />
+<meta name="date" content="2017-10-19" />
 
 <title>Hierarchical Normal Example (Stan)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Hierarchical Normal Example (Stan)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-10-18</em></h4>
+<h4 class="date"><em>2017-10-19</em></h4>
 
 
 <div id="TOC">
@@ -90,7 +90,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>In this example, we are interested in comparing the null model <span class="math inline">\(\mathcal{H}_0\)</span>, which posits that the group-level mean <span class="math inline">\(\mu = 0\)</span>, to the alternative model <span class="math inline">\(\mathcal{H}_1\)</span>, which allows <span class="math inline">\(\mu\)</span> to be different from zero. First, we generate some data from the null model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bridgesampling)
 
-### generate data <span class="al">###</span>
+### generate data ###
 <span class="kw">set.seed</span>(<span class="dv">12345</span>)
 
 mu &lt;-<span class="st"> </span><span class="dv">0</span>
@@ -101,7 +101,7 @@ n &lt;-<span class="st"> </span><span class="dv">20</span>
 theta &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n, mu, <span class="kw">sqrt</span>(tau2))
 y &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n, theta, <span class="kw">sqrt</span>(sigma2))</code></pre></div>
 <p>Next, we specify the prior parameters <span class="math inline">\(\mu_0\)</span>, <span class="math inline">\(\tau^2_0\)</span>, <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\beta\)</span>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### set prior parameters <span class="al">###</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### set prior parameters ###
 mu0 &lt;-<span class="st"> </span><span class="dv">0</span>
 tau20 &lt;-<span class="st"> </span><span class="dv">1</span>
 alpha &lt;-<span class="st"> </span><span class="dv">1</span>
@@ -176,18 +176,18 @@ stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmod
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H0</span>
 H0.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H0.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53477
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53227
 ## Estimate obtained in 5 iteration(s) via method &quot;normal&quot;.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
 H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
 <span class="kw">print</span>(H1.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79481
-## Estimate obtained in 5 iteration(s) via method &quot;normal&quot;.</code></pre>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79729
+## Estimate obtained in 4 iteration(s) via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
-<span class="kw">print</span>(<span class="kw">error_measures</span>(H0.bridge)<span class="op">$</span>percentage)</code></pre></div>
+<span class="kw">print</span>(<span class="kw">error_measures</span>(H0.bridge)$percentage)</code></pre></div>
 <pre><code>## [1] &quot;0.144%&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1.bridge)<span class="op">$</span>percentage)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1.bridge)$percentage)</code></pre></div>
 <pre><code>## [1] &quot;0.164%&quot;</code></pre>
 </div>
 <div id="bayesian-model-comparison" class="section level2">
@@ -196,19 +196,19 @@ H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(s
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BF01 &lt;-<span class="st"> </span><span class="kw">bf</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(BF01)</code></pre></div>
-<pre><code>## The estimated Bayes factor in favor of x1 over x2 is equal to: 1.29698</code></pre>
+<pre><code>## The estimated Bayes factor in favor of x1 over x2 is equal to: 1.30346</code></pre>
 <p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>post_prob</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (assuming equal prior model probabilities)</span>
 post1 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(post1)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
-## 0.5646459 0.4353541</code></pre>
+## 0.5658696 0.4341304</code></pre>
 <p>When the argument <code>prior_prob</code> is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the <code>prior_prob</code> argument to specify different prior model probabilities:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (using user-specified prior model probabilities)</span>
 post2 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
 <span class="kw">print</span>(post2)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
-## 0.6604957 0.3395043</code></pre>
+## 0.6616115 0.3383885</code></pre>
 </div>
 
 <script type="text/javascript">

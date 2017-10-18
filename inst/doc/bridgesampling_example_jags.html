@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-10-18" />
+<meta name="date" content="2017-10-19" />
 
 <title>Hierarchical Normal Example (JAGS)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Hierarchical Normal Example (JAGS)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-10-18</em></h4>
+<h4 class="date"><em>2017-10-19</em></h4>
 
 
 <div id="TOC">
@@ -91,7 +91,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>In this example, we are interested in comparing the null model <span class="math inline">\(\mathcal{H}_0\)</span>, which posits that the group-level mean <span class="math inline">\(\mu = 0\)</span>, to the alternative model <span class="math inline">\(\mathcal{H}_1\)</span>, which allows <span class="math inline">\(\mu\)</span> to be different from zero. First, we generate some data from the null model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bridgesampling)
 
-### generate data <span class="al">###</span>
+### generate data ###
 <span class="kw">set.seed</span>(<span class="dv">12345</span>)
 
 mu &lt;-<span class="st"> </span><span class="dv">0</span>
@@ -102,7 +102,7 @@ n &lt;-<span class="st"> </span><span class="dv">20</span>
 theta &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n, mu, <span class="kw">sqrt</span>(tau2))
 y &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n, theta, <span class="kw">sqrt</span>(sigma2))</code></pre></div>
 <p>Next, we specify the prior parameters <span class="math inline">\(\mu_0\)</span>, <span class="math inline">\(\tau^2_0\)</span>, <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\beta\)</span>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### set prior parameters <span class="al">###</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### set prior parameters ###
 mu0 &lt;-<span class="st"> </span><span class="dv">0</span>
 tau20 &lt;-<span class="st"> </span><span class="dv">1</span>
 alpha &lt;-<span class="st"> </span><span class="dv">1</span>
@@ -113,10 +113,10 @@ beta &lt;-<span class="st"> </span><span class="dv">1</span></code></pre></div>
 <p>Now we can fit the null and the alternative model in <code>JAGS</code> (note that it is necessary to install <code>JAGS</code> for this). One usually requires a larger number of posterior sample for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples (i.e., 50,000 post burn-in samples per chain) for this comparatively simple model.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(R2jags)
 
-### functions to get posterior samples <span class="al">###</span>
+### functions to get posterior samples ###
 
 <span class="co"># H0: mu = 0</span>
-getSamplesModelH0 &lt;-<span class="st"> </span><span class="cf">function</span>(data, <span class="dt">niter =</span> <span class="dv">52000</span>, <span class="dt">nburnin =</span> <span class="dv">2000</span>, <span class="dt">nchains =</span> <span class="dv">3</span>) {
+getSamplesModelH0 &lt;-<span class="st"> </span>function(data, <span class="dt">niter =</span> <span class="dv">52000</span>, <span class="dt">nburnin =</span> <span class="dv">2000</span>, <span class="dt">nchains =</span> <span class="dv">3</span>) {
   
   model &lt;-<span class="st"> &quot;</span>
 <span class="st">    model {</span>
@@ -138,7 +138,7 @@ getSamplesModelH0 &lt;-<span class="st"> </span><span class="cf">function</span>
 }
 
 <span class="co"># H1: mu != 0</span>
-getSamplesModelH1 &lt;-<span class="st"> </span><span class="cf">function</span>(data, <span class="dt">niter =</span> <span class="dv">52000</span>, <span class="dt">nburnin =</span> <span class="dv">2000</span>,
+getSamplesModelH1 &lt;-<span class="st"> </span>function(data, <span class="dt">niter =</span> <span class="dv">52000</span>, <span class="dt">nburnin =</span> <span class="dv">2000</span>,
                               <span class="dt">nchains =</span> <span class="dv">3</span>) {
   
   model &lt;-<span class="st"> &quot;</span>
@@ -161,7 +161,7 @@ getSamplesModelH1 &lt;-<span class="st"> </span><span class="cf">function</span>
   
 }
 
-### get posterior samples <span class="al">###</span>
+### get posterior samples ###
 
 <span class="co"># create data lists for JAGS</span>
 data_H0 &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> <span class="kw">length</span>(y), <span class="dt">alpha =</span> alpha, <span class="dt">beta =</span> beta, <span class="dt">sigma2 =</span> sigma2)
@@ -176,30 +176,30 @@ samples_H1 &lt;-<span class="st"> </span><span class="kw">getSamplesModelH1</spa
 <h2>Specifying the Unnormalized Log Posterior Function</h2>
 <p>The next step is to write the corresponding <code>log_posterior</code> (i.e., unnormalized posterior) function for both models. This function takes one draw from the joint posterior and the data object as input and returns the log of the unnormalized joint posterior density. When using MCMC software such as <code>JAGS</code> or <code>Stan</code>, specifying this function is relatively simple. As a rule of thumb, one only needs to look for all places where a “<code>~</code>” sign appears in the model code. The log of the densities on the right-hand side of these “<code>~</code>” symbols needs to be evaluated for the relevant quantities and then these log densities values are summed.</p>
 <p>For example, in the null model, there are three “<code>~</code>” signs. Starting at the data-level, we need to evaluate the log of the normal density with mean <span class="math inline">\(\theta_i\)</span> and variance <span class="math inline">\(\sigma^2\)</span> for all <span class="math inline">\(y_i\)</span> and then sum the resulting log density values. Next, we move one step up in the model and evaluate the log of the group-level density for all <span class="math inline">\(\theta_i\)</span>. Hence, we evaluate the log of the normal density for <span class="math inline">\(\theta_i\)</span> with mean <span class="math inline">\(\mu = 0\)</span> and variance <span class="math inline">\(\tau^2\)</span> (remember that <code>JAGS</code> parametrizes the normal distribution in terms of the precision <code>invTau2</code> = <span class="math inline">\(1/\tau^2\)</span>; in contrast, <code>R</code> parametrizes it in terms of the standard deviation) and sum the resulting log density values. The result of this summation is added to the result of the previous summation for the data-level normal distribution. Finally, we need to evaluate the log of the prior density for <code>invTau2</code>. This means that we compute the log density of the gamma distribution with parameters <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> for the sampled <code>invTau2</code> value and add the resulting log density value to the result of summing the data-level and group-level log densities. The unnormalized log posterior for the alternative model can be obtained in a similar fashion. The resulting functions look as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### functions for evaluating the unnormalized posteriors on log scale <span class="al">###</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### functions for evaluating the unnormalized posteriors on log scale ###
 
-log_posterior_H0 &lt;-<span class="st"> </span><span class="cf">function</span>(samples.row, data) {
+log_posterior_H0 &lt;-<span class="st"> </span>function(samples.row, data) {
   
   mu &lt;-<span class="st"> </span><span class="dv">0</span>
   invTau2 &lt;-<span class="st"> </span>samples.row[[ <span class="st">&quot;invTau2&quot;</span> ]]
-  theta &lt;-<span class="st"> </span>samples.row[ <span class="kw">paste0</span>(<span class="st">&quot;theta[&quot;</span>, <span class="kw">seq_along</span>(data<span class="op">$</span>y), <span class="st">&quot;]&quot;</span>) ]
+  theta &lt;-<span class="st"> </span>samples.row[ <span class="kw">paste0</span>(<span class="st">&quot;theta[&quot;</span>, <span class="kw">seq_along</span>(data$y), <span class="st">&quot;]&quot;</span>) ]
   
-  <span class="kw">sum</span>(<span class="kw">dnorm</span>(data<span class="op">$</span>y, theta, data<span class="op">$</span>sigma2, <span class="dt">log =</span> <span class="ot">TRUE</span>)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">sum</span>(<span class="kw">dnorm</span>(theta, mu, <span class="dv">1</span><span class="op">/</span><span class="kw">sqrt</span>(invTau2), <span class="dt">log =</span> <span class="ot">TRUE</span>)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">dgamma</span>(invTau2, data<span class="op">$</span>alpha, data<span class="op">$</span>beta, <span class="dt">log =</span> <span class="ot">TRUE</span>)
+  <span class="kw">sum</span>(<span class="kw">dnorm</span>(data$y, theta, data$sigma2, <span class="dt">log =</span> <span class="ot">TRUE</span>)) +
+<span class="st">    </span><span class="kw">sum</span>(<span class="kw">dnorm</span>(theta, mu, <span class="dv">1</span>/<span class="kw">sqrt</span>(invTau2), <span class="dt">log =</span> <span class="ot">TRUE</span>)) +
+<span class="st">    </span><span class="kw">dgamma</span>(invTau2, data$alpha, data$beta, <span class="dt">log =</span> <span class="ot">TRUE</span>)
   
 }
 
-log_posterior_H1 &lt;-<span class="st"> </span><span class="cf">function</span>(samples.row, data) {
+log_posterior_H1 &lt;-<span class="st"> </span>function(samples.row, data) {
   
   mu &lt;-<span class="st"> </span>samples.row[[ <span class="st">&quot;mu&quot;</span> ]]
   invTau2 &lt;-<span class="st"> </span>samples.row[[ <span class="st">&quot;invTau2&quot;</span> ]]
-  theta &lt;-<span class="st"> </span>samples.row[ <span class="kw">paste0</span>(<span class="st">&quot;theta[&quot;</span>, <span class="kw">seq_along</span>(data<span class="op">$</span>y), <span class="st">&quot;]&quot;</span>) ]
+  theta &lt;-<span class="st"> </span>samples.row[ <span class="kw">paste0</span>(<span class="st">&quot;theta[&quot;</span>, <span class="kw">seq_along</span>(data$y), <span class="st">&quot;]&quot;</span>) ]
   
-  <span class="kw">sum</span>(<span class="kw">dnorm</span>(data<span class="op">$</span>y, theta, data<span class="op">$</span>sigma2, <span class="dt">log =</span> <span class="ot">TRUE</span>)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">sum</span>(<span class="kw">dnorm</span>(theta, mu, <span class="dv">1</span><span class="op">/</span><span class="kw">sqrt</span>(invTau2), <span class="dt">log =</span> <span class="ot">TRUE</span>)) <span class="op">+</span>
-<span class="st">    </span><span class="kw">dnorm</span>(mu, data<span class="op">$</span>mu0, <span class="kw">sqrt</span>(data<span class="op">$</span>tau20), <span class="dt">log =</span> <span class="ot">TRUE</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw">dgamma</span>(invTau2, data<span class="op">$</span>alpha, data<span class="op">$</span>beta, <span class="dt">log =</span> <span class="ot">TRUE</span>)
+  <span class="kw">sum</span>(<span class="kw">dnorm</span>(data$y, theta, data$sigma2, <span class="dt">log =</span> <span class="ot">TRUE</span>)) +
+<span class="st">    </span><span class="kw">sum</span>(<span class="kw">dnorm</span>(theta, mu, <span class="dv">1</span>/<span class="kw">sqrt</span>(invTau2), <span class="dt">log =</span> <span class="ot">TRUE</span>)) +
+<span class="st">    </span><span class="kw">dnorm</span>(mu, data$mu0, <span class="kw">sqrt</span>(data$tau20), <span class="dt">log =</span> <span class="ot">TRUE</span>) +
+<span class="st">    </span><span class="kw">dgamma</span>(invTau2, data$alpha, data$beta, <span class="dt">log =</span> <span class="ot">TRUE</span>)
   
 }</code></pre></div>
 </div>
@@ -207,17 +207,17 @@ log_posterior_H1 &lt;-<span class="st"> </span><span class="cf">function</span>(
 <h2>Specifying the Parameter Bounds</h2>
 <p>The final step before computing the log marginal likelihoods is to specify the parameter bounds. In this example, for both models, all parameters can range from <span class="math inline">\(-\infty\)</span> to <span class="math inline">\(\infty\)</span> except the precision <code>invTau2</code> which has a lower bound of zero. These boundary vectors need to be named and the names need to match the order of the parameters.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># specify parameter bounds H0</span>
-cn &lt;-<span class="st"> </span><span class="kw">colnames</span>(samples_H0<span class="op">$</span>BUGSoutput<span class="op">$</span>sims.matrix)
-cn &lt;-<span class="st"> </span>cn[cn <span class="op">!=</span><span class="st"> &quot;deviance&quot;</span>]
-lb_H0 &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="op">-</span><span class="ot">Inf</span>, <span class="kw">length</span>(cn))
+cn &lt;-<span class="st"> </span><span class="kw">colnames</span>(samples_H0$BUGSoutput$sims.matrix)
+cn &lt;-<span class="st"> </span>cn[cn !=<span class="st"> &quot;deviance&quot;</span>]
+lb_H0 &lt;-<span class="st"> </span><span class="kw">rep</span>(-<span class="ot">Inf</span>, <span class="kw">length</span>(cn))
 ub_H0 &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">Inf</span>, <span class="kw">length</span>(cn))
 <span class="kw">names</span>(lb_H0) &lt;-<span class="st"> </span><span class="kw">names</span>(ub_H0) &lt;-<span class="st"> </span>cn
 lb_H0[[ <span class="st">&quot;invTau2&quot;</span> ]] &lt;-<span class="st"> </span><span class="dv">0</span>
 
 <span class="co"># specify parameter bounds H1</span>
-cn &lt;-<span class="st"> </span><span class="kw">colnames</span>(samples_H1<span class="op">$</span>BUGSoutput<span class="op">$</span>sims.matrix)
-cn &lt;-<span class="st"> </span>cn[cn <span class="op">!=</span><span class="st"> &quot;deviance&quot;</span>]
-lb_H1 &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="op">-</span><span class="ot">Inf</span>, <span class="kw">length</span>(cn))
+cn &lt;-<span class="st"> </span><span class="kw">colnames</span>(samples_H1$BUGSoutput$sims.matrix)
+cn &lt;-<span class="st"> </span>cn[cn !=<span class="st"> &quot;deviance&quot;</span>]
+lb_H1 &lt;-<span class="st"> </span><span class="kw">rep</span>(-<span class="ot">Inf</span>, <span class="kw">length</span>(cn))
 ub_H1 &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">Inf</span>, <span class="kw">length</span>(cn))
 <span class="kw">names</span>(lb_H1) &lt;-<span class="st"> </span><span class="kw">names</span>(ub_H1) &lt;-<span class="st"> </span>cn
 lb_H1[[ <span class="st">&quot;invTau2&quot;</span> ]] &lt;-<span class="st"> </span><span class="dv">0</span></code></pre></div>
@@ -242,9 +242,9 @@ H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<
 ## Estimate obtained in 5 iteration(s) via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
-<span class="kw">print</span>(<span class="kw">error_measures</span>(H0.bridge)<span class="op">$</span>percentage)</code></pre></div>
+<span class="kw">print</span>(<span class="kw">error_measures</span>(H0.bridge)$percentage)</code></pre></div>
 <pre><code>## [1] &quot;0.144%&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1.bridge)<span class="op">$</span>percentage)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1.bridge)$percentage)</code></pre></div>
 <pre><code>## [1] &quot;0.162%&quot;</code></pre>
 </div>
 <div id="bayesian-model-comparison" class="section level2">
