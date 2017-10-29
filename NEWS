@@ -1,4 +1,20 @@
                        ***********************************
+                       ** bridgesampling VERSION 0.4-x **
+                       ***********************************
+                    
+                    Changes in bridgesampling Version 0.4-x
+                    Released XXX 2017
+
+  Significant User Visible Changes and New Features
+
+  o 
+  
+  Bugfixes
+  
+  o Retroactively updated the NEWS file.
+  
+  
+                       ***********************************
                        ** bridgesampling VERSION 0.3-x **
                        ***********************************
                     
@@ -15,6 +31,12 @@
   o Added stanreg method to bridge_sampler() which allows to pass objects from 
     rstanarm. Note that this method requires to specify the diagnostic_file 
     option, see examples. Thanks to Ben Goodrich for the pull request.
+    
+  o Added new vignette introducing the package: bridgesampling: An R Package 
+    for Estimating Normalizing Constants 
+    
+  o Added two new data sets plus code used in the new vignette, see ?ier and 
+    ?turtles
     
   o Added bayes_factor() as alias for bf(), as bf() is an existing function in 
     package brms. 
