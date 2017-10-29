@@ -9,6 +9,8 @@
 
   o More informative error messages for methods due to checking of input values:
     - bridge_sampler() methods now check lb and ub.
+    - bf() methods check class of x2.
+    - post_prob() check if only one object of appropriate class is passed.
   
   Bugfixes
   

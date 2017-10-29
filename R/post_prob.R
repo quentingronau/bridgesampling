@@ -22,11 +22,11 @@ post_prob <- function (x, ..., prior_prob = NULL, model_names = NULL) {
 post_prob.bridge <- function(x, ..., prior_prob = NULL, model_names = NULL) {
   dots <- list(...)
   mc <- match.call()
-  modb <- (as.logical(vapply(dots, is, NA, "bridge")) |
-             as.logical(vapply(dots, is, NA, "bridge_list"))
-           )
+  modb <- vapply(dots, inherits, NA, what = c("bridge", "bridge_list"))
   if (is.null(model_names))
     model_names <- c(deparse(mc[["x"]]), vapply(which(modb), function(x) deparse(mc[[x+2]]), ""))
+  if (sum(modb) == 0)
+    stop("Only one object of class 'bridge' or 'bridge_list' passed.", call. = FALSE)
   if (sum(modb) != length(dots))
     warning("Objects not of class 'bridge' or 'bridge_list' are ignored.", call. = FALSE)
 
@@ -41,12 +41,11 @@ post_prob.bridge <- function(x, ..., prior_prob = NULL, model_names = NULL) {
 post_prob.bridge_list <- function(x, ..., prior_prob = NULL, model_names = NULL) {
   dots <- list(...)
   mc <- match.call()
-  modb <- (as.logical(vapply(dots, is, NA, "bridge")) |
-             as.logical(vapply(dots, is, NA, "bridge_list"))
-           )
-  #modl <- as.logical(vapply(dots, is, NA, "bridge_list"))
+  modb <- vapply(dots, inherits, NA, what = c("bridge", "bridge_list"))
   if (is.null(model_names))
     model_names <- c(deparse(mc[["x"]]), vapply(which(modb), function(x) deparse(mc[[x+2]]), ""))
+  if (sum(modb) == 0)
+    stop("Only one object of class 'bridge' or 'bridge_list' passed.", call. = FALSE)
   if (sum(modb) != length(dots))
     warning("Objects not of class 'bridge' or 'bridge_list' are ignored.", call. = FALSE)
 

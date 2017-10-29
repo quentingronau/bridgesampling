@@ -28,5 +28,9 @@ test_that("post_prob works with lists and with NAs.", {
 
   expect_is(post_prob(H1L, H0L), "matrix")
   expect_warning(post_prob(H1L, H0L, H0), "recycled")
+  expect_warning(post_prob(H1L, H0L, 4), "ignored")
+  expect_warning(post_prob(H0, H0L, 4), "ignored")
   expect_warning(post_prob(H1L, H0L, bridge_o), "NA")
+  expect_error(post_prob(H1L, 4, 5, 6), "one object")
+  expect_error(post_prob(H0, 4, 5, 6), "one object")
 })

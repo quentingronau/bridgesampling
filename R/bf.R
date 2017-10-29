@@ -61,6 +61,8 @@ bayes_factor.default <- function(x1, x2, log = FALSE, ...) {
 bf.bridge <- function(x1, x2, log = FALSE, ...) {
   #name1 <- as.character(match.call()[[2]])
   #name2 <- as.character(match.call()[[3]])
+  if (!inherits(x2, c("bridge", "bridge_list")))
+    stop("x2 needs to be of class 'bridge' or 'bridge_list'.", call. = FALSE)
   bf <- .bf_calc(logml(x1), logml(x2), log = log)
   out <- list(bf = bf, log = log)
   class(out) <- "bf_bridge"
@@ -71,6 +73,8 @@ bf.bridge <- function(x1, x2, log = FALSE, ...) {
 #' @rdname bf
 #' @export
 bf.bridge_list <- function(x1, x2, log = FALSE, ...) {
+  if (!inherits(x2, c("bridge", "bridge_list")))
+    stop("x2 needs to be of class 'bridge' or 'bridge_list'.", call. = FALSE)
   logml1 <- x1$logml
   logml2 <- x2$logml
   median1 <- median(logml1, na.rm = TRUE)
