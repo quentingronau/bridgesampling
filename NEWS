@@ -7,11 +7,14 @@
 
   Significant User Visible Changes and New Features
 
-  o 
+  o More informative error messages for methods due to checking of input values:
+    - bridge_sampler() methods now check lb and ub.
   
   Bugfixes
   
   o Retroactively updated the NEWS file.
+  
+  o 
   
   
                        ***********************************

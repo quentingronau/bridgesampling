@@ -202,6 +202,28 @@ test_that("bridge sampler matches analytical value", {
     expect_equal(bridge_normal_rm$logml, expected = rep(exact_logml, length(bridge_normal_rm$logml)), tolerance = 0.01)
     expect_equal(bridge_warp3_rm$logml, expected = rep(exact_logml, length(bridge_warp3_rm$logml)), tolerance = 0.01)
 
+    ### check that wrong lb and ub produce errors:
+    ub_H0 <- ub_H1[-2]
+    lb_H0 <- lb_H1[-1]
+    expect_error(bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
+                                      data = data_H1, lb = lb_H1, ub = ub_H0),
+                 "ub does not contain all parameters")
+    expect_error(bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
+                                      data = data_H1, lb = lb_H0, ub = ub_H1),
+                 "lb does not contain all parameters")
+    expect_error(bridge_sampler(samples = samples1, log_posterior = log_posterior_H1,
+                                    data = data_H1, lb = lb_H1, ub = ub_H0),
+                 "ub does not contain all parameters")
+    expect_error(bridge_sampler(samples = samples1, log_posterior = log_posterior_H1,
+                                    data = data_H1, lb = lb_H0, ub = ub_H1),
+                 "lb does not contain all parameters")
+    expect_error(bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
+                                    data = data_H1, lb = lb_H0, ub = ub_H1),
+                 "lb does not contain all parameters")
+    expect_error(bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
+                                    data = data_H1, lb = lb_H1, ub = ub_H0),
+                 "ub does not contain all parameters")
+
   }
 
 })
