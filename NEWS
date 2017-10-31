@@ -1,7 +1,7 @@
                        ***********************************
                        ** bridgesampling VERSION 0.4-x **
                        ***********************************
-                    
+
                     Changes in bridgesampling Version 0.4-x
                     Released XXX 2017
 
@@ -10,93 +10,93 @@
   o More informative error messages for methods due to checking of input values:
     - bridge_sampler() methods now check lb and ub.
     - bf() methods check class of x2.
-    - post_prob() check if only one object of appropriate class is passed.
-  
+    - post_prob() checks if only one object of appropriate class is passed.
+
   Bugfixes
-  
+
   o Retroactively updated the NEWS file.
-  
-  o 
-  
-  
+
+  o
+
+
                        ***********************************
                        ** bridgesampling VERSION 0.3-x **
                        ***********************************
-                    
+
                     Changes in bridgesampling Version 0.3-x
                     Released October 2017
 
   Significant User Visible Changes and New Features
 
-  o Added a variety of new methods for bridge_sampler() that automatically 
-    extract the posterior samples, but also require a log_posterior function. 
-    Specifically, bridge_sampler() now has methods of this kind for the 
+  o Added a variety of new methods for bridge_sampler() that automatically
+    extract the posterior samples, but also require a log_posterior function.
+    Specifically, bridge_sampler() now has methods of this kind for the
     following objects: matrix, mcmc.list, rjags, and runjags.
-    
-  o Added stanreg method to bridge_sampler() which allows to pass objects from 
-    rstanarm. Note that this method requires to specify the diagnostic_file 
+
+  o Added stanreg method to bridge_sampler() which allows to pass objects from
+    rstanarm. Note that this method requires to specify the diagnostic_file
     option, see examples. Thanks to Ben Goodrich for the pull request.
-    
-  o Added new vignette introducing the package: bridgesampling: An R Package 
-    for Estimating Normalizing Constants 
-    
-  o Added two new data sets plus code used in the new vignette, see ?ier and 
+
+  o Added new vignette introducing the package: bridgesampling: An R Package
+    for Estimating Normalizing Constants
+
+  o Added two new data sets plus code used in the new vignette, see ?ier and
     ?turtles
-    
-  o Added bayes_factor() as alias for bf(), as bf() is an existing function in 
-    package brms. 
-    
-  o Added use_neff argument to bridge_sampler() which allows to determine 
+
+  o Added bayes_factor() as alias for bf(), as bf() is an existing function in
+    package brms.
+
+  o Added use_neff argument to bridge_sampler() which allows to determine
     whether the effective sample size or the actual sample size is used for
     bridge sampling.
-  
+
   Bugfixes
 
-  o bridge_sampler() for stan objects on windows should not fail anymore if 
+  o bridge_sampler() for stan objects on windows should not fail anymore if
     cores > 1. Instead, cores will be set to 1 (with warnings).
 
 
                        ***********************************
                        ** bridgesampling VERSION 0.2-x **
                        ***********************************
-                    
+
                     Changes in bridgesampling Version 0.2-x
                     Released June 2017
 
   Significant User Visible Changes and New Features
 
-  o Added stan_bridge_sampler(), which allows one to obtain the marginal 
-    likelihood directly from a fitted stanfit object that contains posterior 
-    samples. Note that it may be necessary to compile a new stanfit object 
-    without samples if the one with samples was compiled in a different 
+  o Added stan_bridge_sampler(), which allows one to obtain the marginal
+    likelihood directly from a fitted stanfit object that contains posterior
+    samples. Note that it may be necessary to compile a new stanfit object
+    without samples if the one with samples was compiled in a different
     session/pc. See new vignettes for examples.
-    
+
   o Added repetitions argument to bridge sampler functions which allows to
     compute independent bridge sample estimates (based on the same posterior
-    samples). bridge_sampler() now returns object of class "bridge" for 
+    samples). bridge_sampler() now returns object of class "bridge" for
     calculations with repetitions = 1, but an object of class "bridge_list" if
-    repetitions > 1, the latter contains the full list of estimates (but no q 
-    vectors). 
-  
+    repetitions > 1, the latter contains the full list of estimates (but no q
+    vectors).
+
   o Renamed compute_post_prob() to post_prob(), which is now a generic function
-    with methods for bridge objects. The default method allows just logml 
-    values. For "bridge_list" objects (i.e., with repetitions > 1) a matrix of 
-    posterior probabilities with rows for each repetition is returned. 
-  
+    with methods for bridge objects. The default method allows just logml
+    values. For "bridge_list" objects (i.e., with repetitions > 1) a matrix of
+    posterior probabilities with rows for each repetition is returned.
+
   o added new generic function logml() which returns the log marginal likelihood
     as a scalar value.
-    
-  o Multicore computations (i.e., cors > 1) on Unix-like systen (e.g., Mac OS, 
+
+  o Multicore computations (i.e., cors > 1) on Unix-like systen (e.g., Mac OS,
     Linux) are now performed with forking via parallel::mcapply().
-  
+
   Bugfixes
 
   o compute_post_prob() now works even when exp(logml) initially returns Inf
     (solution works via brobdingnag).
-    
+
   o Bridge sampler more robust due to various small improvements and produces
-    more informative error messages should it fail. 
-    
-  o If log_prob() returns NA, these values are replaced with -Inf on the log 
+    more informative error messages should it fail.
+
+  o If log_prob() returns NA, these values are replaced with -Inf on the log
     scale (which assumes a likelihood of 0). With warning.
 
