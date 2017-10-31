@@ -22,6 +22,7 @@ Computes error measures for estimated marginal likelihood.
 }
 \details{
 Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
+Only applicable in case the object of class \code{"bridge"} has been obtained with \code{method = "normal"} and \code{repetitions = 1}.
 }
 \note{
 For examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}

@@ -3,6 +3,7 @@
 #' @title Error Measures for Estimated Marginal Likelihood
 #' @param bridge_object an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
 #' @details Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
+#' Only applicable in case the object of class \code{"bridge"} has been obtained with \code{method = "normal"} and \code{repetitions = 1}.
 #' @return a list with the objects:
 #' \itemize{
 #'  \item \code{re2}: approximate relative mean-squared error for marginal likelihood estimate.
