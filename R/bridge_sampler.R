@@ -447,23 +447,24 @@ print.bridge_list <- function(x, na.rm = TRUE, ...) {
 
 #' @method summary bridge
 #' @export
-summary.bridge <- function(x, na.rm = TRUE, ...) {
+summary.bridge <- function(object, na.rm = TRUE, ...) {
 
-  stopifnot(x$method %in% c("normal", "warp3"))
+  stopifnot(object$method %in% c("normal", "warp3"))
 
-  if (x$method == "normal") {
+  if (object$method == "normal") {
 
-    em <- error_measures(x)
-    out <- data.frame("Logml_Estimate" = x$logml,
+    em <- error_measures(object)
+    out <- data.frame("Logml_Estimate" = object$logml,
                       "Relative_Mean_Squared_Error" = em$re2,
                       "Coefficient_of_Variation" = em$cv,
                       "Percentage_Error" = em$percentage,
-                      "Method" = x$method,
+                      "Method" = object$method,
                       "Repetitions" = 1)
 
-  } else if (x$method == "warp3") {
+  } else if (object$method == "warp3") {
 
-    out <- data.frame("Logml_Estimate" = x$logml, "Method" = x$method,
+    out <- data.frame("Logml_Estimate" = object$logml,
+                      "Method" = object$method,
                       "Repetitions" = 1)
 
   }
@@ -475,15 +476,15 @@ summary.bridge <- function(x, na.rm = TRUE, ...) {
 
 #' @method summary bridge_list
 #' @export
-summary.bridge_list <- function(x, na.rm = TRUE, ...) {
+summary.bridge_list <- function(object, na.rm = TRUE, ...) {
 
-  stopifnot(x$method %in% c("normal", "warp3") && x$repetitions > 1)
+  stopifnot(object$method %in% c("normal", "warp3") && object$repetitions > 1)
 
-  out <- data.frame("Logml_Estimate" = median(x$logml, na.rm = na.rm),
-                    "Min" = min(x$logml, na.rm = na.rm),
-                    "Max" = max(x$logml, na.rm = na.rm),
-                    "Interquartile_Range" = stats::IQR(x$logml, na.rm = na.rm),
-                    "Method" = x$method, "Repetitions" = x$repetitions)
+  out <- data.frame("Logml_Estimate" = median(object$logml, na.rm = na.rm),
+                    "Min" = min(object$logml, na.rm = na.rm),
+                    "Maobject" = max(object$logml, na.rm = na.rm),
+                    "Interquartile_Range" = stats::IQR(object$logml, na.rm = na.rm),
+                    "Method" = object$method, "Repetitions" = object$repetitions)
 
   class(out) <- "summary.bridge_list"
   return(out)
