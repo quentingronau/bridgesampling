@@ -469,7 +469,7 @@ summary.bridge <- function(object, na.rm = TRUE, ...) {
 
   }
 
-  class(out) <- "summary.bridge"
+  class(out) <- c("summary.bridge", "data.frame")
   return(out)
 
 }
@@ -482,11 +482,11 @@ summary.bridge_list <- function(object, na.rm = TRUE, ...) {
 
   out <- data.frame("Logml_Estimate" = median(object$logml, na.rm = na.rm),
                     "Min" = min(object$logml, na.rm = na.rm),
-                    "Maobject" = max(object$logml, na.rm = na.rm),
+                    "Max" = max(object$logml, na.rm = na.rm),
                     "Interquartile_Range" = stats::IQR(object$logml, na.rm = na.rm),
                     "Method" = object$method, "Repetitions" = object$repetitions)
 
-  class(out) <- "summary.bridge_list"
+  class(out) <- c("summary.bridge_list", "data.frame")
   return(out)
 
 }
@@ -499,24 +499,26 @@ print.summary.bridge <- function(x, ...) {
 
   if (x[["Method"]] == "normal") {
 
-    cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
-               x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
-               x[["Logml_Estimate"]],
-               '\n\nError Measures:\n\n Relative Mean-Squared Error: ',
-               x[["Relative_Mean_Squared_Error"]], '\n Coefficient of Variation: ',
-               x[["Coefficient_of_Variation"]], '\n Percentage Error: ',
-               x[["Percentage_Error"]],
-               '\n\nNote:\nAll error measures are approximate.\n\n'))
+    cat('\nBridge sampling log marginal likelihood estimate \n(method = "',
+        as.character(x[["Method"]]),
+        '", repetitions = ', x[["Repetitions"]], '):\n\n ',
+          x[["Logml_Estimate"]],
+        '\n\nError Measures:\n\n Relative Mean-Squared Error: ',
+          x[["Relative_Mean_Squared_Error"]],
+        '\n Coefficient of Variation: ', x[["Coefficient_of_Variation"]],
+        '\n Percentage Error: ', x[["Percentage_Error"]],
+        '\n\nNote:\nAll error measures are approximate.\n\n', sep = "")
 
   } else if (x[["Method"]] == "warp3") {
 
-    cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
-               x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
-               x[["Logml_Estimate"]],
-               '\n\nNote:\nNo error measures are available for method = "warp3"',
-               '\nwith repetitions = 1.',
-               '\nWe recommend to run the warp3 procedure multiple times to',
-               '\nassess the uncertainty of the estimate.\n\n'))
+    cat('\nBridge sampling log marginal likelihood estimate \n(method = "',
+        as.character(x[["Method"]]),
+        '", repetitions = ', x[["Repetitions"]], '):\n\n ',
+        x[["Logml_Estimate"]],
+        '\n\nNote:\nNo error measures are available for method = "warp3"',
+        '\nwith repetitions = 1.',
+        '\nWe recommend to run the warp3 procedure multiple times to',
+        '\nassess the uncertainty of the estimate.\n\n', sep = "")
 
   }
 
@@ -525,14 +527,14 @@ print.summary.bridge <- function(x, ...) {
 #' @method print summary.bridge_list
 #' @export
 print.summary.bridge_list <- function(x, ...) {
-
-  cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
-             x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
-             x[["Logml_Estimate"]], '\n\nError Measures:\n\n Min: ',
-             x[["Min"]], '\n Max: ', x[["Max"]], '\n Interquartile Range: ',
-             x[["Interquartile_Range"]],
-             '\n\nNote:\nAll error measures are based on ',
-             x[["Repetitions"]], ' estimates.\n\n'))
+  cat('\nBridge sampling log marginal likelihood estimate \n(method = "',
+      as.character(x[["Method"]]), '", repetitions = ', x[["Repetitions"]],
+      '):\n\n ', x[["Logml_Estimate"]],
+      '\n\nError Measures:\n\n Min: ', x[["Min"]],
+      '\n Max: ', x[["Max"]],
+      '\n Interquartile Range: ', x[["Interquartile_Range"]],
+      '\n\nNote:\nAll error measures are based on ', x[["Repetitions"]],
+      ' estimates.\n\n', sep = "")
 
 }
 
