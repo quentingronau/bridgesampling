@@ -18,10 +18,13 @@
 #' @importFrom coda spectrum0.ar
 error_measures <- function(bridge_object) {
 
-  if (bridge_object$method == "warp3")
-    stop("error_measures not implemented for warp3 method. We recommend to run
-         the warp3 procedure multiple times to assess the uncertainty of the
-         estimate.")
+  if (bridge_object$method == "warp3") {
+    stop(paste0("error_measures not implemented for warp3 method.",
+                "\n  We recommend to run the warp3 procedure multiple times",
+                "\n  to assess the uncertainty of the estimate."))
+  } else if (inherits(bridge_object, "bridge_list")) {
+    stop("error_measures not available for bridge_list objects.")
+  }
 
   e <- as.brob( exp(1) )
 

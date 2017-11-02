@@ -421,6 +421,8 @@ bridge_sampler.runjags <- function(samples = NULL, log_posterior = NULL, ..., da
 
 ######## Methods for bridge objects:
 
+# print methods
+
 #' @method print bridge
 #' @export
 print.bridge <- function(x, ...) {
@@ -434,9 +436,102 @@ print.bridge <- function(x, ...) {
 #' @export
 print.bridge_list <- function(x, na.rm = TRUE, ...) {
 
-  cat("Median of ", x$repetitions,  " bridge sampling estimates of the log marginal likelihood: ",
-      round(median(x$logml, na.rm = na.rm), 5), "\nRange of estimates: ", round(range(x$logml, na.rm=na.rm)[1], 5), " to ",
+  cat("Median of ", x$repetitions,  " bridge sampling estimates\nof the log marginal likelihood: ",
+      round(median(x$logml, na.rm = na.rm), 5), "\nRange of estimates: ", round(range(x$logml, na.rm = na.rm)[1], 5), " to ",
       round(range(x$logml, na.rm = na.rm)[2], 5),
       "\nInterquartile range: ", round(stats::IQR(x$logml, na.rm = na.rm), 5), "\nMethod: ", x$method, sep = "")
   if (any(is.na(x$logml))) warning(sum(is.na(x$logml))," bridge sampling estimate(s) are NAs.", call. = FALSE)
 }
+
+# summary methods
+
+#' @method summary bridge
+#' @export
+summary.bridge <- function(x, na.rm = TRUE, ...) {
+
+  stopifnot(x$method %in% c("normal", "warp3"))
+
+  if (x$method == "normal") {
+
+    em <- error_measures(x)
+    out <- data.frame("Logml_Estimate" = x$logml,
+                      "Relative_Mean_Squared_Error" = em$re2,
+                      "Coefficient_of_Variation" = em$cv,
+                      "Percentage_Error" = em$percentage,
+                      "Method" = x$method,
+                      "Repetitions" = 1)
+
+  } else if (x$method == "warp3") {
+
+    out <- data.frame("Logml_Estimate" = x$logml, "Method" = x$method,
+                      "Repetitions" = 1)
+
+  }
+
+  class(out) <- "summary.bridge"
+  return(out)
+
+}
+
+#' @method summary bridge_list
+#' @export
+summary.bridge_list <- function(x, na.rm = TRUE, ...) {
+
+  stopifnot(x$method %in% c("normal", "warp3") && x$repetitions > 1)
+
+  out <- data.frame("Logml_Estimate" = median(x$logml, na.rm = na.rm),
+                    "Min" = min(x$logml, na.rm = na.rm),
+                    "Max" = max(x$logml, na.rm = na.rm),
+                    "Interquartile_Range" = stats::IQR(x$logml, na.rm = na.rm),
+                    "Method" = x$method, "Repetitions" = x$repetitions)
+
+  class(out) <- "summary.bridge_list"
+  return(out)
+
+}
+
+# print.summary methods
+
+#' @method print.summary bridge
+#' @export
+print.summary.bridge <- function(x, ...) {
+
+  if (x[["Method"]] == "normal") {
+
+    cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
+               x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
+               x[["Logml_Estimate"]],
+               '\n\nUncertainty Measures:\n\n Relative Mean-Squared Error: ',
+               x[["Relative_Mean_Squared_Error"]], '\n Coefficient of Variation: ',
+               x[["Coefficient_of_Variation"]], '\n Percentage Error: ',
+               x[["Percentage_Error"]],
+               '\n\nNote:\nAll uncertainty measures are approximate.\n\n'))
+
+  } else if (x[["Method"]] == "warp3") {
+
+    cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
+               x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
+               x[["Logml_Estimate"]],
+               '\n\nNote:\nNo uncertainty measures are available for method = "warp3"',
+               '\nwith repetitions = 1.',
+               '\nWe recommend to run the warp3 procedure multiple times to',
+               '\nassess the uncertainty of the estimate.\n\n'))
+
+  }
+
+}
+
+#' @method print.summary bridge
+#' @export
+print.summary.bridge_list <- function(x, ...) {
+
+  cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
+             x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
+             x[["Logml_Estimate"]], '\n\nUncertainty Measures:\n\n Min: ',
+             x[["Min"]], '\n Max: ', x[["Max"]], '\n Interquartile Range: ',
+             x[["Interquartile_Range"]],
+             '\n\nNote:\nAll uncertainty measures are based on ',
+             x[["Repetitions"]], ' estimates.\n\n'))
+
+}
+
