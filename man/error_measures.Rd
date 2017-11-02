@@ -2,27 +2,44 @@
 % Please edit documentation in R/error_measures.R
 \name{error_measures}
 \alias{error_measures}
+\alias{error_measures.bridge}
+\alias{error_measures.bridge_list}
 \title{Error Measures for Estimated Marginal Likelihood}
 \usage{
-error_measures(bridge_object)
+error_measures(bridge_object, ...)
+
+\method{error_measures}{bridge}(bridge_object, ...)
+
+\method{error_measures}{bridge_list}(bridge_object, na.rm = TRUE, ...)
 }
 \arguments{
-\item{bridge_object}{an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.}
+\item{bridge_object}{an object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}.}
+
+\item{...}{additional arguments (currently ignored).}
+
+\item{na.rm}{a logical indicating whether missing values in logml estimates should be removed.  Ignored for the \code{bridge} method.}
 }
 \value{
-a list with the objects:
+If \code{bridge_object} is of class \code{"bridge"} and has been obtained with \code{method = "normal"} and \code{repetitions = 1}, returns a list with components:
 \itemize{
  \item \code{re2}: approximate relative mean-squared error for marginal likelihood estimate.
- \item \code{cv}: coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased).
- \item \code{percentage}: percentage error of marginal likelihood estimate.
+ \item \code{cv}: approximate coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased).
+ \item \code{percentage}: approximate percentage error of marginal likelihood estimate.
+}
+If \code{bridge_object} is of class \code{"bridge_list"}, returns a list with components:
+\itemize{
+ \item \code{min}: minimum of the log marginal likelihood estimates.
+ \item \code{max}: maximum of the log marginal likelihood estimates.
+ \item \code{IQR}: interquartile range of the log marginal likelihood estimates.
 }
 }
 \description{
 Computes error measures for estimated marginal likelihood.
 }
 \details{
-Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
-Only applicable in case the object of class \code{"bridge"} has been obtained with \code{method = "normal"} and \code{repetitions = 1}.
+Computes error measures for marginal likelihood bridge sampling estimates. The approximate errors for a \code{bridge_object} of class \code{"bridge"} that has been obtained with \code{method = "normal"} and \code{repetitions = 1} are based on Fruehwirth-Schnatter (2004).
+Not applicable in case the object of class \code{"bridge"} has been obtained with \code{method = "warp3"} and \code{repetitions = 1}.
+To assess the uncertainty of the estimate in this case, it is recommended to run the \code{"warp3"} procedure multiple times.
 }
 \note{
 For examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}

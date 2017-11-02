@@ -1,29 +1,44 @@
 #' Computes error measures for estimated marginal likelihood.
 #' @export
 #' @title Error Measures for Estimated Marginal Likelihood
-#' @param bridge_object an object of class \code{"bridge"} as returned from \code{\link{bridge_sampler}}.
-#' @details Computes approximate error measures for marginal likelihood bridge sampling estimates. Based on Fruehwirth-Schnatter (2004).
-#' Only applicable in case the object of class \code{"bridge"} has been obtained with \code{method = "normal"} and \code{repetitions = 1}.
-#' @return a list with the objects:
+#' @param bridge_object an object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}.
+#' @param na.rm a logical indicating whether missing values in logml estimates should be removed.  Ignored for the \code{bridge} method.
+#' @param ... additional arguments (currently ignored).
+#' @details Computes error measures for marginal likelihood bridge sampling estimates. The approximate errors for a \code{bridge_object} of class \code{"bridge"} that has been obtained with \code{method = "normal"} and \code{repetitions = 1} are based on Fruehwirth-Schnatter (2004).
+#' Not applicable in case the object of class \code{"bridge"} has been obtained with \code{method = "warp3"} and \code{repetitions = 1}.
+#' To assess the uncertainty of the estimate in this case, it is recommended to run the \code{"warp3"} procedure multiple times.
+#' @return If \code{bridge_object} is of class \code{"bridge"} and has been obtained with \code{method = "normal"} and \code{repetitions = 1}, returns a list with components:
 #' \itemize{
 #'  \item \code{re2}: approximate relative mean-squared error for marginal likelihood estimate.
-#'  \item \code{cv}: coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased).
-#'  \item \code{percentage}: percentage error of marginal likelihood estimate.
+#'  \item \code{cv}: approximate coefficient of variation for marginal likelihood estimate (assumes that bridge estimate is unbiased).
+#'  \item \code{percentage}: approximate percentage error of marginal likelihood estimate.
 #' }
+#' If \code{bridge_object} is of class \code{"bridge_list"}, returns a list with components:
+  #' \itemize{
+  #'  \item \code{min}: minimum of the log marginal likelihood estimates.
+  #'  \item \code{max}: maximum of the log marginal likelihood estimates.
+  #'  \item \code{IQR}: interquartile range of the log marginal likelihood estimates.
+  #' }
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}
 #' @references
 #' Fruehwirth-Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. \emph{The Econometrics Journal, 7}, 143-167. \url{http://dx.doi.org/10.1111/j.1368-423X.2004.00125.x}
 #' @import Brobdingnag
 #' @importFrom coda spectrum0.ar
-error_measures <- function(bridge_object) {
+#' @export
+error_measures <- function (bridge_object, ...) {
+  UseMethod("error_measures", bridge_object)
+}
+
+#' @rdname error_measures
+#' @export
+error_measures.bridge <- function(bridge_object,...) {
 
   if (bridge_object$method == "warp3") {
-    stop(paste0("error_measures not implemented for warp3 method.",
+    stop(paste0("error_measures not implemented for warp3 method with",
+                "\n  repetitions = 1.",
                 "\n  We recommend to run the warp3 procedure multiple times",
                 "\n  to assess the uncertainty of the estimate."))
-  } else if (inherits(bridge_object, "bridge_list")) {
-    stop("error_measures not available for bridge_list objects.")
   }
 
   e <- as.brob( exp(1) )
@@ -56,5 +71,15 @@ error_measures <- function(bridge_object) {
   # convert to percentage error
   percentage <- scales::percent(cv)
   return(list(re2 = re2, cv = cv, percentage = percentage))
+
+}
+
+#' @rdname error_measures
+#' @export
+error_measures.bridge_list <- function(bridge_object, na.rm = TRUE, ...) {
+
+  return(list(min = min(bridge_object$logml, na.rm = na.rm),
+              max = max(bridge_object$logml, na.rm = TRUE),
+              IQR = stats::IQR(bridge_object$logml, na.rm = na.rm)))
 
 }

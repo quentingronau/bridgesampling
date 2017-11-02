@@ -502,18 +502,18 @@ print.summary.bridge <- function(x, ...) {
     cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
                x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
                x[["Logml_Estimate"]],
-               '\n\nUncertainty Measures:\n\n Relative Mean-Squared Error: ',
+               '\n\nError Measures:\n\n Relative Mean-Squared Error: ',
                x[["Relative_Mean_Squared_Error"]], '\n Coefficient of Variation: ',
                x[["Coefficient_of_Variation"]], '\n Percentage Error: ',
                x[["Percentage_Error"]],
-               '\n\nNote:\nAll uncertainty measures are approximate.\n\n'))
+               '\n\nNote:\nAll error measures are approximate.\n\n'))
 
   } else if (x[["Method"]] == "warp3") {
 
     cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
                x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
                x[["Logml_Estimate"]],
-               '\n\nNote:\nNo uncertainty measures are available for method = "warp3"',
+               '\n\nNote:\nNo error measures are available for method = "warp3"',
                '\nwith repetitions = 1.',
                '\nWe recommend to run the warp3 procedure multiple times to',
                '\nassess the uncertainty of the estimate.\n\n'))
@@ -528,10 +528,10 @@ print.summary.bridge_list <- function(x, ...) {
 
   cat(paste0('\nBridge sampling log marginal likelihood estimate \n(method = "',
              x[["Method"]], '", repetitions = ', x[["Repetitions"]], '):\n\n ',
-             x[["Logml_Estimate"]], '\n\nUncertainty Measures:\n\n Min: ',
+             x[["Logml_Estimate"]], '\n\nError Measures:\n\n Min: ',
              x[["Min"]], '\n Max: ', x[["Max"]], '\n Interquartile Range: ',
              x[["Interquartile_Range"]],
-             '\n\nNote:\nAll uncertainty measures are based on ',
+             '\n\nNote:\nAll error measures are based on ',
              x[["Repetitions"]], ' estimates.\n\n'))
 
 }
