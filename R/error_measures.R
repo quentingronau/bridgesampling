@@ -79,7 +79,7 @@ error_measures.bridge <- function(bridge_object,...) {
 error_measures.bridge_list <- function(bridge_object, na.rm = TRUE, ...) {
 
   return(list(min = min(bridge_object$logml, na.rm = na.rm),
-              max = max(bridge_object$logml, na.rm = TRUE),
+              max = max(bridge_object$logml, na.rm = na.rm),
               IQR = stats::IQR(bridge_object$logml, na.rm = na.rm)))
 
 }
