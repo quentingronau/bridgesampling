@@ -490,9 +490,9 @@ summary.bridge_list <- function(x, na.rm = TRUE, ...) {
 
 }
 
-# print.summary methods
+# print summary methods
 
-#' @method print.summary bridge
+#' @method print summary.bridge
 #' @export
 print.summary.bridge <- function(x, ...) {
 
@@ -521,7 +521,7 @@ print.summary.bridge <- function(x, ...) {
 
 }
 
-#' @method print.summary bridge
+#' @method print summary.bridge_list
 #' @export
 print.summary.bridge_list <- function(x, ...) {
 
