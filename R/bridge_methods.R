@@ -59,11 +59,13 @@ summary.bridge_list <- function(object, na.rm = TRUE, ...) {
     stop('object$method needs to be either "normal" or "warp3".', call. = FALSE)
   }
 
+  em <- error_measures(object, na.rm = na.rm)
   out <- data.frame("Logml_Estimate" = median(object$logml, na.rm = na.rm),
-                    "Min" = min(object$logml, na.rm = na.rm),
-                    "Max" = max(object$logml, na.rm = na.rm),
-                    "Interquartile_Range" = stats::IQR(object$logml, na.rm = na.rm),
-                    "Method" = object$method, "Repetitions" = object$repetitions)
+                    "Min" = em$min,
+                    "Max" = em$max,
+                    "Interquartile_Range" = em$IQR,
+                    "Method" = object$method,
+                    "Repetitions" = object$repetitions)
 
   class(out) <- c("summary.bridge_list", "data.frame")
   return(out)
