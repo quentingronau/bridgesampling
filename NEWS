@@ -11,12 +11,21 @@
     - bridge_sampler() methods now check lb and ub.
     - bf() methods check class of x2.
     - post_prob() checks if only one object of appropriate class is passed.
+    
+  o Promoted error_measures() to generic function with methods for both 
+    repetitions = 1 and repetitions > 1. In the latter case median and IQR are 
+    reported. The only situation where we can not report error measures is if
+    repetitions = 1 and method = "warp3".
+    
+  o Added summary() (and corresponding print.summary) methods for bridge and 
+    bridge_list objects. These methods now always invoke error_measures() and 
+    return a data.frame with both log marginal likelihood and error information. 
+    These methods are described in ?`bridge-methods`.
 
   Bugfixes
 
   o Retroactively updated the NEWS file.
 
-  o
 
 
                        ***********************************
