@@ -3,7 +3,7 @@
 #' Methods defined for objects returned from the generic \code{\link{bridge_sampler}} function.
 #'
 #' @param object,x object of class \code{bridge} or \code{bridge_list} as returned from \code{\link{bridge_sampler}}.
-#' @param na.rm logical. Currently not used.
+#' @param na.rm logical. Should NA estimates in \code{bridge_list} objects be removed? Passed to \code{\link{error_measures}}.
 #' @param ... further arguments, currently ignored.
 #'
 #' @return

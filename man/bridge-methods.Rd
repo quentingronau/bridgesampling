@@ -25,7 +25,7 @@
 \arguments{
 \item{object, x}{object of class \code{bridge} or \code{bridge_list} as returned from \code{\link{bridge_sampler}}.}
 
-\item{na.rm}{logical. Currently not used.}
+\item{na.rm}{logical. Should NA estimates in \code{bridge_list} objects be removed? Passed to \code{\link{error_measures}}.}
 
 \item{...}{further arguments, currently ignored.}
 }
