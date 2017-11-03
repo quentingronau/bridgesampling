@@ -69,7 +69,7 @@
 #'Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis, 54}, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 #' @example examples/example.bridge_sampler.R
 #'
-#' @seealso \code{\link{bf}} allows to calculate Bayes factors and \code{\link{post_prob}} allows to calculate posterior model probabilities from bridge sampling estimates. \code{\link{bridge-methods}} lists some additional methods that automatically invoke the \code{\link{error_measures}} function.
+#' @seealso \code{\link{bf}} allows the user to calculate Bayes factors and \code{\link{post_prob}} allows the user to calculate posterior model probabilities from bridge sampling estimates. \code{\link{bridge-methods}} lists some additional methods that automatically invoke the \code{\link{error_measures}} function.
 #'
 #' @importFrom mvtnorm rmvnorm dmvnorm
 #' @importFrom Matrix nearPD

@@ -352,7 +352,7 @@ Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of Comp
 Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination methods for generalised linear mixed models. \emph{Computational Statistics & Data Analysis, 54}, 3269-3288. \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 }
 \seealso{
-\code{\link{bf}} allows to calculate Bayes factors and \code{\link{post_prob}} allows to calculate posterior model probabilities from bridge sampling estimates. \code{\link{bridge-methods}} lists some additional methods that automatically invoke the \code{\link{error_measures}} function.
+\code{\link{bf}} allows the user to calculate Bayes factors and \code{\link{post_prob}} allows the user to calculate posterior model probabilities from bridge sampling estimates. \code{\link{bridge-methods}} lists some additional methods that automatically invoke the \code{\link{error_measures}} function.
 }
 \author{
 Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the \code{stanreg} method.
