@@ -23,7 +23,9 @@ NULL
 #' @export
 summary.bridge <- function(object, na.rm = TRUE, ...) {
 
-  stopifnot(object$method %in% c("normal", "warp3"))
+  if( ! (object$method %in% c("normal", "warp3"))) {
+    stop('object$method needs to be either "normal" or "warp3".', call. = FALSE)
+  }
 
   if (object$method == "normal") {
 
@@ -53,7 +55,9 @@ summary.bridge <- function(object, na.rm = TRUE, ...) {
 #' @export
 summary.bridge_list <- function(object, na.rm = TRUE, ...) {
 
-  stopifnot(object$method %in% c("normal", "warp3") && object$repetitions > 1)
+  if( ! (object$method %in% c("normal", "warp3"))) {
+    stop('object$method needs to be either "normal" or "warp3".', call. = FALSE)
+  }
 
   out <- data.frame("Logml_Estimate" = median(object$logml, na.rm = na.rm),
                     "Min" = min(object$logml, na.rm = na.rm),
