@@ -50,10 +50,10 @@ test_that("bridge sampler summary method correctly displayed", {
   s_warp3_2 <- summary(bridge_warp3_2)
 
   expect_equal(names(s_normal_2), c("Logml_Estimate",
-                                  "Min",
-                                  "Max",
-                                  "Interquartile_Range",
-                                  "Method", "Repetitions"))
+                                    "Min",
+                                    "Max",
+                                    "Interquartile_Range",
+                                    "Method", "Repetitions"))
   expect_equal(names(s_warp3_2), c("Logml_Estimate",
                                    "Min",
                                    "Max",
