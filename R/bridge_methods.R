@@ -35,7 +35,8 @@ summary.bridge <- function(object, na.rm = TRUE, ...) {
                       "Coefficient_of_Variation" = em$cv,
                       "Percentage_Error" = em$percentage,
                       "Method" = object$method,
-                      "Repetitions" = 1)
+                      "Repetitions" = 1,
+                      stringsAsFactors = FALSE)
 
   } else if (object$method == "warp3") {
 
