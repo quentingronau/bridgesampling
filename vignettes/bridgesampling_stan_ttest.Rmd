@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
   
-In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in `Stan`. This approach has the advantage that the user only needs to pass the fitted `stanfit` object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the `BayesFactor` package (Morey & Rouder, 2015).
+In this vignette, we explain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in `Stan`. This approach has the advantage that the user only needs to pass the fitted `stanfit` object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the `BayesFactor` package (Morey & Rouder, 2015).
   
 ## Model
 The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean $\mu$ and variance $\sigma^2$. The model is then reparametrized in terms of the standardized effect size $\delta = \mu/\sigma$. For the standardized effect size, a Cauchy prior with location zero and scale $r = 1/\sqrt{2}$ is used. For the variance $\sigma^2$, Jeffreys's prior is used: $p(\sigma^2) \propto 1/\sigma^2$.
