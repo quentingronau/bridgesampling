@@ -3,7 +3,7 @@
                        ***********************************
 
                     Changes in bridgesampling Version 0.4-x
-                    Released November 2017
+                    Released December 2017
 
   Significant User Visible Changes and New Features
 
@@ -21,6 +21,8 @@
     bridge_list objects. These methods now always invoke error_measures() and 
     return a data.frame with both log marginal likelihood and error information. 
     These methods are described in ?`bridge-methods`.
+    
+  o Updated bridgesampling vignette to latest version.
 
   Bugfixes
 
