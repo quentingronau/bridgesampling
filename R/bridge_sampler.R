@@ -414,6 +414,10 @@ bridge_sampler.MCMC_refClass <- function(samples,
 
   mcmc_samples <- as.matrix(samples$mvSamples)
 
+  if (all(is.na(mcmc_samples))) {
+    stop("nimble object does not contain samples. Call runMCMC() first.", call. = FALSE)
+  }
+
   # make sure that samples is a list
   if (is.matrix(mcmc_samples)) {
     # TRUE in case nchains = 1
