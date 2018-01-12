@@ -145,7 +145,7 @@ for (k in 1:3) {
 }
 
 # example output
-print(bridge[[2]])
+summary(bridge[[2]])
 
 #-------------------------------------------------------------------------------
 # compute posterior model probabilities

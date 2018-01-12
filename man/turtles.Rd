@@ -135,6 +135,10 @@ bridge_H1 <- bridge_sampler(stanfit_H1)
 error_measures(bridge_H0)$percentage
 error_measures(bridge_H1)$percentage
 
+### summary ###
+summary(bridge_H0)
+summary(bridge_H1)
+
 ### compute Bayes factor ("true" value: BF01 = 1.273) ###
 bf(bridge_H0, bridge_H1)
 
