@@ -1,4 +1,22 @@
                        ***********************************
+                       ** bridgesampling VERSION 0.5-x **
+                       ***********************************
+
+                    Changes in bridgesampling Version 0.5-x
+                    Released XXX 2018
+
+  Significant User Visible Changes and New Features
+
+  o Added support for nimble objects (http://r-nimble.org/) via 
+    bridge_sampler.MCMC_refClass method. Thanks to Perry de Valpine for his help 
+    in creating this method.
+
+  Bugfixes
+
+  o 
+
+
+                       ***********************************
                        ** bridgesampling VERSION 0.4-x **
                        ***********************************
 
