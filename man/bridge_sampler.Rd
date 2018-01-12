@@ -8,6 +8,7 @@
 \alias{bridge_sampler.stanreg}
 \alias{bridge_sampler.rjags}
 \alias{bridge_sampler.runjags}
+\alias{bridge_sampler.MCMC_refClass}
 \title{Log Marginal Likelihood via Bridge Sampling}
 \usage{
 bridge_sampler(samples, ...)
@@ -43,6 +44,10 @@ bridge_sampler(samples, ...)
   method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
   varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
   silent = FALSE, verbose = FALSE)
+
+\method{bridge_sampler}{MCMC_refClass}(samples, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, maxiter = 1000,
+  silent = FALSE, verbose = FALSE, ...)
 }
 \arguments{
 \item{samples}{an \code{mcmc.list} object, a fitted \code{stanfit} object, a \code{stanreg} object, an \code{rjags} object, a \code{runjags} object, or a \code{matrix} with posterior samples (\code{colnames} need to correspond to parameter names in \code{lb} and \code{ub})  with posterior samples.}

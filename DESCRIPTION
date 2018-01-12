@@ -37,13 +37,14 @@ Suggests:
     R.rsp,
     BayesFactor,
     rstan,
-    rstanarm
+    rstanarm,
+    nimble
 Description: Provides functions for estimating marginal likelihoods, Bayes
     factors, posterior model probabilities, and normalizing constants in general,
     via different versions of bridge sampling (Meng & Wong, 1996, 
     <http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm>).
 License: GPL (>=2)
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 VignetteBuilder: knitr, R.rsp
 URL: https://github.com/quentingronau/bridgesampling

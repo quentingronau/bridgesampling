@@ -394,6 +394,71 @@ bridge_sampler.runjags <- function(samples = NULL, log_posterior = NULL, ..., da
 }
 
 
+#' @rdname bridge_sampler
+#' @export
+bridge_sampler.MCMC_refClass <- function(samples,
+                                  repetitions = 1,
+                                  method = "normal",
+                                  cores = 1,
+                                  use_neff = TRUE,
+                                  maxiter = 1000,
+                                  silent = FALSE,
+                                  verbose = FALSE,
+                                  ...) {
+
+  # cores > 1 only for unix:
+  if (!(.Platform$OS.type == "unix") & (cores != 1)) {
+    warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.", call. = FALSE)
+    cores <- 1L
+  }
+
+  mcmc_samples <- as.matrix(samples$mvSamples)
+
+  # make sure that samples is a list
+  if (is.matrix(mcmc_samples)) {
+    # TRUE in case nchains = 1
+    mcmc_samples <- list(mcmc_samples)
+  }
+
+  # convert samples to mcmc.list
+  samples_mcmc <- lapply(mcmc_samples, FUN = coda::as.mcmc)
+  samples_mcmc_list <- coda::as.mcmc.list(samples_mcmc)
+
+  ## get model name from MCMC_refClass object
+  mod_name <- ls(samples$nimbleProject$models)[1]
+  nimble_model <- samples$nimbleProject$models[[mod_name]]
+
+  # compile log_posterior for bridge sampling
+  log_posterior_tmp <- .log_posterior_nimble(model = nimble_model,
+                                             nodes = colnames(mcmc_samples[[1]]))
+  suppressMessages(
+    clog_posterior <- nimble::compileNimble(log_posterior_tmp,
+                                            project = nimble_model))
+
+  # wrapper to match required format for log_posterior
+  log_posterior <- function(x, data) {
+    clog_posterior$run(x)
+  }
+
+  out <- bridge_sampler(samples = samples_mcmc_list,
+                        log_posterior = log_posterior,
+                        ...,
+                        data = NULL,
+                        lb = .nimble_bounds(mcmc_samples[[1]], nimble_model, "lower"),
+                        ub = .nimble_bounds(mcmc_samples[[1]], nimble_model, "upper"),
+                        repetitions = repetitions,
+                        method = method,
+                        cores = cores,
+                        use_neff = use_neff,
+                        packages = "nimble",
+                        maxiter = maxiter,
+                        silent = silent,
+                        verbose = verbose)
+
+  return(out)
+
+}
+
 ######### tools for stanfit method ########
 # taken from rstan:
 .rstan_relist <- function (x, skeleton) {
