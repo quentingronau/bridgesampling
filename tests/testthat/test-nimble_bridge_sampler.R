@@ -40,7 +40,8 @@ test_that("nimble support works", {
 
     # run the MCMC.  This is a wrapper for cmcmc$run() and extraction of samples.
     # the object samplesH1 is actually not needed as the samples are also in cmcmcH1
-    samplesH1 <- runMCMC(cmcmcH1, niter = 1e5, nburnin = 1000, nchains = 2)
+    samplesH1 <- runMCMC(cmcmcH1, niter = 1e5, nburnin = 1000, nchains = 2,
+                         progressBar = FALSE)
 
     # bridge sampling
     bridge_H1 <- bridge_sampler(samples = cmcmcH1,

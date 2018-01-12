@@ -3,7 +3,7 @@ require(testthat)
 options(error = NULL)
 
 load_all()
-test()
+devtools::test()
 
 roxygen2::roxygenize()
 
