@@ -19,5 +19,6 @@ r_binary_packages:
    - knitr
    - stringr
    - mvtnorm
+   - nimble
 r_build_args: --compact-vignettes="gs+qpdf"
 
