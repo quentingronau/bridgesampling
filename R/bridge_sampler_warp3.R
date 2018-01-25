@@ -201,6 +201,7 @@
                                    r0 = r0_2, tol = tol2, L = L, method = "warp3",
                                    maxiter = maxiter, silent = silent,
                                    criterion = "logml", neff = neff)
+      tmp$niter <- maxiter + tmp$niter
     }
 
     logml[i] <- tmp$logml
