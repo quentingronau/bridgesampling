@@ -1,7 +1,20 @@
+# Helper function to represent circular variables (such as mean directions) as
+# "gapless" numerical representations.
+.gaplessCircular <- function(th) {
+
+  # Mean direction
+  md     <- atan2(sum(sin(th)), sum(cos(th)))
+
+  # Shift th so that it is unlikely to have a gap.
+  ((th - md + pi) %% (2*pi)) - pi + md
+}
+
+
 
 #### for matrix method ######
 
-.transform2Real <- function(theta, lb, ub) {
+.transform2Real <- function(theta, lb, ub,
+                            theta_types = rep("continuous", ncol(theta))) {
 
   ### transform samples to real line
 
@@ -9,25 +22,36 @@
   transTypes <- character()
   cn <- colnames(theta)
 
+  names(theta_types) <- cn
+
   for (i in seq_len(ncol(theta))) {
 
     p <- cn[i]
 
-    if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
-      transTypes[[p]] <- "unbounded"
+    if (theta_types[[p]] == "simplex") {
+      transTypes[[p]] <- "simplex"
       theta_t[,i] <- theta[,i]
-    } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.infinite(ub[[p]])) {
-      transTypes[[p]] <- "lower-bounded"
-      theta_t[,i] <- log(theta[,i] - lb[[p]])
-    } else if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.finite(ub[[p]])) {
-      transTypes[[p]] <- "upper-bounded"
-      theta_t[,i] <- log(ub[[p]] - theta[,i])
-    } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
-      transTypes[[p]] <- "double-bounded"
-      theta_t[,i] <- qnorm( (theta[,i] - lb[[p]])/(ub[[p]] - lb[[p]]) )
-    } else {
-      stop("Could not transform parameters, possibly due to invalid lower and/or upper
+    } else if (theta_types[[p]] == "circular") {
+      transTypes[[p]] <- "circular"
+      theta_t[,i] <- .gaplessCircular(theta[,i])
+    } else if (theta_types[[p]] == "continuous") {
+
+      if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
+        transTypes[[p]] <- "unbounded"
+        theta_t[,i] <- theta[,i]
+      } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.infinite(ub[[p]])) {
+        transTypes[[p]] <- "lower-bounded"
+        theta_t[,i] <- log(theta[,i] - lb[[p]])
+      } else if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.finite(ub[[p]])) {
+        transTypes[[p]] <- "upper-bounded"
+        theta_t[,i] <- log(ub[[p]] - theta[,i])
+      } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
+        transTypes[[p]] <- "double-bounded"
+        theta_t[,i] <- qnorm( (theta[,i] - lb[[p]])/(ub[[p]] - lb[[p]]) )
+      } else {
+        stop("Could not transform parameters, possibly due to invalid lower and/or upper
            prior bounds.")
+      }
     }
 
   }
