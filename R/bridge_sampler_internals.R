@@ -21,7 +21,6 @@
   theta_t <- theta
   transTypes <- character()
   cn <- colnames(theta)
-
   names(theta_types) <- cn
 
   # Because the simplex transform must be done on all simplex parameters at
@@ -38,16 +37,17 @@
                  "of simplex parameters are not supported."))
     }
 
-    # Simplex dimension
-    simdim        <- length(simplex_theta)
-    cs            <- c(0L, cumsum(simplex_theta)[-simdim])
+    # Simplex dimensionality
+    simdim <- length(simplex_theta)
+    cs     <- c(0L, cumsum(simplex_theta)[-simdim])
 
     # Get the break proportions, removing the last one because we will end up
     # with one less parameter than the original simplex variables due to the
     # constraint sum(simplex_theta) == 1.
-    z_k           <- (simplex_theta / (1L - cs))[-simdim]
-    y_k           <- log(z_k) - log(1L - z_k) + log((simdim - 1L):1L)
+    z_k    <- (simplex_theta / (1L - cs))[-simdim]
+    y_k    <- log(z_k) - log(1L - z_k) + log((simdim - 1L):1L)
     theta_t[, is_simplex_theta] <- y_k
+    transTypes[[is_simplex_theta]] <- "simplex"
   }
 
 
@@ -73,8 +73,10 @@
       } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
         transTypes[[p]] <- "double-bounded"
         theta_t[,i] <- qnorm( (theta[,i] - lb[[p]])/(ub[[p]] - lb[[p]]) )
-      } else if (theta_types[p] == "simplex")
-        } else {
+
+        # Finally, give an error except for simplex variables, which are already
+        # transformed.
+      } else if (theta_types[p] != "simplex")
         stop(paste("Could not transform parameters, possibly due to invalid",
                    "lower and/or upper prior bounds."))
       }
@@ -86,7 +88,8 @@
   return(list(theta_t = theta_t, transTypes = transTypes))
 }
 
-.invTransform2Real <- function(theta_t, lb, ub) {
+.invTransform2Real <- function(theta_t, lb, ub,
+                               theta_types = rep("real", ncol(theta))) {
 
   ### transform transformed samples back to original scales
 
