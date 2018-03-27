@@ -34,7 +34,8 @@
     simplex_theta <- theta[, is_simplex_theta]
 
     if (!identical(sum(simplex_theta), 1L)) {
-      stop("Simplex parameters do not sum to one. Multiple separate sets of simplex parameters are not supported.")
+      stop(paste("Simplex parameters do not sum to one. Multiple separate sets",
+                 "of simplex parameters are not supported."))
     }
 
     # Simplex dimension
@@ -46,7 +47,7 @@
     # constraint sum(simplex_theta) == 1.
     z_k           <- (simplex_theta / (1L - cs))[-simdim]
     y_k           <- log(z_k) - log(1L - z_k) + log((simdim - 1L):1L)
-    theta_t[,is_simplex_theta] <- simplex_theta
+    theta_t[, is_simplex_theta] <- y_k
   }
 
 
@@ -55,7 +56,7 @@
     p <- cn[i]
 
 
-    } else if (theta_types[p] == "circular") {
+    if (theta_types[p] == "circular") {
       transTypes[[p]] <- "circular"
       theta_t[,i] <- .gaplessCircular(theta[,i])
 
@@ -78,7 +79,7 @@
                    "lower and/or upper prior bounds."))
       }
     }
-  }
+
 
   colnames(theta_t) <- paste0("trans_", colnames(theta))
 
