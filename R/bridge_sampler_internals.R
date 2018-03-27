@@ -48,9 +48,10 @@
       } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
         transTypes[[p]] <- "double-bounded"
         theta_t[,i] <- qnorm( (theta[,i] - lb[[p]])/(ub[[p]] - lb[[p]]) )
-      } else {
-        stop("Could not transform parameters, possibly due to invalid
-             lower and/or upper prior bounds.")
+      } else if (theta_types[p] == "simplex")
+        } else {
+        stop(paste("Could not transform parameters, possibly due to invalid",
+                   "lower and/or upper prior bounds."))
       }
     }
   }
