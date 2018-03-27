@@ -14,7 +14,7 @@
 #### for matrix method ######
 
 .transform2Real <- function(theta, lb, ub,
-                            theta_types = rep("continuous", ncol(theta))) {
+                            theta_types = rep("real", ncol(theta))) {
 
   ### transform samples to real line
 
@@ -24,18 +24,42 @@
 
   names(theta_types) <- cn
 
+  # Because the simplex transform must be done on all simplex parameters at
+  # once, do it before the loop. This transformation follows the Stan reference
+  # manual.
+  is_simplex_theta <- theta_types == "simplex"
+  if (any(is_simplex_theta)) {
+
+    # Select the simplex variables
+    simplex_theta <- theta[, is_simplex_theta]
+
+    if (!identical(sum(simplex_theta), 1L)) {
+      stop("Simplex parameters do not sum to one. Multiple separate sets of simplex parameters are not supported.")
+    }
+
+    # Simplex dimension
+    simdim        <- length(simplex_theta)
+    cs            <- c(0L, cumsum(simplex_theta)[-simdim])
+
+    # Get the break proportions, removing the last one because we will end up
+    # with one less parameter than the original simplex variables due to the
+    # constraint sum(simplex_theta) == 1.
+    z_k           <- (simplex_theta / (1L - cs))[-simdim]
+    y_k           <- log(z_k) - log(1L - z_k) + log((simdim - 1L):1L)
+    theta_t[,is_simplex_theta] <- simplex_theta
+  }
+
+
   for (i in seq_len(ncol(theta))) {
 
     p <- cn[i]
 
-    if (theta_types[[p]] == "simplex") {
-      transTypes[[p]] <- "simplex"
-      theta_t[,i] <- theta[,i]
-    } else if (theta_types[[p]] == "circular") {
+
+    } else if (theta_types[p] == "circular") {
       transTypes[[p]] <- "circular"
       theta_t[,i] <- .gaplessCircular(theta[,i])
 
-    } else if (theta_types[[p]] == "continuous") {
+    } else if (theta_types[p] == "real") {
       if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
         transTypes[[p]] <- "unbounded"
         theta_t[,i] <- theta[,i]
