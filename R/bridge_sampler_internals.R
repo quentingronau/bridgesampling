@@ -34,8 +34,8 @@
     } else if (theta_types[[p]] == "circular") {
       transTypes[[p]] <- "circular"
       theta_t[,i] <- .gaplessCircular(theta[,i])
-    } else if (theta_types[[p]] == "continuous") {
 
+    } else if (theta_types[[p]] == "continuous") {
       if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
         transTypes[[p]] <- "unbounded"
         theta_t[,i] <- theta[,i]
@@ -49,17 +49,15 @@
         transTypes[[p]] <- "double-bounded"
         theta_t[,i] <- qnorm( (theta[,i] - lb[[p]])/(ub[[p]] - lb[[p]]) )
       } else {
-        stop("Could not transform parameters, possibly due to invalid lower and/or upper
-           prior bounds.")
+        stop("Could not transform parameters, possibly due to invalid
+             lower and/or upper prior bounds.")
       }
     }
-
   }
 
   colnames(theta_t) <- paste0("trans_", colnames(theta))
 
   return(list(theta_t = theta_t, transTypes = transTypes))
-
 }
 
 .invTransform2Real <- function(theta_t, lb, ub) {
