@@ -23,6 +23,6 @@ r_build_args: --compact-vignettes="gs+qpdf"
 
 before_install:
   - sudo mkdir -p /usr/lib/R/library
-  - echo 'R_LIBS=/usr/lib/R/library:/usr/lib/R/site-library/' > ~/.Renviron
+  - echo 'R_LIBS=/usr/lib/R/library' > ~/.Renviron
   - sudo chmod 2777 /usr/lib/R/library
 
