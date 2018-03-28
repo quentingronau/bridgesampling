@@ -43,7 +43,7 @@
                                                 nrow(theta), simdim, byrow = TRUE)
 
     theta_t[, is_simplex_theta] <- y_k
-    transTypes[[is_simplex_theta]] <- "simplex"
+    transTypes[is_simplex_theta] <- "simplex"
   }
 
 
