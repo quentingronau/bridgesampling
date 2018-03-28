@@ -91,6 +91,7 @@
   theta <- theta_t
   colnames(theta) <- stringr::str_sub(colnames(theta), 7)
   cn <- colnames(theta)
+  names(theta_types) <- cn
 
   # Because the simplex transform must be done on all simplex parameters at
   # once, do it before the loop. This transformation follows the Stan reference
@@ -111,19 +112,11 @@
 
     x_k <- z_k
 
-    for (si in 2:simdim) {
-      x_k[, si] <- (1 - [, 1:si])*z_k
-
+    for (k in 2:simdim) {
+      x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
     }
 
-    cs     <- cbind(0L, t(apply(simplex_theta, 1L, cumsum))[, -simdim])
-
-    # Get the break proportions.
-    z_k    <- (simplex_theta / (1L - cs))
-    y_k    <- log(z_k) - log(1L - z_k) + matrix(log(simdim:1L),
-                                                nrow(theta), simdim, byrow = TRUE)
-
-    theta_t[, is_simplex_theta]
+    theta[, is_simplex_theta] <- x_k
   }
 
   # Note that the circular variables are not transformed back, because they are
@@ -132,17 +125,19 @@
 
     p <- cn[i]
 
-    if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
-      theta[,i] <- theta_t[,i]
-    } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.infinite(ub[[p]])) {
-      theta[,i] <- exp(theta_t[,i]) + lb[[p]]
-    } else if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.finite(ub[[p]])) {
-      theta[,i] <- ub[[p]] - exp(theta_t[,i])
-    } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
-      theta[,i] <- pnorm(theta_t[,i])*(ub[[p]] - lb[[p]]) + lb[[p]]
-    } else {
-      stop("Could not transform parameters, possibly due to invalid lower and/or upper
-           prior bounds.")
+    if (theta_types[[p]] == "real") {
+      if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
+        theta[,i] <- theta_t[,i]
+      } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.infinite(ub[[p]])) {
+        theta[,i] <- exp(theta_t[,i]) + lb[[p]]
+      } else if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.finite(ub[[p]])) {
+        theta[,i] <- ub[[p]] - exp(theta_t[,i])
+      } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
+        theta[,i] <- pnorm(theta_t[,i])*(ub[[p]] - lb[[p]]) + lb[[p]]
+      } else {
+        stop("Could not transform parameters, possibly due to invalid lower and/or upper
+             prior bounds.")
+      }
     }
 
   }
