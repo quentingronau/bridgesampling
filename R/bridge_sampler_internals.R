@@ -32,11 +32,6 @@
     # Select the simplex variables
     simplex_theta <- theta[, is_simplex_theta]
 
-    if (!identical(sum(simplex_theta), 1L)) {
-      stop(paste("Simplex parameters do not sum to one. Multiple separate sets",
-                 "of simplex parameters are not supported."))
-    }
-
     # Simplex dimensionality
     simdim <- length(simplex_theta)
     cs     <- c(0L, cumsum(simplex_theta)[-simdim])

@@ -77,7 +77,7 @@
 #' @importFrom stringr str_sub
 #' @importFrom stats qnorm pnorm dnorm median cov var
 #' @export
-bridge_sampler <- function (samples, ...) {
+bridge_sampler <- function(samples, ...) {
    UseMethod("bridge_sampler", samples)
 }
 
@@ -246,9 +246,16 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
                            lb = NULL, ub = NULL, repetitions = 1, method = "normal",
                            cores = 1, use_neff = TRUE, packages = NULL, varlist = NULL,
                            envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
+                           param_types = rep("real", ncol(theta)),
                            silent = FALSE, verbose = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
+
+  # Check simplex computation
+  if (!identical(sum(simplex_theta), 1L)) {
+    stop(paste("Simplex parameters do not sum to one. Multiple separate sets",
+               "of simplex parameters are not supported."))
+  }
 
   # transform parameters to real line
   tmp <- .transform2Real(samples, lb, ub)
