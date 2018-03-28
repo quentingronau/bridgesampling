@@ -184,6 +184,7 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
                                      packages = NULL, varlist = NULL, envir = .GlobalEnv,
                                      rcppFile = NULL, maxiter = 1000, silent = FALSE,
                                      verbose = FALSE) {
+  if (!requireNamespace("nimble")) stop("package nimble required")
   # split samples in two parts
   nr <- nrow(samples[[1]])
   samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2))
