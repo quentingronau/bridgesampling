@@ -19,7 +19,7 @@
   ### transform samples to real line
 
   theta_t <- theta
-  transTypes <- character()
+  transTypes <- character(ncol(theta))
   cn <- colnames(theta)
   names(theta_types) <- cn
 
@@ -51,12 +51,11 @@
 
     p <- cn[i]
 
-
-    if (theta_types[p] == "circular") {
+    if (theta_types[[p]] == "circular") {
       transTypes[[p]] <- "circular"
       theta_t[,i] <- .gaplessCircular(theta[,i])
 
-    } else if (theta_types[p] == "real") {
+    } else if (theta_types[[p]] == "real") {
       if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
         transTypes[[p]] <- "unbounded"
         theta_t[,i] <- theta[,i]
