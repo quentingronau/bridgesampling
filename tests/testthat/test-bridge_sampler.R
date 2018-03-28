@@ -144,3 +144,22 @@ test_that("bridge sampler matches anlytical value normal example", {
                "do not sum to one")
 
 })
+
+
+context('non-standard parameter spaces')
+
+test_that("bridge sampler functions for non-standard parameter spaces", {
+
+
+  ru <- runif(10)
+  simdat <- (ru / sum(ru))[-10]
+
+  bridgesampling:::.transform2Real(theta = simdat,
+                                   lb = rep(0, 9),
+                                   ub = rep(1, 9),
+                                   theta_types = rep("simplex", 9))
+
+
+})
+
+
