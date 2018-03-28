@@ -104,6 +104,18 @@
 
     # Simplex dimensionality
     simdim <- ncol(simplex_theta)
+
+    logitz <- simplex_theta - matrix(log(simdim:1L),
+                                      nrow(theta), simdim, byrow = TRUE)
+    z_k    <- exp(logitz) / (1 + exp(logitz))
+
+    x_k <- z_k
+
+    for (si in 2:simdim) {
+      x_k[, si] <- (1 - [, 1:si])*z_k
+
+    }
+
     cs     <- cbind(0L, t(apply(simplex_theta, 1L, cumsum))[, -simdim])
 
     # Get the break proportions.
@@ -111,9 +123,11 @@
     y_k    <- log(z_k) - log(1L - z_k) + matrix(log(simdim:1L),
                                                 nrow(theta), simdim, byrow = TRUE)
 
-    theta_t[, is_simplex_theta] <- y_k
+    theta_t[, is_simplex_theta]
   }
 
+  # Note that the circular variables are not transformed back, because they are
+  # simply a different numerical representation.
   for (i in seq_len(ncol(theta_t))) {
 
     p <- cn[i]
