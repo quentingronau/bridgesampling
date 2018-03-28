@@ -109,9 +109,7 @@
     logitz <- simplex_theta - matrix(log(simdim:1L),
                                       nrow(theta), simdim, byrow = TRUE)
     z_k    <- exp(logitz) / (1 + exp(logitz))
-
     x_k <- z_k
-
     for (k in 2:simdim) {
       x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
     }
@@ -153,7 +151,7 @@
   logJ <- matrix(nrow = nrow(theta_t), ncol = ncol(theta_t))
   cn <- stringr::str_sub(colnames(theta_t), 7)
 
-  # Separate the computations for the
+  # Separate the computations for the simplex
   is_simplex_theta <- transTypes == "simplex"
   if (any(is_simplex_theta)) {
 
@@ -165,7 +163,14 @@
 
     logitz <- simplex_theta - matrix(log(simdim:1L),
                                      nrow(theta), simdim, byrow = TRUE)
-    z_k    <- exp(logitz) / (1 + exp(logitz))
+    z_k <- exp(logitz) / (1 + exp(logitz))
+    x_k <- sum_x_k <- z_k
+
+    for (k in 2:simdim) {
+      x_k[, k]     <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
+      sum_x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE]))
+    }
+    logJ[, is_simplex_theta] <- log(z_k) + log(1 - z_k) + log(sum_x_k)
   }
 
 
@@ -192,9 +197,9 @@
 
 .split_matrix <- function(matrix, cores) {
   out <- vector("list", cores)
-  borders <- ceiling(seq(from = 0, to = nrow(matrix), length.out = cores+1))
+  borders <- ceiling(seq(from = 0, to = nrow(matrix), length.out = cores + 1))
   for (i in seq_len(cores)) {
-    out[[i]] <- matrix[(borders[i]+1):borders[i+1],,drop = FALSE]
+    out[[i]] <- matrix[(borders[i] + 1):borders[i + 1], , drop = FALSE]
   }
   out
 }
