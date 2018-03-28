@@ -21,6 +21,9 @@ r_binary_packages:
    - mvtnorm
 r_build_args: --compact-vignettes="gs+qpdf"
 
+env:
+  - R_LIBS_SITE=/usr/lib/R/library
+
 before_install:
   - sudo mkdir -p /usr/lib/R/library
   - echo 'R_LIBS=/usr/lib/R/library' > ~/.Renviron
