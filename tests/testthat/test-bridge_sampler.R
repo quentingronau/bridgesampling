@@ -151,10 +151,10 @@ context('non-standard parameter spaces')
 test_that("bridge sampler functions for non-standard parameter spaces", {
 
 
-  ru <- runif(10)
-  simdat <- (ru / sum(ru))[-10]
+  ru <- replicate(10, runif(10))
+  theta <- (ru / rowSums(ru))[, -10]
 
-  bridgesampling:::.transform2Real(theta = simdat,
+  bridgesampling:::.transform2Real(theta,
                                    lb = rep(0, 9),
                                    ub = rep(1, 9),
                                    theta_types = rep("simplex", 9))

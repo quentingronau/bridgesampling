@@ -25,7 +25,8 @@
 
   # Because the simplex transform must be done on all simplex parameters at
   # once, do it before the loop. This transformation follows the Stan reference
-  # manual.
+  # manual. For simplex variables, we expect one parameter less than the number
+  # of weights due to the contstraint sum(simplex_theta) == 1.
   is_simplex_theta <- theta_types == "simplex"
   if (any(is_simplex_theta)) {
 
@@ -33,14 +34,14 @@
     simplex_theta <- theta[, is_simplex_theta]
 
     # Simplex dimensionality
-    simdim <- length(simplex_theta)
-    cs     <- c(0L, cumsum(simplex_theta)[-simdim])
+    simdim <- ncol(simplex_theta)
+    cs     <- cbind(0L, t(apply(simplex_theta, 1L, cumsum))[, -simdim])
 
-    # Get the break proportions, removing the last one because we will end up
-    # with one less parameter than the original simplex variables due to the
-    # constraint sum(simplex_theta) == 1.
-    z_k    <- (simplex_theta / (1L - cs))[-simdim]
-    y_k    <- log(z_k) - log(1L - z_k) + log((simdim - 1L):1L)
+    # Get the break proportions.
+    z_k    <- (simplex_theta / (1L - cs))
+    y_k    <- log(z_k) - log(1L - z_k) + matrix(log(simdim:1L),
+                                                nrow(theta), simdim, byrow = TRUE)
+
     theta_t[, is_simplex_theta] <- y_k
     transTypes[[is_simplex_theta]] <- "simplex"
   }
