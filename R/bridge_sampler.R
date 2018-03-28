@@ -246,19 +246,28 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
                            lb = NULL, ub = NULL, repetitions = 1, method = "normal",
                            cores = 1, use_neff = TRUE, packages = NULL, varlist = NULL,
                            envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-                           param_types = rep("real", ncol(theta)),
+                           param_types = rep("real", ncol(samples)),
                            silent = FALSE, verbose = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
 
   # Check simplex computation
-  if (!identical(sum(simplex_theta), 1L)) {
-    stop(paste("Simplex parameters do not sum to one. Multiple separate sets",
-               "of simplex parameters are not supported."))
+  is_simplex_param <- param_types == "simplex"
+  if (any(is_simplex_param)) {
+    simplex_samples <- samples[, is_simplex_param]
+
+    if (any(!(rowSums(simplex_samples) == 1L))) {
+      stop(paste("Simplex parameters do not sum to one. This could be due to
+               having multiple separate sets of simplex parameters, which are
+               not supported. "))
+    }
+
+    # Remove the last simplex variable because it is superfluous.
+    samples <- samples[, -which(is_simplex_param)[sum(is_simplex_param)]]
   }
 
   # transform parameters to real line
-  tmp <- .transform2Real(samples, lb, ub)
+  tmp <- .transform2Real(samples, lb, ub, trans_types = param_types)
   theta_t <- tmp$theta_t
   transTypes <- tmp$transTypes
 

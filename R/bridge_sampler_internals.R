@@ -92,6 +92,28 @@
   colnames(theta) <- stringr::str_sub(colnames(theta), 7)
   cn <- colnames(theta)
 
+  # Because the simplex transform must be done on all simplex parameters at
+  # once, do it before the loop. This transformation follows the Stan reference
+  # manual. For simplex variables, we expect one parameter less than the number
+  # of weights due to the contstraint sum(simplex_theta) == 1.
+  is_simplex_theta <- theta_types == "simplex"
+  if (any(is_simplex_theta)) {
+
+    # Select the simplex variables
+    simplex_theta <- theta[, is_simplex_theta]
+
+    # Simplex dimensionality
+    simdim <- ncol(simplex_theta)
+    cs     <- cbind(0L, t(apply(simplex_theta, 1L, cumsum))[, -simdim])
+
+    # Get the break proportions.
+    z_k    <- (simplex_theta / (1L - cs))
+    y_k    <- log(z_k) - log(1L - z_k) + matrix(log(simdim:1L),
+                                                nrow(theta), simdim, byrow = TRUE)
+
+    theta_t[, is_simplex_theta] <- y_k
+  }
+
   for (i in seq_len(ncol(theta_t))) {
 
     p <- cn[i]
