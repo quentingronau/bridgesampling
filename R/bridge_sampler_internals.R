@@ -101,7 +101,7 @@
   if (any(is_simplex_theta)) {
 
     # Select the simplex variables
-    simplex_theta <- theta[, is_simplex_theta]
+    simplex_theta <- theta_t[, is_simplex_theta]
 
     # Simplex dimensionality
     simdim <- ncol(simplex_theta)
@@ -153,6 +153,22 @@
   logJ <- matrix(nrow = nrow(theta_t), ncol = ncol(theta_t))
   cn <- stringr::str_sub(colnames(theta_t), 7)
 
+  # Separate the computations for the
+  is_simplex_theta <- transTypes == "simplex"
+  if (any(is_simplex_theta)) {
+
+    # Select the simplex variables
+    simplex_theta <- theta_t[, is_simplex_theta]
+
+    # Simplex dimensionality
+    simdim <- ncol(simplex_theta)
+
+    logitz <- simplex_theta - matrix(log(simdim:1L),
+                                     nrow(theta), simdim, byrow = TRUE)
+    z_k    <- exp(logitz) / (1 + exp(logitz))
+  }
+
+
   for (i in seq_len( ncol(theta_t) )) {
 
     p <- cn[i]
@@ -165,8 +181,9 @@
       logJ[,i] <- theta_t[,i]
     } else if (transTypes[[p]] == "double-bounded") {
       logJ[,i] <- log(ub[[p]] - lb[[p]]) + dnorm(theta_t[,i], log = TRUE)
+    } else if (transTypes[[p]] == "circular") {
+      logJ[,i] <- 0
     }
-
   }
 
   return(.rowSums(logJ, m = nrow(logJ), n = ncol(logJ)))

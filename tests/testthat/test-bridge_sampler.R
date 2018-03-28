@@ -162,11 +162,12 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
 
   expect_equal(theta_t$transTypes[1], "simplex")
 
-  theta_t_inv <- bridgesampling:::.invTransform2Real(theta_t,
+  theta_t_t <- bridgesampling:::.invTransform2Real(theta_t$theta_t,
                                               lb = rep(0, 9),
                                               ub = rep(1, 9),
                                               theta_types = rep("simplex", 9))
 
+  expect_equal(theta, theta_t_t)
 
 })
 
