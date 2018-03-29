@@ -110,8 +110,11 @@
                                       nrow(theta), simdim, byrow = TRUE)
     z_k    <- exp(logitz) / (1 + exp(logitz))
     x_k <- z_k
-    for (k in 2:simdim) {
-      x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
+
+    if (simdim > 1) {
+      for (k in 2:simdim) {
+        x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
+      }
     }
 
     theta[, is_simplex_theta] <- x_k
@@ -166,11 +169,13 @@
     z_k <- exp(logitz) / (1 + exp(logitz))
     x_k <- sum_x_k <- z_k
 
-    for (k in 2:simdim) {
-      x_k[, k]     <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
-      sum_x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE]))
+    if (simdim > 1) {
+      for (k in 2:simdim) {
+        x_k[, k]     <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
+        sum_x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE]))
+      }
+      logJ[, is_simplex_theta] <- log(z_k) + log(1 - z_k) + log(sum_x_k)
     }
-    logJ[, is_simplex_theta] <- log(z_k) + log(1 - z_k) + log(sum_x_k)
   }
 
 
