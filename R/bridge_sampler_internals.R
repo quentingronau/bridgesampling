@@ -31,7 +31,7 @@
   if (any(is_simplex_theta)) {
 
     # Select the simplex variables
-    simplex_theta <- theta[, is_simplex_theta]
+    simplex_theta <- theta[, is_simplex_theta, drop = FALSE]
 
     # Simplex dimensionality
     simdim <- ncol(simplex_theta)
@@ -101,7 +101,7 @@
   if (any(is_simplex_theta)) {
 
     # Select the simplex variables
-    simplex_theta <- theta_t[, is_simplex_theta]
+    simplex_theta <- theta_t[, is_simplex_theta, drop = FALSE]
 
     # Simplex dimensionality
     simdim <- ncol(simplex_theta)
@@ -156,7 +156,7 @@
   if (any(is_simplex_theta)) {
 
     # Select the simplex variables
-    simplex_theta <- theta_t[, is_simplex_theta]
+    simplex_theta <- theta_t[, is_simplex_theta, drop = FALSE]
 
     # Simplex dimensionality
     simdim <- ncol(simplex_theta)
