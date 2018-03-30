@@ -2,7 +2,7 @@
 
 dist: trusty
 language: R
-sudo: true
+sudo: false
 cache: packages
 r:
   - release
@@ -20,12 +20,4 @@ r_binary_packages:
    - stringr
    - mvtnorm
 r_build_args: --compact-vignettes="gs+qpdf"
-
-env:
-  - R_LIBS_SITE=/usr/lib/R/library
-
-before_install:
-  - sudo mkdir -p /usr/lib/R/library
-  - echo 'R_LIBS=/usr/lib/R/library' > ~/.Renviron
-  - sudo chmod 2777 /usr/lib/R/library
 
