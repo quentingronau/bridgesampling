@@ -217,9 +217,10 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
                                         ub = rep(1, n)))
   }
 
-  integrate(Vectorize(p_y), -100,100)$value
+  # The jaobian corrects for the transformation
+  expect_equal(integrate(Vectorize(p_y), -100, 100)$value, 1)
 
 })
-y
+
 
 
