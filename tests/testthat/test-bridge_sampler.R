@@ -169,6 +169,57 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
 
   expect_equal(theta, theta_t_t)
 
+  # jacobian works
+  n <- 2
+  # ru <- runif(n)
+  # theta_full <- t((ru / sum(ru)))
+
+  theta_full <- t(c(.4, .6))
+  theta <- theta_full[, -n, drop = FALSE]
+  colnames(theta) <- paste0("sim", (1:(n - 1)))
+
+  y <- bridgesampling:::.transform2Real(theta,
+                                        lb = rep(0, n - 1),
+                                        ub = rep(1, n - 1),
+                                        theta_types = rep("simplex", n - 1))$theta_t
+  tt <- rep("simplex", n - 1)
+  colnames(y) <- paste0("trans_sim", (1:(n - 1)))
+  names(tt) <- paste0("sim", (1:(n - 1)))
+  bridgesampling:::.logJacobian(y,
+                                tt,
+                                lb = rep(0, n),
+                                ub = rep(1, n))
+
+
+  skip("skip due to dependence on MCMCpack")
+
+  invsimplex <- function(y) {
+    y <- as.matrix(y)
+    n <- length(y)
+    colnames(y) <- paste0("trans_sim", (1:n))
+    out1 <- bridgesampling:::.invTransform2Real(y,
+                                        lb = rep(0, n),
+                                        ub = rep(1, n),
+                                     theta_types = rep("simplex", n))
+    c(out1, 1 - sum(out1))
+  }
+  invsimplex(100)
+  p_y <- function(y) {
+    y <- as.matrix(y)
+    n <- length(y)
+    tt <- rep("simplex", n)
+    colnames(y) <- paste0("trans_sim", (1:n))
+    names(tt) <- paste0("sim", (1:n))
+    MCMCpack::ddirichlet(invsimplex(y), theta_full*10) *
+      exp(bridgesampling:::.logJacobian(y,
+                                        tt,
+                                        lb = rep(0, n),
+                                        ub = rep(1, n)))
+  }
+
+  integrate(Vectorize(p_y), -100,100)$value
+
 })
+y
 
 
