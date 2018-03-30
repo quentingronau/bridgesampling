@@ -161,21 +161,27 @@
     # Select the simplex variables
     simplex_theta <- theta_t[, is_simplex_theta, drop = FALSE]
 
-    # Simplex dimensionality
+    # Simplex dimensionality, this is K - 1
     simdim <- ncol(simplex_theta)
 
     logitz <- simplex_theta - matrix(log(simdim:1L),
                                      nrow(theta), simdim, byrow = TRUE)
     z_k <- exp(logitz) / (1 + exp(logitz))
-    x_k <- sum_x_k <- z_k
+    x_k <- z_k
+
+    # Sum_x_k is the length of the remaining stick at step k. At the start, the
+    # whole stick is still left
+    sum_x_k <- matrix(nrow = nrow(theta_t), ncol = ncol(theta_t))
+    sum_x_k[, 1] <- 1
 
     if (simdim > 1) {
       for (k in 2:simdim) {
-        x_k[, k]     <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
-        sum_x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE]))
+        rsx <- rowSums(x_k[, 1:(k - 1), drop = FALSE])
+        x_k[, k]     <- (1 - rsx) * z_k[, k]
+        sum_x_k[, k] <- (1 - rsx)
       }
-      logJ[, is_simplex_theta] <- log(z_k) + log(1 - z_k) + log(sum_x_k)
     }
+    logJ[, is_simplex_theta] <- log(z_k) + log(1 - z_k) + log(sum_x_k)
   }
 
 
