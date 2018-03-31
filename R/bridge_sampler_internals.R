@@ -21,7 +21,7 @@
   theta_t <- theta
   transTypes <- character(ncol(theta))
   cn <- colnames(theta)
-  names(theta_types) <- cn
+  names(theta_types) <- names(transTypes) <- cn
 
   # Because the simplex transform must be done on all simplex parameters at
   # once, do it before the loop. This transformation follows the Stan reference
