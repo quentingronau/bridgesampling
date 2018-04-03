@@ -184,7 +184,6 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
                                      packages = NULL, varlist = NULL, envir = .GlobalEnv,
                                      rcppFile = NULL, maxiter = 1000, silent = FALSE,
                                      verbose = FALSE) {
-  if (!requireNamespace("nimble")) stop("package nimble required")
   # split samples in two parts
   nr <- nrow(samples[[1]])
   samples4fit_index <- seq_len(nr) %in% seq_len(round(nr/2))
@@ -406,17 +405,56 @@ bridge_sampler.MCMC_refClass <- function(samples,
                                   silent = FALSE,
                                   verbose = FALSE,
                                   ...) {
+  if (!requireNamespace("nimble")) stop("package nimble required")
+
+  ## functions for nimble support
+  .log_posterior_nimble <- nimble::nimbleFunction(
+
+    # based on code by Perry de Valpine
+
+    ## setup code is executed in R and specializes an instance
+    ## of the nimbleFunction to a particular model or nodes
+    setup = function(model, nodes) {
+      calcNodes <- model$getDependencies(nodes)
+    },
+    ## run code is called repeatedly and can be converted into C++
+    run = function(sample = double(1)) {
+      values(model, nodes) <<- sample
+      out <- model$calculate(calcNodes)
+      return(out)
+      returnType(double(0))
+    }
+  )
+  .nimble_bounds <- function(samples, model, which) {
+
+    if ( ! (which %in% c("lower", "upper")) ) {
+      stop('"which" needs to be either "lower" or "upper"\n',  call. = FALSE)
+    }
+
+    cn <- colnames(samples)
+    bounds <- numeric(length(cn))
+    names(bounds) <- cn
+
+    for (i in seq_along(cn)) {
+      bounds[[cn[i]]] <- model$getBound(cn[i], which)
+    }
+
+    return(bounds)
+
+  }
 
   # cores > 1 only for unix:
   if (!(.Platform$OS.type == "unix") & (cores != 1)) {
-    warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.", call. = FALSE)
+    warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.",
+            call. = FALSE)
     cores <- 1L
   }
 
   mcmc_samples <- as.matrix(samples$mvSamples)
 
   if (all(is.na(mcmc_samples))) {
-    stop("nimble object does not contain samples. Call runMCMC() first.", call. = FALSE)
+    stop("nimble object does not contain samples. Call runMCMC() first.",
+         call. = FALSE)
   }
 
   # make sure that samples is a list
@@ -449,8 +487,10 @@ bridge_sampler.MCMC_refClass <- function(samples,
                         log_posterior = log_posterior,
                         ...,
                         data = NULL,
-                        lb = .nimble_bounds(mcmc_samples[[1]], nimble_model, "lower"),
-                        ub = .nimble_bounds(mcmc_samples[[1]], nimble_model, "upper"),
+                        lb = .nimble_bounds(mcmc_samples[[1]],
+                                            nimble_model, "lower"),
+                        ub = .nimble_bounds(mcmc_samples[[1]],
+                                            nimble_model, "upper"),
                         repetitions = repetitions,
                         method = method,
                         cores = cores,
