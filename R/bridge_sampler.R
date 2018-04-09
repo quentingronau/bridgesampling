@@ -268,7 +268,7 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
   }
 
   # transform parameters to real line
-  tmp <- .transform2Real(samples, lb, ub, trans_types = param_types)
+  tmp <- .transform2Real(samples, lb, ub, theta_types = param_types)
   theta_t <- tmp$theta_t
   transTypes <- tmp$transTypes
 
@@ -296,6 +296,7 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
                              "..." = ..., data = data,
                              lb = lb, ub = ub,
                              transTypes = transTypes,
+                             param_types = param_types,
                              repetitions = repetitions, cores = cores,
                              packages = packages, varlist = varlist, envir = envir,
                              rcppFile = rcppFile, maxiter = maxiter,
