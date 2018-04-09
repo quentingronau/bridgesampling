@@ -169,7 +169,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
 
   # tranformations work for different input shapes
   nsimp <- 4
-  n     <- 10
+  n     <- 100
   sum_to_one <- function(x) x / sum(x)
   ru <- t(replicate(n, c(rnorm(2), # unbounded
                        sum_to_one(runif(nsimp)), # simplex
@@ -215,6 +215,15 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
   # the same place on the circle.
   expect_equal(theta %% (2*pi), theta_t_t %% (2*pi))
 
+
+  # Test bridge sampler function with non-standard sample spaces
+  bs_ns <- bridgesampling:::bridge_sampler.matrix(
+    theta_original,
+    data = rnorm(10),
+    log_posterior = function(s, data) -.5*t(s) %*% s,
+    lb = lb, ub = ub)
+
+  expect_true(class(bs_ns) == "bridge")
 
 
 
