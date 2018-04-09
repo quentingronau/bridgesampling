@@ -167,7 +167,8 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
   expect_equal(theta, theta_t_t)
 
 
-  # tranformations work for different input shapnsimp <- 4
+  # tranformations work for different input shapes
+  nsimp <- 4
   n     <- 10
   sum_to_one <- function(x) x / sum(x)
   ru <- t(replicate(n, c(rnorm(2), # unbounded
@@ -201,8 +202,9 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
   theta_t_t <- bridgesampling:::.invTransform2Real(theta_t$theta_t, lb, ub, pt)
 
   # The modulus is to force the circular variables to be equal if they lie on
-  # the same place on the circle.
-  expect_equal(theta %% (2*pi), theta_t_t %% (2*pi))
+  # the same place on the circle. The modulus is also taken for the linear
+  # variables, for simplicity of programming.
+  expect_equal(theta_original %% (2*pi), theta_t_t %% (2*pi))
 
   # Works with one row
   theta <- theta_original[1, , drop = FALSE]
@@ -216,7 +218,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
 
 
 
-  # jacobian works
+  ############ TEST JACOBIAN
   n <- 2
   # ru <- runif(n)
   # theta_full <- t((ru / sum(ru)))

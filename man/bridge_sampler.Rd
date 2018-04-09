@@ -27,7 +27,8 @@ bridge_sampler(samples, ...)
   data = NULL, lb = NULL, ub = NULL, repetitions = 1,
   method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
   varlist = NULL, envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-  silent = FALSE, verbose = FALSE)
+  param_types = rep("real", ncol(samples)), silent = FALSE,
+  verbose = FALSE)
 
 \method{bridge_sampler}{stanreg}(samples, repetitions = 1,
   method = "normal", cores = 1, use_neff = TRUE, maxiter = 1000,
@@ -85,6 +86,8 @@ bridge_sampler(samples, ...)
 \item{envir}{specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 
 \item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).}
+
+\item{param_types}{character vector of length \code{ncol(samples)} with \code{"real"}, \code{"simplex"} or \code{"circular"}. For all regular bounded or unbounded continuous parameters, this should just be \code{"real"}. However, if there are parameters which lie on a simplex or on the circle, this should be noted here. Simplex parameters are parameters which collectively sum to one, such as weights in a mixture model. For these, the stick-breaking transformation is performed as described in the Stan reference manual. The circular variables are given a numerical representation to which the normal distribution is most likely a good fit. Only possible to use with \code{bridge_sampler.matrix}.}
 }
 \value{
 if \code{repetitions = 1}, returns a list of class \code{"bridge"} with components:
@@ -360,5 +363,5 @@ Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model determination 
 \code{\link{bf}} allows the user to calculate Bayes factors and \code{\link{post_prob}} allows the user to calculate posterior model probabilities from bridge sampling estimates. \code{\link{bridge-methods}} lists some additional methods that automatically invoke the \code{\link{error_measures}} function.
 }
 \author{
-Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the \code{stanreg} method.
+Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the \code{stanreg} method. Kees Mulder added methods for simplex and circular variables.
 }
