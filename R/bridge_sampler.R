@@ -17,6 +17,7 @@
 #' @param envir specifies the environment for \code{varlist} (only needed if \code{cores > 1}  and \code{.Platform$OS.type != "unix"} as these objects will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.
 #' @param rcppFile in case \code{cores > 1} and \code{log_posterior} is an \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file (will be compiled on all cores).
 #' @param maxiter maximum number of iterations for the iterative updating scheme. Default is 1,000 to avoid infinite loops.
+#' @param param_types character vector of length \code{ncol(samples)} with \code{"real"}, \code{"simplex"} or \code{"circular"}. For all regular bounded or unbounded continuous parameters, this should just be \code{"real"}. However, if there are parameters which lie on a simplex or on the circle, this should be noted here. Simplex parameters are parameters which collectively sum to one, such as weights in a mixture model. For these, the stick-breaking transformation is performed as described in the Stan reference manual. The circular variables are given a numerical representation to which the normal distribution is most likely a good fit. Only possible to use with \code{bridge_sampler.matrix}.
 #' @param silent Boolean which determines whether to print the number of iterations of the updating scheme to the console. Default is FALSE.
 #' @param verbose Boolean. Should internal debug information be printed to console? Default is FALSE.
 #' @details Bridge sampling is implemented as described in Meng and Wong (1996, see equation 4.1) using the "optimal" bridge function. When \code{method = "normal"}, the proposal distribution is a multivariate normal distribution with mean vector equal to the sample mean vector of \code{samples} and covariance matrix equal to the sample covariance matrix of \code{samples}. For a recent tutorial on bridge sampling, see Gronau et al. (in press).
@@ -56,7 +57,7 @@
 #'
 #' Also note that for testing, the number of posterior samples usually needs to be substantially larger than for estimation.
 #' @note To be able to use a \code{stanreg} object for \code{samples}, the user crucially needs to have specified the \code{diagnostic_file} when fitting the model in \pkg{rstanarm}.
-#' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the \code{stanreg} method.
+#' @author Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e., \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan} by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the \code{stanreg} method. Kees Mulder added methods for simplex and circular variables.
 #' @references
 #' Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U., Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., & Steingroever, H. (in press). A tutorial on bridge sampling. \emph{Journal of Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr \code{vignette("bridgesampling_tutorial")}
 #'
