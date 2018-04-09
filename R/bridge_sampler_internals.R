@@ -35,7 +35,7 @@
 
     # Simplex dimensionality
     simdim <- ncol(simplex_theta)
-    cs     <- cbind(0L, t(apply(simplex_theta, 1L, cumsum))[, -simdim])
+    cs     <- cbind(0L, t(apply(simplex_theta, 1L, cumsum))[, -simdim, drop = FALSE])
 
     # Get the break proportions.
     z_k    <- (simplex_theta / (1L - cs))
