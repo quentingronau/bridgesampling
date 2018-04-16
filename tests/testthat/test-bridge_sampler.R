@@ -155,13 +155,13 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
   ru <- replicate(10, runif(10))
   theta <- (ru / rowSums(ru))[, -10]
   colnames(theta) <- paste0("sim", 1:9)
-  theta_t <- bridgesampling:::.transform2Real(theta,
+  theta_t <- .transform2Real(theta,
                                    lb = rep(0, 9), ub = rep(1, 9),
                                    theta_types = rep("simplex", 9))
 
   expect_equal(theta_t$transTypes[1], "simplex")
 
-  theta_t_t <- bridgesampling:::.invTransform2Real(theta_t$theta_t,
+  theta_t_t <- .invTransform2Real(theta_t$theta_t,
                                               lb = rep(0, 9), ub = rep(1, 9),
                                               theta_types = rep("simplex", 9))
   expect_equal(theta, theta_t_t)
@@ -198,8 +198,8 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
   colnames(theta_original) <- names(lb) <- names(ub) <- names(pt) <- nm
 
 
-  theta_t <- bridgesampling:::.transform2Real(theta_original, lb, ub, pt)
-  theta_t_t <- bridgesampling:::.invTransform2Real(theta_t$theta_t, lb, ub, pt)
+  theta_t <- .transform2Real(theta_original, lb, ub, pt)
+  theta_t_t <- .invTransform2Real(theta_t$theta_t, lb, ub, pt)
 
   # The modulus is to force the circular variables to be equal if they lie on
   # the same place on the circle. The modulus is also taken for the linear
@@ -208,8 +208,8 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
 
   # Works with one row
   theta <- theta_original[1, , drop = FALSE]
-  theta_t <- bridgesampling:::.transform2Real(theta, lb, ub, pt)
-  theta_t_t <- bridgesampling:::.invTransform2Real(theta_t$theta_t, lb, ub, pt)
+  theta_t <- .transform2Real(theta, lb, ub, pt)
+  theta_t_t <- .invTransform2Real(theta_t$theta_t, lb, ub, pt)
 
   # The modulus is to force the circular variables to be equal if they lie on
   # the same place on the circle.
@@ -217,7 +217,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
 
 
   # Test bridge sampler function with non-standard sample spaces
-  bs_ns <- bridgesampling:::bridge_sampler.matrix(
+  bs_ns <- bridge_sampler.matrix(
     theta_original,
     data = rnorm(10),
     log_posterior = function(s, data) -.5*t(s) %*% s,
@@ -236,14 +236,14 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
   theta <- theta_full[, -n, drop = FALSE]
   colnames(theta) <- paste0("sim", (1:(n - 1)))
 
-  y <- bridgesampling:::.transform2Real(theta,
+  y <- .transform2Real(theta,
                                         lb = rep(0, n - 1),
                                         ub = rep(1, n - 1),
                                         theta_types = rep("simplex", n - 1))$theta_t
   tt <- rep("simplex", n - 1)
   colnames(y) <- paste0("trans_sim", (1:(n - 1)))
   names(tt) <- paste0("sim", (1:(n - 1)))
-  bridgesampling:::.logJacobian(y,
+  .logJacobian(y,
                                 tt,
                                 lb = rep(0, n),
                                 ub = rep(1, n))
@@ -255,7 +255,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
     y <- as.matrix(y)
     n <- length(y)
     colnames(y) <- paste0("trans_sim", (1:n))
-    out1 <- bridgesampling:::.invTransform2Real(y,
+    out1 <- .invTransform2Real(y,
                                         lb = rep(0, n),
                                         ub = rep(1, n),
                                      theta_types = rep("simplex", n))
@@ -269,7 +269,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
     colnames(y) <- paste0("trans_sim", (1:n))
     names(tt) <- paste0("sim", (1:n))
     MCMCpack::ddirichlet(invsimplex(y), theta_full*10) *
-      exp(bridgesampling:::.logJacobian(y,
+      exp(.logJacobian(y,
                                         tt,
                                         lb = rep(0, n),
                                         ub = rep(1, n)))
