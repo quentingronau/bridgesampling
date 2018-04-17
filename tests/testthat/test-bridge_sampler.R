@@ -159,7 +159,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
                                    lb = rep(0, 9), ub = rep(1, 9),
                                    theta_types = rep("simplex", 9))
 
-  expect_equal(theta_t$transTypes[1], "simplex")
+  expect_equal(theta_t$transTypes[1], c(sim1 = "simplex"))
 
   theta_t_t <- .invTransform2Real(theta_t$theta_t,
                                               lb = rep(0, 9), ub = rep(1, 9),
@@ -229,24 +229,23 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
 
   ############ TEST JACOBIAN
   n <- 2
-  # ru <- runif(n)
-  # theta_full <- t((ru / sum(ru)))
 
   theta_full <- t(c(.4, .6))
   theta <- theta_full[, -n, drop = FALSE]
   colnames(theta) <- paste0("sim", (1:(n - 1)))
 
-  y <- .transform2Real(theta,
+  y <- bridgesampling:::.transform2Real(theta,
                                         lb = rep(0, n - 1),
                                         ub = rep(1, n - 1),
                                         theta_types = rep("simplex", n - 1))$theta_t
   tt <- rep("simplex", n - 1)
   colnames(y) <- paste0("trans_sim", (1:(n - 1)))
   names(tt) <- paste0("sim", (1:(n - 1)))
-  .logJacobian(y,
-                                tt,
-                                lb = rep(0, n),
-                                ub = rep(1, n))
+  jacob <- .logJacobian(y, tt,
+                        lb = rep(0, n),
+                        ub = rep(1, n))
+
+  expect_true(is.numeric(jacob))
 
 
   skip("skip due to dependence on MCMCpack")
