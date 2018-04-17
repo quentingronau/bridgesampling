@@ -11,7 +11,8 @@
   ...,
   data,
   lb, ub,
-  transTypes, # types of transformations for the different parameters (named character vector)
+  transTypes, # types of transformations (unbounded/lower/upperbounded) for the different parameters (named character vector)
+  param_types, # Sample space for transformations (real, circular, simplex)
   cores,
   repetitions,
   packages,
@@ -48,22 +49,22 @@
   # evaluate log of likelihood times prior for posterior samples and generated samples
   q21 <- vector(mode = "list", length = repetitions)
   if (cores == 1) {
-    q11 <- apply(.invTransform2Real(samples_4_iter, lb, ub), 1, log_posterior,
+    q11 <- apply(.invTransform2Real(samples_4_iter, lb, ub, param_types), 1, log_posterior,
                  data = data, ...) + .logJacobian(samples_4_iter, transTypes, lb, ub)
     for (i in seq_len(repetitions)) {
-      q21[[i]] <- apply(.invTransform2Real(gen_samples[[i]], lb, ub), 1, log_posterior,
+      q21[[i]] <- apply(.invTransform2Real(gen_samples[[i]], lb, ub, param_types), 1, log_posterior,
                         data = data, ...) + .logJacobian(gen_samples[[i]], transTypes, lb, ub)
     }
   } else if (cores > 1) {
     if ( .Platform$OS.type == "unix") {
-      split1 <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub), cores=cores)
+      split1 <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub, param_types), cores=cores)
       q11 <- parallel::mclapply(split1, FUN =
                                   function(x) apply(x, 1, log_posterior, data = data, ...),
                                   mc.preschedule = FALSE,
                                   mc.cores = cores)
       q11 <- unlist(q11) + .logJacobian(samples_4_iter, transTypes, lb, ub)
       for (i in seq_len(repetitions)) {
-        split2 <- .split_matrix(matrix=.invTransform2Real(gen_samples[[i]], lb, ub), cores = cores)
+        split2 <- .split_matrix(matrix=.invTransform2Real(gen_samples[[i]], lb, ub, param_types), cores = cores)
         q21[[i]] <- parallel::mclapply(split2, FUN =
                                   function(x) apply(x, 1, log_posterior, data = data, ...),
                                   mc.preschedule = FALSE,
@@ -84,10 +85,10 @@
       parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
     }
 
-    q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub), log_posterior,
+    q11 <- parallel::parRapply(cl = cl, x = .invTransform2Real(samples_4_iter, lb, ub, param_types), log_posterior,
                                data = data, ...) + .logJacobian(samples_4_iter, transTypes, lb, ub)
     for (i in seq_len(repetitions)) {
-      q21[[i]] <- parallel::parRapply(cl = cl, x = .invTransform2Real(gen_samples[[i]], lb, ub), log_posterior,
+      q21[[i]] <- parallel::parRapply(cl = cl, x = .invTransform2Real(gen_samples[[i]], lb, ub, param_types), log_posterior,
                                       data = data, ...) + .logJacobian(gen_samples[[i]], transTypes, lb, ub)
     }
     parallel::stopCluster(cl)
