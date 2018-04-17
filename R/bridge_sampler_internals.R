@@ -165,7 +165,7 @@
     simdim <- ncol(simplex_theta)
 
     logitz <- simplex_theta - matrix(log(simdim:1L),
-                                     nrow(theta), simdim, byrow = TRUE)
+                                     nrow(theta_t), simdim, byrow = TRUE)
     z_k <- exp(logitz) / (1 + exp(logitz))
     x_k <- z_k
 
