@@ -221,7 +221,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
     theta_original,
     data = rnorm(10),
     log_posterior = function(s, data) -.5*t(s) %*% s,
-    lb = lb, ub = ub)
+    lb = lb, ub = ub, silent = TRUE, verbose = FALSE)
 
   expect_true(class(bs_ns) == "bridge")
 
