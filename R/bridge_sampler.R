@@ -257,7 +257,7 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
   if (any(is_simplex_param)) {
     simplex_samples <- samples[, is_simplex_param]
 
-    if (any(!(rowSums(simplex_samples) == 1L))) {
+    if (any(!(round(rowSums(simplex_samples), 6) == 1L))) {
       stop(paste("Simplex parameters do not sum to one. This could be due to
                having multiple separate sets of simplex parameters, which are
                not supported. "))
