@@ -265,6 +265,7 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
 
     # Remove the last simplex variable because it is superfluous.
     samples <- samples[, -which(is_simplex_param)[sum(is_simplex_param)]]
+    param_types <- param_types[-which(is_simplex_param)[sum(is_simplex_param)]]
   }
 
   # transform parameters to real line
