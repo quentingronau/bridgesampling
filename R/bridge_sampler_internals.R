@@ -171,7 +171,7 @@
 
     # Sum_x_k is the length of the remaining stick at step k. At the start, the
     # whole stick is still left
-    sum_x_k <- matrix(nrow = nrow(theta_t), ncol = ncol(theta_t))
+    sum_x_k <- matrix(nrow = nrow(theta_t), ncol = simdim)
     sum_x_k[, 1] <- 1
 
     if (simdim > 1) {
