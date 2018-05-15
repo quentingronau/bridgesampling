@@ -257,14 +257,18 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
   if (any(is_simplex_param)) {
     simplex_samples <- samples[, is_simplex_param]
 
-    if (any(!(rowSums(simplex_samples) == 1L))) {
+    if (any(!(round(rowSums(simplex_samples), 6) == 1L))) {
       stop(paste("Simplex parameters do not sum to one. This could be due to
                having multiple separate sets of simplex parameters, which are
                not supported. "))
     }
 
     # Remove the last simplex variable because it is superfluous.
-    samples <- samples[, -which(is_simplex_param)[sum(is_simplex_param)]]
+    last_sim <- which(is_simplex_param)[sum(is_simplex_param)]
+    samples <- samples[, -last_sim]
+    param_types <- param_types[-last_sim]
+    lb <- lb[-last_sim]
+    ub <- ub[-last_sim]
   }
 
   # transform parameters to real line
