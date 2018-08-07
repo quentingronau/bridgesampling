@@ -1,16 +1,35 @@
-#' Generic function that computes posterior model probabilities from marginal likelihoods.
+#' Generic function that computes posterior model probabilities from marginal
+#' likelihoods.
 #' @export
 #' @title Posterior Model Probabilities from Marginal Likelihoods
-#' @param x Object of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Additionally, the default method assumes that all passed objects are numeric log marginal likelihoods (e.g., from \code{\link{logml}}) and will throw an error otherwise.
-#' @param ... further objects of class \code{"bridge"} or \code{"bridge_list"} as returned from \code{\link{bridge_sampler}}. Or numeric values for the default method.
-#' @param prior_prob numeric vector with prior model probabilities. If omitted, a uniform prior is used (i.e., all models are equally likely a priori). The default \code{NULL} corresponds to equal prior model weights.
-#' @param model_names If \code{NULL} (the default) will use model names derived from deparsing the call. Otherwise will use the passed values as model names.
+#' @param x Object of class \code{"bridge"} or \code{"bridge_list"} as returned
+#'   from \code{\link{bridge_sampler}}. Additionally, the default method assumes
+#'   that all passed objects are numeric log marginal likelihoods (e.g., from
+#'   \code{\link{logml}}) and will throw an error otherwise.
+#' @param ... further objects of class \code{"bridge"} or \code{"bridge_list"}
+#'   as returned from \code{\link{bridge_sampler}}. Or numeric values for the
+#'   default method.
+#' @param prior_prob numeric vector with prior model probabilities. If omitted,
+#'   a uniform prior is used (i.e., all models are equally likely a priori). The
+#'   default \code{NULL} corresponds to equal prior model weights.
+#' @param model_names If \code{NULL} (the default) will use model names derived
+#'   from deparsing the call. Otherwise will use the passed values as model
+#'   names.
 #'
-#' @return For the default method and the method for \code{"bridge"} objects, a named numeric vector with posterior model probabilities (i.e., which sum to one).
+#' @return For the default method and the method for \code{"bridge"} objects, a
+#'   named numeric vector with posterior model probabilities (i.e., which sum to
+#'   one).
 #'
-#' For the method for \code{"bridge_list"} objects, a matrix consisting of posterior model probabilities where each row sums to one and gives the model probabilities for one set of logmls. The (named) columns correspond to the models and the number of rows is given by the \code{"bridge_list"} element with the most \code{repetitions}. Elements with fewer repetitions will be recycled (with warning).
+#'   For the method for \code{"bridge_list"} objects, a matrix consisting of
+#'   posterior model probabilities where each row sums to one and gives the
+#'   model probabilities for one set of logmls. The (named) columns correspond
+#'   to the models and the number of rows is given by the \code{"bridge_list"}
+#'   element with the most \code{repetitions}. Elements with fewer repetitions
+#'   will be recycled (with warning).
 #' @author Quentin F. Gronau and Henrik Singmann
-#' @note For realistic examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}
+#' @note For realistic examples, see \code{\link{bridge_sampler}} and the
+#'   accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")}
+#'   \cr \code{vignette("bridgesampling_example_stan")}
 #' @example examples/example.post_prob.R
 #' @importFrom methods is
 post_prob <- function (x, ..., prior_prob = NULL, model_names = NULL) {
