@@ -47,6 +47,6 @@ Description: Provides functions for estimating marginal likelihoods, Bayes
     <http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm>).
 License: GPL (>=2)
 LazyData: true
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr, R.rsp
 URL: https://github.com/quentingronau/bridgesampling
