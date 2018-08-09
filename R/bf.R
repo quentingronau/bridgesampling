@@ -66,8 +66,8 @@ bf.bridge <- function(x1, x2, log = FALSE, ...) {
   class(out) <- "bf_bridge"
   try({
     mc <- match.call()
-    name1 <- as.character(mc[["x1"]])
-    name2 <- as.character(mc[["x2"]])
+    name1 <- deparse(mc[["x1"]])
+    name2 <- deparse(mc[["x2"]])
     attr(out, "model_names") <- c(name1, name2)
   }, silent = TRUE)
   return(out)
@@ -98,8 +98,8 @@ bf.bridge_list <- function(x1, x2, log = FALSE, ...) {
   class(out) <- "bf_bridge_list"
   try({
     mc <- match.call()
-    name1 <- as.character(mc[["x1"]])
-    name2 <- as.character(mc[["x2"]])
+    name1 <- deparse(mc[["x1"]])
+    name2 <- deparse(mc[["x2"]])
     attr(out, "model_names") <- c(name1, name2)
   }, silent = TRUE)
   return(out)
@@ -119,8 +119,8 @@ bf.default <- function(x1, x2, log = FALSE, ...) {
   class(out) <- "bf_default"
   try({
     mc <- match.call()
-    name1 <- as.character(mc[["x1"]])
-    name2 <- as.character(mc[["x2"]])
+    name1 <- deparse(mc[["x1"]])
+    name2 <- deparse(mc[["x2"]])
     attr(out, "model_names") <- c(name1, name2)
   }, silent = TRUE)
   return(out)
