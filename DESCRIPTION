@@ -40,7 +40,8 @@ Suggests:
     BayesFactor,
     rstan,
     rstanarm,
-    nimble
+    nimble,
+    MCMCpack
 Description: Provides functions for estimating marginal likelihoods, Bayes
     factors, posterior model probabilities, and normalizing constants in general,
     via different versions of bridge sampling (Meng & Wong, 1996, 

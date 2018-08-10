@@ -248,7 +248,7 @@ test_that("bridge sampler functions for non-standard parameter spaces", {
   expect_true(is.numeric(jacob))
 
 
-  skip("skip due to dependence on MCMCpack")
+  skip_if_not_installed("MCMCpack")
 
   invsimplex <- function(y) {
     y <- as.matrix(y)
