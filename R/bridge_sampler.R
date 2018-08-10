@@ -521,7 +521,6 @@ bridge_sampler.runjags <- function(samples = NULL, log_posterior = NULL, ..., da
 
 }
 
-
 #' @rdname bridge_sampler
 #' @export
 bridge_sampler.MCMC_refClass <- function(samples,
@@ -536,7 +535,7 @@ bridge_sampler.MCMC_refClass <- function(samples,
   if (!requireNamespace("nimble")) stop("package nimble required")
 
   ## functions for nimble support
-  nimble_log_post <- ".log_posterior_nimble <- nimble::nimbleFunction(
+  .log_posterior_nimble <- ".log_posterior_nimble <- nimble::nimbleFunction(
 
     # based on code by Perry de Valpine
 
@@ -553,7 +552,7 @@ bridge_sampler.MCMC_refClass <- function(samples,
       returnType(double(0))
     }
   )"
-  eval(parse(text = nimble_log_post)) ## trick for avoiding R CMD check warnings
+  eval(parse(text = .log_posterior_nimble)) ## trick for avoiding R CMD check NOTEs
   .nimble_bounds <- function(samples, model, which) {
 
     if ( ! (which %in% c("lower", "upper")) ) {
