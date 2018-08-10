@@ -122,6 +122,22 @@ test_that("bridge sampler matches analytical value", {
                                      method = "warp3", silent = TRUE, repetitions = 2,
                                      cores = 2)
 
+    # mcmc
+    bridge_normal_s <- bridge_sampler(samples = samples1[[1]], log_posterior = log_posterior_H1,
+                                      data = data_H1, lb = lb_H1, ub = ub_H1,
+                                      method = "normal", silent = TRUE, repetitions = 2)
+    bridge_warp3_s <- bridge_sampler(samples = samples1[[1]], log_posterior = log_posterior_H1,
+                                   data = data_H1, lb = lb_H1, ub = ub_H1,
+                                   method = "warp3", silent = TRUE, repetitions = 2)
+    bridge_normal_m_s <- bridge_sampler(samples = samples1[[1]], log_posterior = log_posterior_H1,
+                                      data = data_H1, lb = lb_H1, ub = ub_H1,
+                                      method = "normal", silent = TRUE, repetitions = 2,
+                                      cores = 2)
+    bridge_warp3_m_s <- bridge_sampler(samples = samples1[[1]], log_posterior = log_posterior_H1,
+                                     data = data_H1, lb = lb_H1, ub = ub_H1,
+                                     method = "warp3", silent = TRUE, repetitions = 2,
+                                     cores = 2)
+
     # rjags
     bridge_normal_j <- bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
                                     data = data_H1, lb = lb_H1, ub = ub_H1,
@@ -168,61 +184,177 @@ test_that("bridge sampler matches analytical value", {
       mH1integrand <- function(tau2, y, sigma2, mu0, tau20, alpha, beta) {
 
         (sigma2 + tau2)^(-n/2) *
-          exp(-1/2 * ((n*mean(y)^2 + (n - 1)*sd(y)^2)/(sigma2 + tau2) + mu0^2/tau20 -
-                        ((n*mean(y))/(sigma2 + tau2) +  mu0/tau20)^2 / (n/(sigma2 + tau2) + 1/tau20))) *
-          (n/(sigma2 + tau2) + 1/tau20)^(-1/2) * tau2^(-alpha - 1) * exp(-beta/tau2)
+          exp(-1/2 * ((n*mean(y)^2 + (n - 1)*sd(y)^2)/(sigma2 + tau2) +
+                        mu0^2/tau20 - ((n*mean(y))/(sigma2 + tau2) +
+                                         mu0/tau20)^2 /
+                        (n/(sigma2 + tau2) + 1/tau20))) *
+          (n/(sigma2 + tau2) + 1/tau20)^(-1/2) * tau2^(-alpha - 1) *
+          exp(-beta/tau2)
 
       }
 
-      (2*pi)^(-n/2) * (tau20)^(-1/2) * beta^alpha/gamma(alpha) * integrate(mH1integrand, 0, Inf,
-                                                                           rel.tol = rel.tol, y = y,
-                                                                           sigma2 = sigma2, mu0 = mu0,
-                                                                           tau20 = tau20, alpha = alpha,
-                                                                           beta = beta)$value
+      (2*pi)^(-n/2) * (tau20)^(-1/2) * beta^alpha/gamma(alpha) *
+        integrate(mH1integrand, 0, Inf,
+                  rel.tol = rel.tol, y = y,
+                  sigma2 = sigma2, mu0 = mu0,
+                  tau20 = tau20, alpha = alpha,
+                  beta = beta)$value
 
     }
 
     exact_logml <- log(mH1(data_H1))
 
     expect_equal(class(samples1), expected = "mcmc.list")
-    expect_equal(bridge_normal$logml, expected = rep(exact_logml, length(bridge_normal$logml)), tolerance = 0.01)
-    expect_equal(bridge_warp3$logml, expected = rep(exact_logml, length(bridge_warp3$logml)), tolerance = 0.01)
-    expect_equal(bridge_normal_m$logml, expected = rep(exact_logml, length(bridge_normal_m$logml)), tolerance = 0.01)
-    expect_equal(bridge_warp3_m$logml, expected = rep(exact_logml, length(bridge_warp3_m$logml)), tolerance = 0.01)
+    expect_equal(
+      bridge_normal$logml,
+      expected = rep(exact_logml, length(bridge_normal$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3$logml,
+      expected = rep(exact_logml, length(bridge_warp3$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_normal_m$logml,
+      expected = rep(exact_logml, length(bridge_normal_m$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3_m$logml,
+      expected = rep(exact_logml, length(bridge_warp3_m$logml)),
+      tolerance = 0.01
+    )
+
+    expect_equal(class(samples1[[1]]), expected = "mcmc")
+    expect_equal(
+      bridge_normal_s$logml,
+      expected = rep(exact_logml, length(bridge_normal_s$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3_s$logml,
+      expected = rep(exact_logml, length(bridge_warp3_s$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_normal_m_s$logml,
+      expected = rep(exact_logml, length(bridge_normal_m_s$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3_m_s$logml,
+      expected = rep(exact_logml, length(bridge_warp3_m_s$logml)),
+      tolerance = 0.01
+    )
 
     expect_equal(class(samples_H1), expected = "rjags")
-    expect_equal(bridge_normal_j$logml, expected = rep(exact_logml, length(bridge_normal_j$logml)), tolerance = 0.01)
-    expect_equal(bridge_warp3_j$logml, expected = rep(exact_logml, length(bridge_warp3_j$logml)), tolerance = 0.01)
-    expect_equal(bridge_normal_jm$logml, expected = rep(exact_logml, length(bridge_normal_jm$logml)), tolerance = 0.01)
-    expect_equal(bridge_warp3_jm$logml, expected = rep(exact_logml, length(bridge_warp3_jm$logml)), tolerance = 0.01)
+    expect_equal(
+      bridge_normal_j$logml,
+      expected = rep(exact_logml, length(bridge_normal_j$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3_j$logml,
+      expected = rep(exact_logml, length(bridge_warp3_j$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_normal_jm$logml,
+      expected = rep(exact_logml, length(bridge_normal_jm$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3_jm$logml,
+      expected = rep(exact_logml, length(bridge_warp3_jm$logml)),
+      tolerance = 0.01
+    )
 
     expect_equal(class(samples_runjags), expected = "runjags")
-    expect_equal(bridge_normal_r$logml, expected = rep(exact_logml, length(bridge_normal_r$logml)), tolerance = 0.01)
-    expect_equal(bridge_warp3_r$logml, expected = rep(exact_logml, length(bridge_warp3_r$logml)), tolerance = 0.01)
-    expect_equal(bridge_normal_rm$logml, expected = rep(exact_logml, length(bridge_normal_rm$logml)), tolerance = 0.01)
-    expect_equal(bridge_warp3_rm$logml, expected = rep(exact_logml, length(bridge_warp3_rm$logml)), tolerance = 0.01)
+    expect_equal(
+      bridge_normal_r$logml,
+      expected = rep(exact_logml, length(bridge_normal_r$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3_r$logml,
+      expected = rep(exact_logml, length(bridge_warp3_r$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_normal_rm$logml,
+      expected = rep(exact_logml, length(bridge_normal_rm$logml)),
+      tolerance = 0.01
+    )
+    expect_equal(
+      bridge_warp3_rm$logml,
+      expected = rep(exact_logml, length(bridge_warp3_rm$logml)),
+      tolerance = 0.01
+    )
 
     ### check that wrong lb and ub produce errors:
     ub_H0 <- ub_H1[-2]
     lb_H0 <- lb_H1[-1]
-    expect_error(bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
-                                      data = data_H1, lb = lb_H1, ub = ub_H0),
-                 "ub does not contain all parameters")
-    expect_error(bridge_sampler(samples = samples_runjags, log_posterior = log_posterior_H1,
-                                      data = data_H1, lb = lb_H0, ub = ub_H1),
-                 "lb does not contain all parameters")
-    expect_error(bridge_sampler(samples = samples1, log_posterior = log_posterior_H1,
-                                    data = data_H1, lb = lb_H1, ub = ub_H0),
-                 "ub does not contain all parameters")
-    expect_error(bridge_sampler(samples = samples1, log_posterior = log_posterior_H1,
-                                    data = data_H1, lb = lb_H0, ub = ub_H1),
-                 "lb does not contain all parameters")
-    expect_error(bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
-                                    data = data_H1, lb = lb_H0, ub = ub_H1),
-                 "lb does not contain all parameters")
-    expect_error(bridge_sampler(samples = samples_H1, log_posterior = log_posterior_H1,
-                                    data = data_H1, lb = lb_H1, ub = ub_H0),
-                 "ub does not contain all parameters")
+    expect_error(
+      bridge_sampler(
+        samples = samples_runjags,
+        log_posterior = log_posterior_H1,
+        data = data_H1,
+        lb = lb_H1,
+        ub = ub_H0
+      ),
+      "ub does not contain all parameters"
+    )
+    expect_error(
+      bridge_sampler(
+        samples = samples_runjags,
+        log_posterior = log_posterior_H1,
+        data = data_H1,
+        lb = lb_H0,
+        ub = ub_H1
+      ),
+      "lb does not contain all parameters"
+    )
+    expect_error(
+      bridge_sampler(
+        samples = samples1,
+        log_posterior = log_posterior_H1,
+        data = data_H1,
+        lb = lb_H1,
+        ub = ub_H0
+      ),
+      "ub does not contain all parameters"
+    )
+    expect_error(
+      bridge_sampler(
+        samples = samples1,
+        log_posterior = log_posterior_H1,
+        data = data_H1,
+        lb = lb_H0,
+        ub = ub_H1
+      ),
+      "lb does not contain all parameters"
+    )
+    expect_error(
+      bridge_sampler(
+        samples = samples_H1,
+        log_posterior = log_posterior_H1,
+        data = data_H1,
+        lb = lb_H0,
+        ub = ub_H1
+      ),
+      "lb does not contain all parameters"
+    )
+    expect_error(
+      bridge_sampler(
+        samples = samples_H1,
+        log_posterior = log_posterior_H1,
+        data = data_H1,
+        lb = lb_H1,
+        ub = ub_H0
+      ),
+      "ub does not contain all parameters"
+    )
 
   }
 

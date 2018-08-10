@@ -347,14 +347,44 @@ bridge_sampler.mcmc.list <- function(samples = NULL, log_posterior = NULL, ..., 
 
 }
 
+#' @rdname bridge_sampler
+#' @export
+bridge_sampler.mcmc <- function(samples = NULL, log_posterior = NULL, ...,
+                                data = NULL, lb = NULL, ub = NULL,
+                                repetitions = 1, method = "normal",
+                                cores = 1, use_neff = TRUE,
+                                packages = NULL, varlist = NULL,
+                                envir = .GlobalEnv, rcppFile = NULL,
+                                maxiter = 1000,
+                                param_types = rep("real", ncol(samples)),
+                                silent = FALSE, verbose = FALSE) {
+  samples <- as.matrix(samples)
+  bridge_output <- bridge_sampler(samples = samples,
+                                  log_posterior = log_posterior,
+                                  ...,
+                                  data = data, lb = lb, ub = ub,
+                                  repetitions = repetitions,
+                                  method = method,
+                                  cores = cores, use_neff = use_neff,
+                                  packages = packages, varlist = varlist,
+                                  envir = envir, rcppFile = rcppFile,
+                                  maxiter = maxiter,
+                                  param_types = param_types,
+                                  silent = silent, verbose = verbose)
+  return(bridge_output)
+}
+
 #' @export
 #' @rdname bridge_sampler
-bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., data = NULL,
-                           lb = NULL, ub = NULL, repetitions = 1, method = "normal",
-                           cores = 1, use_neff = TRUE, packages = NULL, varlist = NULL,
-                           envir = .GlobalEnv, rcppFile = NULL, maxiter = 1000,
-                           param_types = rep("real", ncol(samples)),
-                           silent = FALSE, verbose = FALSE) {
+bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ...,
+                                data = NULL, lb = NULL, ub = NULL,
+                                repetitions = 1, method = "normal",
+                                cores = 1, use_neff = TRUE,
+                                packages = NULL, varlist = NULL,
+                                envir = .GlobalEnv, rcppFile = NULL,
+                                maxiter = 1000,
+                                param_types = rep("real", ncol(samples)),
+                                silent = FALSE, verbose = FALSE) {
 
   # see Meng & Wong (1996), equation 4.1
 
@@ -390,10 +420,11 @@ bridge_sampler.matrix <- function(samples = NULL, log_posterior = NULL, ..., dat
 
   # compute effective sample size
   if (use_neff) {
-    neff <- tryCatch(median(coda::effectiveSize(coda::mcmc(samples_4_iter))), error = function(e) {
-      warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
-      return(NULL)
-    })
+    neff <- tryCatch(median(coda::effectiveSize(coda::mcmc(samples_4_iter))),
+                     error = function(e) {
+                       warning("effective sample size cannot be calculated, has been replaced by number of samples.", call. = FALSE)
+                       return(NULL)
+                     })
   } else {
     neff <- NULL
   }

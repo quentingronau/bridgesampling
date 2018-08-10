@@ -4,6 +4,7 @@
 \alias{bridge_sampler}
 \alias{bridge_sampler.stanfit}
 \alias{bridge_sampler.mcmc.list}
+\alias{bridge_sampler.mcmc}
 \alias{bridge_sampler.matrix}
 \alias{bridge_sampler.stanreg}
 \alias{bridge_sampler.rjags}
@@ -24,6 +25,13 @@ bridge_sampler(samples, ...)
   method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
   varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
   maxiter = 1000, silent = FALSE, verbose = FALSE)
+
+\method{bridge_sampler}{mcmc}(samples = NULL, log_posterior = NULL,
+  ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+  maxiter = 1000, param_types = rep("real", ncol(samples)),
+  silent = FALSE, verbose = FALSE)
 
 \method{bridge_sampler}{matrix}(samples = NULL, log_posterior = NULL,
   ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
