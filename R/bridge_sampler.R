@@ -59,11 +59,12 @@
 #'  bounded or unbounded continuous parameters, this should just be
 #'  \code{"real"}. However, if there are parameters which lie on a simplex or on
 #'  the circle, this should be noted here. Simplex parameters are parameters
-#'  which collectively sum to one, such as weights in a mixture model. For
-#'  these, the stick-breaking transformation is performed as described in the
-#'  Stan reference manual. The circular variables are given a numerical
-#'  representation to which the normal distribution is most likely a good fit.
-#'  Only possible to use with \code{bridge_sampler.matrix}.
+#'  which are bounded below by zero and collectively sum to one, such as weights
+#'  in a mixture model. For these, the stick-breaking transformation is
+#'  performed as described in the Stan reference manual. The circular variables
+#'  are given a numerical representation to which the normal distribution is
+#'  most likely a good fit. Only possible to use with
+#'  \code{bridge_sampler.matrix}.
 #'@param silent Boolean which determines whether to print the number of
 #'  iterations of the updating scheme to the console. Default is FALSE.
 #'@param verbose Boolean. Should internal debug information be printed to
@@ -143,29 +144,30 @@
 #'  \code{stanreg} method. Kees Mulder added methods for simplex and circular
 #'  variables.
 #'@references Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U.,
-#'Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., &
-#'Steingroever, H. (in press). A tutorial on bridge sampling. \emph{Journal of
-#'Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr
-#'\code{vignette("bridgesampling_tutorial")}
+#'  Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., &
+#'  Steingroever, H. (in press). A tutorial on bridge sampling. \emph{Journal of
+#'  Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr
+#'  \code{vignette("bridgesampling_tutorial")}
 #'
-#'Gronau, Q. F., Wagenmakers, E.-J., Heck, D. W., & Matzke, D. (2017). \emph{A
-#'simple method for comparing complex models: Bayesian model comparison for
-#'hierarchical multinomial processing tree models using Warp-III bridge
-#'sampling}. Manuscript submitted for publication.
-#'\url{https://psyarxiv.com/yxhfm}
+#'  Gronau, Q. F., Wagenmakers, E.-J., Heck, D. W., & Matzke, D. (2017). \emph{A
+#'  simple method for comparing complex models: Bayesian model comparison for
+#'  hierarchical multinomial processing tree models using Warp-III bridge
+#'  sampling}. Manuscript submitted for publication.
+#'  \url{https://psyarxiv.com/yxhfm}
 #'
-#'Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing constants
-#'via a simple identity: A theoretical exploration. \emph{Statistica Sinica, 6},
-#'831-860. \url{http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm}
+#'  Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing
+#'  constants via a simple identity: A theoretical exploration. \emph{Statistica
+#'  Sinica, 6}, 831-860.
+#'  \url{http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm}
 #'
-#'Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of
-#'Computational and Graphical Statistics, 11(3)}, 552-586.
-#'\url{http://dx.doi.org/10.1198/106186002457}
+#'  Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of
+#'  Computational and Graphical Statistics, 11(3)}, 552-586.
+#'  \url{http://dx.doi.org/10.1198/106186002457}
 #'
-#'Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model
-#'determination methods for generalised linear mixed models. \emph{Computational
-#'Statistics & Data Analysis, 54}, 3269-3288.
-#'\url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
+#'  Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model
+#'  determination methods for generalised linear mixed models.
+#'  \emph{Computational Statistics & Data Analysis, 54}, 3269-3288.
+#'  \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
 #'@example examples/example.bridge_sampler.R
 #'
 #'@seealso \code{\link{bf}} allows the user to calculate Bayes factors and
@@ -174,12 +176,12 @@
 #'  lists some additional methods that automatically invoke the
 #'  \code{\link{error_measures}} function.
 #'
-#' @importFrom mvtnorm rmvnorm dmvnorm
-#' @importFrom Matrix nearPD
-#' @import Brobdingnag
-#' @importFrom stringr str_sub
-#' @importFrom stats qnorm pnorm dnorm median cov var
-#' @export
+#'@importFrom mvtnorm rmvnorm dmvnorm
+#'@importFrom Matrix nearPD
+#'@import Brobdingnag
+#'@importFrom stringr str_sub
+#'@importFrom stats qnorm pnorm dnorm median cov var
+#'@export
 bridge_sampler <- function(samples, ...) {
    UseMethod("bridge_sampler", samples)
 }
