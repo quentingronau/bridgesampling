@@ -65,8 +65,8 @@ test_that("bridge sampler yields correct results", {
     H1 <- bridge_sampler(stanfitH1, silent = TRUE)
 
     # compute percentage errors
-    eH0 <- error_measures(H0)$percentage
-    eH1 <- error_measures(H1)$percentage
+    H0.error <- error_measures(H0)$percentage
+    H1.error <- error_measures(H1)$percentage
 
     # compute Bayes factor
     BF10 <- bf(H1, H0)
@@ -98,7 +98,7 @@ test_that("bridge sampler yields correct results", {
                              control = list(adapt_delta = .99))
 
     Hplus <- bridge_sampler(stanfitHplus, silent = TRUE)
-    eHplus <- error_measures(Hplus)$percentage
+    Hplus.error <- error_measures(Hplus)$percentage
 
     # compute Bayes factor
     BFplus0 <- bf(Hplus, H0)

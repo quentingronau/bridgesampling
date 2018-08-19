@@ -72,13 +72,15 @@ test_that("bridge sampler yields correct results", {
     # fit models
     stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                    alpha = alpha,
-                                                   beta = beta),
+                                                   beta = beta,
+                                                   sigma2 = sigma2),
                           iter = 50000, warmup = 1000, chains = 3, cores = 1)
     stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
                                                    mu0 = mu0,
                                                    tau20 = tau20,
                                                    alpha = alpha,
-                                                   beta = beta),
+                                                   beta = beta,
+                                                   sigma2 = sigma2),
                           iter = 50000, warmup = 1000, chains = 3, cores = 1)
 
     # compute log marginal likelihood via bridge sampling for H0
@@ -88,8 +90,8 @@ test_that("bridge sampler yields correct results", {
     H1.bridge <- bridge_sampler(stanfitH1, silent = TRUE)
 
     # compute percentage errors
-    eH0 <- error_measures(H0.bridge)$percentage
-    eH1 <- error_measures(H1.bridge)$percentage
+    H0.error <- error_measures(H0.bridge)$percentage
+    H1.error <- error_measures(H1.bridge)$percentage
 
     # compute Bayes factor
     BF01 <- bf(H0.bridge, H1.bridge)
@@ -132,7 +134,12 @@ test_that("bridge sampler yields correct results", {
 
     }
 
-    exact_logmlH1 <- log(mH1(data_H1))
+    exact_logmlH1 <- log(mH1(list(y = y, n = n,
+                                  mu0 = mu0,
+                                  tau20 = tau20,
+                                  alpha = alpha,
+                                  beta = beta,
+                                  sigma2 = sigma2)))
 
     # "exact" ml H1
     mH0 <- function(data, rel.tol = 1e-10) {
@@ -160,7 +167,10 @@ test_that("bridge sampler yields correct results", {
 
     }
 
-    exact_logmlH0 <- log(mH0(data_H0))
+    exact_logmlH0 <- log(mH0(list(y = y, n = n,
+                                  alpha = alpha,
+                                  beta = beta,
+                                  sigma2 = sigma2)))
 
     exact_BF01 <- exp(exact_logmlH0 - exact_logmlH1)
 

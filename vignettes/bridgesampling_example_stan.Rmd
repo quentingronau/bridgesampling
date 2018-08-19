@@ -99,13 +99,15 @@ Now we can fit the null and the alternative model in `Stan`. One usually require
 # fit models
 stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                alpha = alpha,
-                                               beta = beta),
+                                               beta = beta,
+                                               sigma2 = sigma2),
                       iter = 50000, warmup = 1000, chains = 3, cores = 1)
 stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
                                                mu0 = mu0,
                                                tau20 = tau20,
                                                alpha = alpha,
-                                               beta = beta),
+                                               beta = beta,
+                                               sigma2 = sigma2),
                       iter = 50000, warmup = 1000, chains = 3, cores = 1)
 ```
 
@@ -129,10 +131,15 @@ print(H0.bridge)
 print(H1.bridge)
 ```
 We can use the `error_measures` function to compute an approximate percentage error of the estimates:
-```{r}
+```{r,eval=FALSE}
 # compute percentage errors
-print(error_measures(H0.bridge)$percentage)
-print(error_measures(H1.bridge)$percentage)
+H0.error <- error_measures(H0.bridge)$percentage
+H1.error <- error_measures(H1.bridge)$percentage
+```
+We obtain:
+```{r}
+print(H0.error)
+print(H1.error)
 ```
 
 ## Bayesian Model Comparison

@@ -104,12 +104,16 @@ print(H0)
 print(H1)
 ```
 We can use the `error_measures` function to compute an approximate percentage error of the estimates:
-```{r}
+```{r,eval=FALSE}
 # compute percentage errors
-print(error_measures(H0)$percentage)
-print(error_measures(H1)$percentage)
+H0.error <- error_measures(H0)$percentage
+H1.error <- error_measures(H1)$percentage
 ```
-
+We obtain:
+```{r}
+print(H0.error)
+print(H1.error)
+```
 ## Computing the Bayes Factor
 To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
 In our case, we compute $\text{BF}_{10}$, that is, the Bayes factor which quantifies how much more likely the data are under the alternative versus the null hypothesis:
@@ -157,7 +161,14 @@ Hplus <- bridge_sampler(stanfitHplus, silent = TRUE)
 We obtain:
 ```{r}
 print(Hplus)
-print(error_measures(Hplus)$percentage)
+```
+We can again use the `error_measures` function to compute an approximate percentage error of the estimate:
+```{r,eval=FALSE}
+Hplus.error <- error_measures(Hplus)$percentage
+```
+We obtain:
+```{r}
+print(Hplus.error)
 ```
 The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can be computed as follows:
 ```{r}

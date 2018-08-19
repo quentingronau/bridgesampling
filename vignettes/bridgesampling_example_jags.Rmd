@@ -193,12 +193,16 @@ print(H0.bridge)
 print(H1.bridge)
 ```
 We can use the `error_measures` function to compute an approximate percentage error of the estimates:
-```{r}
+```{r,eval=FALSE}
 # compute percentage errors
-print(error_measures(H0.bridge)$percentage)
-print(error_measures(H1.bridge)$percentage)
+H0.error <- error_measures(H0.bridge)$percentage
+H1.error <- error_measures(H1.bridge)$percentage
 ```
-
+We obtain:
+```{r}
+print(H0.error)
+print(H1.error)
+```
 ## Bayesian Model Comparison
 To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
 In our case, we compute $\text{BF}_{01}$, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:

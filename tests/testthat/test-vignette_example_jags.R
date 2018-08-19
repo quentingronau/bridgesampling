@@ -146,8 +146,8 @@ test_that("bridge sampler yields correct results", {
                                 ub = ub_H1, silent = TRUE)
 
     # compute percentage errors
-    eH0 <- error_measures(H0.bridge)$percentage
-    eH1 <- error_measures(H1.bridge)$percentage
+    H0.error <- error_measures(H0.bridge)$percentage
+    H1.error <- error_measures(H1.bridge)$percentage
 
     # compute Bayes factor
     BF01 <- bf(H0.bridge, H1.bridge)
