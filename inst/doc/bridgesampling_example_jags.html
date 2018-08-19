@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-10-19" />
+<meta name="date" content="2018-08-19" />
 
 <title>Hierarchical Normal Example (JAGS)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Hierarchical Normal Example (JAGS)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-10-19</em></h4>
+<h4 class="date"><em>2018-08-19</em></h4>
 
 
 <div id="TOC">
@@ -230,21 +230,26 @@ lb_H1[[ <span class="st">&quot;invTau2&quot;</span> ]] &lt;-<span class="st"> </
 H0.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<span class="dt">samples =</span> samples_H0, <span class="dt">data =</span> data_H0,
                             <span class="dt">log_posterior =</span> log_posterior_H0, <span class="dt">lb =</span> lb_H0,
                             <span class="dt">ub =</span> ub_H0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H0.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53235
-## Estimate obtained in 4 iteration(s) via method &quot;normal&quot;.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
+
+<span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
 H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<span class="dt">samples =</span> samples_H1, <span class="dt">data =</span> data_H1,
                             <span class="dt">log_posterior =</span> log_posterior_H1, <span class="dt">lb =</span> lb_H1,
-                            <span class="dt">ub =</span> ub_H1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H1.bridge)</code></pre></div>
+                            <span class="dt">ub =</span> ub_H1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H0.bridge)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53235
+## Estimate obtained in 4 iteration(s) via method &quot;normal&quot;.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H1.bridge)</code></pre></div>
 <pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79776
 ## Estimate obtained in 5 iteration(s) via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
-<span class="kw">print</span>(<span class="kw">error_measures</span>(H0.bridge)$percentage)</code></pre></div>
+H0.error &lt;-<span class="st"> </span><span class="kw">error_measures</span>(H0.bridge)$percentage
+H1.error &lt;-<span class="st"> </span><span class="kw">error_measures</span>(H1.bridge)$percentage</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H0.error)</code></pre></div>
 <pre><code>## [1] &quot;0.144%&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1.bridge)$percentage)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H1.error)</code></pre></div>
 <pre><code>## [1] &quot;0.162%&quot;</code></pre>
 </div>
 <div id="bayesian-model-comparison" class="section level2">
@@ -253,7 +258,7 @@ H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(<
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BF01 &lt;-<span class="st"> </span><span class="kw">bf</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(BF01)</code></pre></div>
-<pre><code>## The estimated Bayes factor in favor of x1 over x2 is equal to: 1.30396</code></pre>
+<pre><code>## Estimated Bayes factor in favor of H0.bridge over H1.bridge: 1.30396</code></pre>
 <p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>post_prob</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (assuming equal prior model probabilities)</span>
 post1 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge)

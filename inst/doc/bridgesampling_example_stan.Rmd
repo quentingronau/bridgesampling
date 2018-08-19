@@ -37,7 +37,7 @@ y <- rnorm(n, theta, sqrt(sigma2))
 
 Next, we specify the prior parameters $\mu_0$, $\tau^2_0$, $\alpha$, and $\beta$:
 
-```{r}
+```{r,eval=FALSE}
 ### set prior parameters ###
 mu0 <- 0
 tau20 <- 1
@@ -47,7 +47,7 @@ beta <- 1
 
 ## Specifying the Models
 Next, we implement the models in `Stan`. Note that to compute the (log) marginal likelihood for a `Stan` model, we need to specify the model in a certain way. Instad of using `"~"` signs for specifying distributions, we need to directly use the (log) density functions. The reason for this is that when using the `"~"` sign, constant terms are dropped which are not needed for sampling from the posterior. However, for computing the marginal likelihood, these constants need to be retained. For instance, instead of writing `y ~ normal(mu, sigma)` we would need to write `target += normal_lpdf(y | mu, sigma)`. The models can then be specified and compiled as follows (note that it is necessary to install `rstan` for this):
-```{r, message = FALSE, results='hide',warnings = FALSE}
+```{r, eval=FALSE}
 library(rstan)
 
 # models
@@ -95,37 +95,51 @@ stanmodelH1 <- stan_model(model_code = stancodeH1, model_name="stanmodel")
 ```
 ## Fitting the Models
 Now we can fit the null and the alternative model in `Stan`. One usually requires a larger number of posterior samples for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples for these simple models.
-```{r, message = FALSE, results='hide', warning=FALSE}
+```{r, eval=FALSE}
 # fit models
 stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                alpha = alpha,
-                                               beta = beta),
+                                               beta = beta,
+                                               sigma2 = sigma2),
                       iter = 50000, warmup = 1000, chains = 3, cores = 1)
 stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
                                                mu0 = mu0,
                                                tau20 = tau20,
                                                alpha = alpha,
-                                               beta = beta),
+                                               beta = beta,
+                                               sigma2 = sigma2),
                       iter = 50000, warmup = 1000, chains = 3, cores = 1)
 ```
 
 ## Computing the (Log) Marginal Likelihoods
-Computing the (log) marginal likelihoods via the `bridge_sampler` function is now easy: we only need to pass the `stanfit` objects which contains all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
-```{r}
+Computing the (log) marginal likelihoods via the `bridge_sampler` function is now easy: we only need to pass the `stanfit` objects which contain all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
+```{r, echo=FALSE}
+load(system.file("extdata/", "vignette_example_stan.RData",
+                     package = "bridgesampling"))
+```
+
+```{r,eval=FALSE}
 # compute log marginal likelihood via bridge sampling for H0
 H0.bridge <- bridge_sampler(stanfitH0, silent = TRUE)
-print(H0.bridge)
 
 # compute log marginal likelihood via bridge sampling for H1
 H1.bridge <- bridge_sampler(stanfitH1, silent = TRUE)
+```
+We obtain:
+```{r}
+print(H0.bridge)
 print(H1.bridge)
 ```
-
 We can use the `error_measures` function to compute an approximate percentage error of the estimates:
-```{r}
+```{r,eval=FALSE}
 # compute percentage errors
-print(error_measures(H0.bridge)$percentage)
-print(error_measures(H1.bridge)$percentage)
+H0.error <- error_measures(H0.bridge)$percentage
+H1.error <- error_measures(H1.bridge)$percentage
+```
+We obtain:
+```{r}
+print(H0.error)
+print(H1.error)
 ```
 
 ## Bayesian Model Comparison

@@ -37,7 +37,7 @@ y <- rnorm(n, theta, sqrt(sigma2))
 
 Next, we specify the prior parameters $\mu_0$, $\tau^2_0$, $\alpha$, and $\beta$:
 
-```{r}
+```{r,eval=FALSE}
 ### set prior parameters ###
 mu0 <- 0
 tau20 <- 1
@@ -47,7 +47,7 @@ beta <- 1
 
 ## Fitting the Models
 Now we can fit the null and the alternative model in `JAGS` (note that it is necessary to install `JAGS` for this). One usually requires a larger number of posterior sample for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples (i.e., 50,000 post burn-in samples per chain) for this comparatively simple model.
-```{r, message = FALSE, results='hide'}
+```{r, eval=FALSE}
 library(R2jags)
 
 ### functions to get posterior samples ###
@@ -118,7 +118,7 @@ When using MCMC software such as `JAGS` or `Stan`, specifying this function is r
 The log of the densities on the right-hand side of these "`~`" symbols needs to be evaluated for the relevant quantities and then these log densities values are summed.
 
 For example, in the null model, there are three "`~`" signs. Starting at the data-level, we need to evaluate the log of the normal density with mean $\theta_i$ and variance $\sigma^2$ for all $y_i$ and then sum the resulting log density values. Next, we move one step up in the model and evaluate the log of the group-level density for all $\theta_i$. Hence, we evaluate the log of the normal density for $\theta_i$ with mean $\mu = 0$ and variance $\tau^2$ (remember that `JAGS` parametrizes the normal distribution in terms of the precision `invTau2` = $1/\tau^2$; in contrast, `R` parametrizes it in terms of the standard deviation) and sum the resulting log density values. The result of this summation is added to the result of the previous summation for the data-level normal distribution. Finally, we need to evaluate the log of the prior density for `invTau2`. This means that we compute the log density of the gamma distribution with parameters $\alpha$ and $\beta$ for the sampled `invTau2` value and add the resulting log density value to the result of summing the data-level and group-level log densities. The unnormalized log posterior for the alternative model can be obtained in a similar fashion. The resulting functions look as follows:
-```{r}
+```{r,eval=FALSE}
 ### functions for evaluating the unnormalized posteriors on log scale ###
 
 log_posterior_H0 <- function(samples.row, data) {
@@ -150,7 +150,7 @@ log_posterior_H1 <- function(samples.row, data) {
 
 ## Specifying the Parameter Bounds
 The final step before computing the log marginal likelihoods is to specify the parameter bounds. In this example, for both models, all parameters can range from $-\infty$ to $\infty$ except the precision `invTau2` which has a lower bound of zero. These boundary vectors need to be named and the names need to match the order of the parameters. 
-```{r}
+```{r,eval=FALSE}
 # specify parameter bounds H0
 cn <- colnames(samples_H0$BUGSoutput$sims.matrix)
 cn <- cn[cn != "deviance"]
@@ -171,27 +171,38 @@ Note that currently, the lower and upper bound of a parameter cannot be a functi
 
 ## Computing the (Log) Marginal Likelihoods
 Now we are ready to compute the log marginal likelihoods using the `bridge_sampler` function. We use `silent = TRUE` to suppress printing the number of iterations to the console:
-```{r}
+```{r, echo=FALSE}
+load(system.file("extdata/", "vignette_example_jags.RData",
+                     package = "bridgesampling"))
+```
+
+```{r,eval=FALSE}
 # compute log marginal likelihood via bridge sampling for H0
 H0.bridge <- bridge_sampler(samples = samples_H0, data = data_H0,
                             log_posterior = log_posterior_H0, lb = lb_H0,
                             ub = ub_H0, silent = TRUE)
-print(H0.bridge)
 
 # compute log marginal likelihood via bridge sampling for H1
 H1.bridge <- bridge_sampler(samples = samples_H1, data = data_H1,
                             log_posterior = log_posterior_H1, lb = lb_H1,
                             ub = ub_H1, silent = TRUE)
+```
+We obtain:
+```{r}
+print(H0.bridge)
 print(H1.bridge)
 ```
-
 We can use the `error_measures` function to compute an approximate percentage error of the estimates:
-```{r}
+```{r,eval=FALSE}
 # compute percentage errors
-print(error_measures(H0.bridge)$percentage)
-print(error_measures(H1.bridge)$percentage)
+H0.error <- error_measures(H0.bridge)$percentage
+H1.error <- error_measures(H1.bridge)$percentage
 ```
-
+We obtain:
+```{r}
+print(H0.error)
+print(H1.error)
+```
 ## Bayesian Model Comparison
 To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
 In our case, we compute $\text{BF}_{01}$, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:

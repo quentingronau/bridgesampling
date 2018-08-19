@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-10-19" />
+<meta name="date" content="2018-08-19" />
 
 <title>Hierarchical Normal Example (Stan)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Hierarchical Normal Example (Stan)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-10-19</em></h4>
+<h4 class="date"><em>2018-08-19</em></h4>
 
 
 <div id="TOC">
@@ -161,33 +161,40 @@ stanmodelH1 &lt;-<span class="st"> </span><span class="kw">stan_model</span>(<sp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># fit models</span>
 stanfitH0 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH0, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n,
                                                <span class="dt">alpha =</span> alpha,
-                                               <span class="dt">beta =</span> beta),
+                                               <span class="dt">beta =</span> beta,
+                                               <span class="dt">sigma2 =</span> sigma2),
                       <span class="dt">iter =</span> <span class="dv">50000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">3</span>, <span class="dt">cores =</span> <span class="dv">1</span>)
 stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH1, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n,
                                                <span class="dt">mu0 =</span> mu0,
                                                <span class="dt">tau20 =</span> tau20,
                                                <span class="dt">alpha =</span> alpha,
-                                               <span class="dt">beta =</span> beta),
+                                               <span class="dt">beta =</span> beta,
+                                               <span class="dt">sigma2 =</span> sigma2),
                       <span class="dt">iter =</span> <span class="dv">50000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">3</span>, <span class="dt">cores =</span> <span class="dv">1</span>)</code></pre></div>
 </div>
 <div id="computing-the-log-marginal-likelihoods" class="section level2">
 <h2>Computing the (Log) Marginal Likelihoods</h2>
-<p>Computing the (log) marginal likelihoods via the <code>bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contains all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
+<p>Computing the (log) marginal likelihoods via the <code>bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contain all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H0</span>
 H0.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H0.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53227
+
+<span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
+H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H0.bridge)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.53335
 ## Estimate obtained in 5 iteration(s) via method &quot;normal&quot;.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute log marginal likelihood via bridge sampling for H1</span>
-H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H1.bridge)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.79729
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H1.bridge)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -37.80053
 ## Estimate obtained in 4 iteration(s) via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
-<span class="kw">print</span>(<span class="kw">error_measures</span>(H0.bridge)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.144%&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1.bridge)$percentage)</code></pre></div>
+H0.error &lt;-<span class="st"> </span><span class="kw">error_measures</span>(H0.bridge)$percentage
+H1.error &lt;-<span class="st"> </span><span class="kw">error_measures</span>(H1.bridge)$percentage</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H0.error)</code></pre></div>
+<pre><code>## [1] &quot;0.145%&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H1.error)</code></pre></div>
 <pre><code>## [1] &quot;0.164%&quot;</code></pre>
 </div>
 <div id="bayesian-model-comparison" class="section level2">
@@ -196,19 +203,19 @@ H1.bridge &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(s
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BF01 &lt;-<span class="st"> </span><span class="kw">bf</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(BF01)</code></pre></div>
-<pre><code>## The estimated Bayes factor in favor of x1 over x2 is equal to: 1.30346</code></pre>
+<pre><code>## Estimated Bayes factor in favor of H0.bridge over H1.bridge: 1.30627</code></pre>
 <p>In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the <code>post_prob</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (assuming equal prior model probabilities)</span>
 post1 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge)
 <span class="kw">print</span>(post1)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
-## 0.5658696 0.4341304</code></pre>
+## 0.5663993 0.4336007</code></pre>
 <p>When the argument <code>prior_prob</code> is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the <code>prior_prob</code> argument to specify different prior model probabilities:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute posterior model probabilities (using user-specified prior model probabilities)</span>
 post2 &lt;-<span class="st"> </span><span class="kw">post_prob</span>(H0.bridge, H1.bridge, <span class="dt">prior_prob =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>))
 <span class="kw">print</span>(post2)</code></pre></div>
 <pre><code>## H0.bridge H1.bridge 
-## 0.6616115 0.3383885</code></pre>
+## 0.6620941 0.3379059</code></pre>
 </div>
 
 <script type="text/javascript">

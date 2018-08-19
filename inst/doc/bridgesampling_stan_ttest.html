@@ -12,7 +12,7 @@
 
 <meta name="author" content="Quentin F. Gronau" />
 
-<meta name="date" content="2017-10-19" />
+<meta name="date" content="2018-08-19" />
 
 <title>Bayesian One-Sample T-Test (Stan)</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Bayesian One-Sample T-Test (Stan)</h1>
 <h4 class="author"><em>Quentin F. Gronau</em></h4>
-<h4 class="date"><em>2017-10-19</em></h4>
+<h4 class="date"><em>2018-08-19</em></h4>
 
 
 <div id="TOC">
@@ -86,7 +86,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 </div>
 
-<p>In this vignette, we exlpain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in <code>Stan</code>. This approach has the advantage that the user only needs to pass the fitted <code>stanfit</code> object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the <code>BayesFactor</code> package (Morey &amp; Rouder, 2015).</p>
+<p>In this vignette, we explain how we can compute the (log) marginal likelihood and the Bayes factor for models fitted in <code>Stan</code>. This approach has the advantage that the user only needs to pass the fitted <code>stanfit</code> object which contains all information that is necessary to compute the (log) marginal likelihood. Here we show how one can conduct a Bayesian one-sample t-test as implemented in the <code>BayesFactor</code> package (Morey &amp; Rouder, 2015).</p>
 <div id="model" class="section level2">
 <h2>Model</h2>
 <p>The Bayesian one-sample t-test makes the assumption that the observations are normally distributed with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. The model is then reparametrized in terms of the standardized effect size <span class="math inline">\(\delta = \mu/\sigma\)</span>. For the standardized effect size, a Cauchy prior with location zero and scale <span class="math inline">\(r = 1/\sqrt{2}\)</span> is used. For the variance <span class="math inline">\(\sigma^2\)</span>, Jeffreys’s prior is used: <span class="math inline">\(p(\sigma^2) \propto 1/\sigma^2\)</span>.</p>
@@ -96,6 +96,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2>Data</h2>
 <p>In this example, we will analyze the <code>sleep</code> data set from the <code>t.test</code> example. This data set shows the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients. These data can be analyzed via a one-sample t-test by first computing the difference scores and then conducting the t-test using these difference scores as data. The difference scores are calculated as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bridgesampling)
+
+<span class="kw">set.seed</span>(<span class="dv">12345</span>)
 
 <span class="co"># Sleep data from t.test example</span>
 <span class="kw">data</span>(sleep)
@@ -149,29 +151,32 @@ stanmodelH1 &lt;-<span class="st"> </span><span class="kw">stan_model</span>(<sp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># fit models</span>
 stanfitH0 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH0, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n),
                       <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>, <span class="dt">cores =</span> <span class="dv">1</span>,
-                         <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))
+                      <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))
 stanfitH1 &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelH1, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n, <span class="dt">r =</span> <span class="dv">1</span>/<span class="kw">sqrt</span>(<span class="dv">2</span>)),
                       <span class="dt">iter =</span> <span class="dv">20000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>, <span class="dt">cores =</span> <span class="dv">1</span>,
-                         <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))</code></pre></div>
+                      <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))</code></pre></div>
 </div>
 <div id="computing-the-log-marginal-likelihoods" class="section level2">
 <h2>Computing the (Log) Marginal Likelihoods</h2>
-<p>Computing the (log) marginal likelihoods via the <code>bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contains all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
-H0 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H0)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -20.80841
+<p>Computing the (log) marginal likelihoods via the <code>bridge_sampler</code> function is now easy: we only need to pass the <code>stanfit</code> objects which contain all information necessary. We use <code>silent = TRUE</code> to suppress printing the number of iterations to the console:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">H0 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH0, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
+H1 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H0)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -20.80934
 ## Estimate obtained in 4 iteration(s) via method &quot;normal&quot;.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">H1 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH1, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(H1)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.96113
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H1)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.96114
 ## Estimate obtained in 4 iteration(s) via method &quot;normal&quot;.</code></pre>
 <p>We can use the <code>error_measures</code> function to compute an approximate percentage error of the estimates:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute percentage errors</span>
-<span class="kw">print</span>(<span class="kw">error_measures</span>(H0)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.0483%&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(H1)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.0675%&quot;</code></pre>
+H0.error &lt;-<span class="st"> </span><span class="kw">error_measures</span>(H0)$percentage
+H1.error &lt;-<span class="st"> </span><span class="kw">error_measures</span>(H1)$percentage</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H0.error)</code></pre></div>
+<pre><code>## [1] &quot;0.049%&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(H1.error)</code></pre></div>
+<pre><code>## [1] &quot;0.0655%&quot;</code></pre>
 </div>
 <div id="computing-the-bayes-factor" class="section level2">
 <h2>Computing the Bayes Factor</h2>
@@ -179,7 +184,7 @@ H0 &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitH
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BF10 &lt;-<span class="st"> </span><span class="kw">bf</span>(H1, H0)
 <span class="kw">print</span>(BF10)</code></pre></div>
-<pre><code>## The estimated Bayes factor in favor of x1 over x2 is equal to: 17.24089</code></pre>
+<pre><code>## Estimated Bayes factor in favor of H1 over H0: 17.25678</code></pre>
 <p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(BayesFactor)
 <span class="kw">print</span>(<span class="kw">ttestBF</span>(y))</code></pre></div>
@@ -211,23 +216,27 @@ BF10 &lt;-<span class="st"> </span><span class="kw">bf</span>(H1, H0)
 <span class="st">  target += normal_lpdf(y | delta*sqrt(sigma2), sqrt(sigma2));  // likelihood</span>
 <span class="st">}</span>
 <span class="st">'</span>
-<span class="co"># compile models</span>
+<span class="co"># compile and fit model</span>
 stanmodelHplus &lt;-<span class="st"> </span><span class="kw">stan_model</span>(<span class="dt">model_code =</span> stancodeHplus, <span class="dt">model_name=</span><span class="st">&quot;stanmodel&quot;</span>)
 stanfitHplus &lt;-<span class="st"> </span><span class="kw">sampling</span>(stanmodelHplus, <span class="dt">data =</span> <span class="kw">list</span>(<span class="dt">y =</span> y, <span class="dt">n =</span> n, <span class="dt">r =</span> <span class="dv">1</span>/<span class="kw">sqrt</span>(<span class="dv">2</span>)),
                          <span class="dt">iter =</span> <span class="dv">30000</span>, <span class="dt">warmup =</span> <span class="dv">1000</span>, <span class="dt">chains =</span> <span class="dv">4</span>,
                          <span class="dt">control =</span> <span class="kw">list</span>(<span class="dt">adapt_delta =</span> .<span class="dv">99</span>))</code></pre></div>
-<p>The (log) marginal likelihood is then obtained as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hplus &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitHplus, <span class="dt">silent =</span> <span class="ot">TRUE</span>)
-<span class="kw">print</span>(Hplus)</code></pre></div>
-<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.27085
-## Estimate obtained in 5 iteration(s) via method &quot;normal&quot;.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">error_measures</span>(Hplus)$percentage)</code></pre></div>
-<pre><code>## [1] &quot;0.146%&quot;</code></pre>
+<p>The (log) marginal likelihood is then computed as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hplus &lt;-<span class="st"> </span><span class="kw">bridge_sampler</span>(stanfitHplus, <span class="dt">silent =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(Hplus)</code></pre></div>
+<pre><code>## Bridge sampling estimate of the log marginal likelihood: -17.27045
+## Estimate obtained in 4 iteration(s) via method &quot;normal&quot;.</code></pre>
+<p>We can again use the <code>error_measures</code> function to compute an approximate percentage error of the estimate:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Hplus.error &lt;-<span class="st"> </span><span class="kw">error_measures</span>(Hplus)$percentage</code></pre></div>
+<p>We obtain:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(Hplus.error)</code></pre></div>
+<pre><code>## [1] &quot;0.136%&quot;</code></pre>
 <p>The one-sided Bayes factor in favor of a positive effect versus the null hypothesis can be computed as follows:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compute Bayes factor</span>
 BFplus0 &lt;-<span class="st"> </span><span class="kw">bf</span>(Hplus, H0)
 <span class="kw">print</span>(BFplus0)</code></pre></div>
-<pre><code>## The estimated Bayes factor in favor of x1 over x2 is equal to: 34.38307</code></pre>
+<pre><code>## Estimated Bayes factor in favor of Hplus over H0: 34.42872</code></pre>
 <p>We can compare the bridge sampling result to the <code>BayesFactor</code> package result:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">ttestBF</span>(y, <span class="dt">nullInterval =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="ot">Inf</span>)))</code></pre></div>
 <pre><code>## Bayes factor analysis
