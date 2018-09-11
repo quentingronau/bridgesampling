@@ -14,28 +14,48 @@
 #### for matrix method ######
 
 .transform2Real <- function(theta, lb, ub,
-                            theta_types = rep("continuous", ncol(theta))) {
+                            theta_types = rep("real", ncol(theta))) {
 
   ### transform samples to real line
 
   theta_t <- theta
-  transTypes <- character()
+  transTypes <- character(ncol(theta))
   cn <- colnames(theta)
+  names(theta_types) <- names(transTypes) <- cn
 
-  names(theta_types) <- cn
+  # Because the simplex transform must be done on all simplex parameters at
+  # once, do it before the loop. This transformation follows the Stan reference
+  # manual. For simplex variables, we expect one parameter less than the number
+  # of weights due to the contstraint sum(simplex_theta) == 1.
+  is_simplex_theta <- theta_types == "simplex"
+  if (any(is_simplex_theta)) {
+
+    # Select the simplex variables
+    simplex_theta <- theta[, is_simplex_theta, drop = FALSE]
+
+    # Simplex dimensionality
+    simdim <- ncol(simplex_theta)
+    cs     <- cbind(0L, t(apply(simplex_theta, 1L, cumsum))[, -simdim, drop = FALSE])
+
+    # Get the break proportions.
+    z_k    <- (simplex_theta / (1L - cs))
+    y_k    <- log(z_k) - log(1L - z_k) + matrix(log(simdim:1L),
+                                                nrow(theta), simdim, byrow = TRUE)
+
+    theta_t[, is_simplex_theta] <- y_k
+    transTypes[is_simplex_theta] <- "simplex"
+  }
+
 
   for (i in seq_len(ncol(theta))) {
 
     p <- cn[i]
 
-    if (theta_types[[p]] == "simplex") {
-      transTypes[[p]] <- "simplex"
-      theta_t[,i] <- theta[,i]
-    } else if (theta_types[[p]] == "circular") {
+    if (theta_types[[p]] == "circular") {
       transTypes[[p]] <- "circular"
       theta_t[,i] <- .gaplessCircular(theta[,i])
 
-    } else if (theta_types[[p]] == "continuous") {
+    } else if (theta_types[[p]] == "real") {
       if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
         transTypes[[p]] <- "unbounded"
         theta_t[,i] <- theta[,i]
@@ -48,41 +68,77 @@
       } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
         transTypes[[p]] <- "double-bounded"
         theta_t[,i] <- qnorm( (theta[,i] - lb[[p]])/(ub[[p]] - lb[[p]]) )
-      } else {
-        stop("Could not transform parameters, possibly due to invalid
-             lower and/or upper prior bounds.")
+
+        # Finally, give an error except for simplex variables, which are already
+        # transformed.
+      } else if (theta_types[p] != "simplex")
+        stop(paste("Could not transform parameters, possibly due to invalid",
+                   "lower and/or upper prior bounds."))
       }
     }
-  }
+
 
   colnames(theta_t) <- paste0("trans_", colnames(theta))
 
   return(list(theta_t = theta_t, transTypes = transTypes))
 }
 
-.invTransform2Real <- function(theta_t, lb, ub) {
+.invTransform2Real <- function(theta_t, lb, ub,
+                               theta_types = rep("real", ncol(theta))) {
 
   ### transform transformed samples back to original scales
 
   theta <- theta_t
   colnames(theta) <- stringr::str_sub(colnames(theta), 7)
   cn <- colnames(theta)
+  names(theta_types) <- cn
 
+  # Because the simplex transform must be done on all simplex parameters at
+  # once, do it before the loop. This transformation follows the Stan reference
+  # manual. For simplex variables, we expect one parameter less than the number
+  # of weights due to the contstraint sum(simplex_theta) == 1.
+  is_simplex_theta <- theta_types == "simplex"
+  if (any(is_simplex_theta)) {
+
+    # Select the simplex variables
+    simplex_theta <- theta_t[, is_simplex_theta, drop = FALSE]
+
+    # Simplex dimensionality
+    simdim <- ncol(simplex_theta)
+
+    logitz <- simplex_theta - matrix(log(simdim:1L),
+                                      nrow(theta), simdim, byrow = TRUE)
+    z_k    <- exp(logitz) / (1 + exp(logitz))
+    x_k <- z_k
+
+    if (simdim > 1) {
+      for (k in 2:simdim) {
+        x_k[, k] <- (1 - rowSums(x_k[, 1:(k - 1), drop = FALSE])) * z_k[, k]
+      }
+    }
+
+    theta[, is_simplex_theta] <- x_k
+  }
+
+  # Note that the circular variables are not transformed back, because they are
+  # simply a different numerical representation.
   for (i in seq_len(ncol(theta_t))) {
 
     p <- cn[i]
 
-    if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
-      theta[,i] <- theta_t[,i]
-    } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.infinite(ub[[p]])) {
-      theta[,i] <- exp(theta_t[,i]) + lb[[p]]
-    } else if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.finite(ub[[p]])) {
-      theta[,i] <- ub[[p]] - exp(theta_t[,i])
-    } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
-      theta[,i] <- pnorm(theta_t[,i])*(ub[[p]] - lb[[p]]) + lb[[p]]
-    } else {
-      stop("Could not transform parameters, possibly due to invalid lower and/or upper
-           prior bounds.")
+    if (theta_types[[p]] == "real") {
+      if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
+        theta[,i] <- theta_t[,i]
+      } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.infinite(ub[[p]])) {
+        theta[,i] <- exp(theta_t[,i]) + lb[[p]]
+      } else if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.finite(ub[[p]])) {
+        theta[,i] <- ub[[p]] - exp(theta_t[,i])
+      } else if (lb[[p]] < ub[[p]] && is.finite(lb[[p]]) && is.finite(ub[[p]])) {
+        theta[,i] <- pnorm(theta_t[,i])*(ub[[p]] - lb[[p]]) + lb[[p]]
+      } else {
+        stop("Could not transform parameters, possibly due to invalid lower and/or upper
+             prior bounds.")
+      }
     }
 
   }
@@ -98,6 +154,37 @@
   logJ <- matrix(nrow = nrow(theta_t), ncol = ncol(theta_t))
   cn <- stringr::str_sub(colnames(theta_t), 7)
 
+  # Separate the computations for the simplex
+  is_simplex_theta <- transTypes == "simplex"
+  if (any(is_simplex_theta)) {
+
+    # Select the simplex variables
+    simplex_theta <- theta_t[, is_simplex_theta, drop = FALSE]
+
+    # Simplex dimensionality, this is K - 1
+    simdim <- ncol(simplex_theta)
+
+    logitz <- simplex_theta - matrix(log(simdim:1L),
+                                     nrow(theta_t), simdim, byrow = TRUE)
+    z_k <- exp(logitz) / (1 + exp(logitz))
+    x_k <- z_k
+
+    # Sum_x_k is the length of the remaining stick at step k. At the start, the
+    # whole stick is still left
+    sum_x_k <- matrix(nrow = nrow(theta_t), ncol = simdim)
+    sum_x_k[, 1] <- 1
+
+    if (simdim > 1) {
+      for (k in 2:simdim) {
+        rsx <- rowSums(x_k[, 1:(k - 1), drop = FALSE])
+        x_k[, k]     <- (1 - rsx) * z_k[, k]
+        sum_x_k[, k] <- (1 - rsx)
+      }
+    }
+    logJ[, is_simplex_theta] <- log(z_k) + log(1 - z_k) + log(sum_x_k)
+  }
+
+
   for (i in seq_len( ncol(theta_t) )) {
 
     p <- cn[i]
@@ -110,8 +197,9 @@
       logJ[,i] <- theta_t[,i]
     } else if (transTypes[[p]] == "double-bounded") {
       logJ[,i] <- log(ub[[p]] - lb[[p]]) + dnorm(theta_t[,i], log = TRUE)
+    } else if (transTypes[[p]] == "circular") {
+      logJ[,i] <- 0
     }
-
   }
 
   return(.rowSums(logJ, m = nrow(logJ), n = ncol(logJ)))
@@ -120,9 +208,9 @@
 
 .split_matrix <- function(matrix, cores) {
   out <- vector("list", cores)
-  borders <- ceiling(seq(from = 0, to = nrow(matrix), length.out = cores+1))
+  borders <- ceiling(seq(from = 0, to = nrow(matrix), length.out = cores + 1))
   for (i in seq_len(cores)) {
-    out[[i]] <- matrix[(borders[i]+1):borders[i+1],,drop = FALSE]
+    out[[i]] <- matrix[(borders[i] + 1):borders[i + 1], , drop = FALSE]
   }
   out
 }

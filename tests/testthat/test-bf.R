@@ -28,14 +28,14 @@ test_that("bf various basic checks", {
   BF <- bf(bridge_normal, bridge_warp3)
   log_BF <- bf(bridge_normal, bridge_warp3, log = TRUE)
 
-  expect_output(print(BF), "The estimated Bayes factor")
-  expect_output(print(log_BF), "The estimated log Bayes factor")
+  expect_output(print(BF), "Estimated Bayes factor")
+  expect_output(print(log_BF), "Estimated log Bayes factor")
 
   BF2 <- bayes_factor(bridge_normal, bridge_warp3)
   log_BF2 <- bayes_factor(bridge_normal, bridge_warp3, log = TRUE)
 
-  expect_output(print(BF2), "The estimated Bayes factor")
-  expect_output(print(log_BF2), "The estimated log Bayes factor")
+  expect_output(print(BF2), "Estimated Bayes factor")
+  expect_output(print(log_BF2), "Estimated log Bayes factor")
 
 
   # repetitions > 1
@@ -49,8 +49,8 @@ test_that("bf various basic checks", {
   BF_mult <- bf(bridge_normal_mult, bridge_warp3_mult)
   log_BF_mult <- bf(bridge_normal_mult, bridge_warp3_mult, log = TRUE)
 
-  expect_output(print(BF_mult), "based on the medians")
-  expect_output(print(log_BF_mult), "based on the medians")
+  expect_output(print(BF_mult), "based on medians")
+  expect_output(print(log_BF_mult), "based on medians")
 
   ## bf with multi and singular objects
   expect_is(suppressWarnings(bf(bridge_normal_mult, bridge_normal)), "bf_bridge_list")
@@ -61,7 +61,7 @@ test_that("bf various basic checks", {
   BF <- bf(1, 2)
   log_BF <- bf(1, 2, log = TRUE)
 
-  expect_output(print(BF), "The Bayes factor")
-  expect_output(print(log_BF), "The log Bayes factor")
+  expect_output(print(BF), "Bayes factor")
+  expect_output(print(log_BF), "Log Bayes factor")
 
 })

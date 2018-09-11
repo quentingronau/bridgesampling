@@ -3,17 +3,24 @@
                        ***********************************
 
                     Changes in bridgesampling Version 0.5-x
-                    Released XXX 2018
+                    Released August 2018
 
   Significant User Visible Changes and New Features
 
-  o Added support for nimble objects (http://r-nimble.org/) via 
-    bridge_sampler.MCMC_refClass method. Thanks to Perry de Valpine for his help 
+  o Added support for nimble objects (http://r-nimble.org/) via
+    bridge_sampler.MCMC_refClass method. Thanks to Perry de Valpine for his help
     in creating this method.
+
+  o The print methods for the bf() function now try to deparse the model names
+    from the user input and use these names instead of x1 and x2.
+
+  o Added support for simplex and circular parameters which can be specified
+    using the new argument param_types of the bridge_sampler function
+    (thanks to Kees Mulder)
 
   Bugfixes
 
-  o 
+  o
 
 
                        ***********************************
@@ -29,17 +36,17 @@
     - bridge_sampler() methods now check lb and ub.
     - bf() methods check class of x2.
     - post_prob() checks if only one object of appropriate class is passed.
-    
-  o Promoted error_measures() to generic function with methods for both 
-    repetitions = 1 and repetitions > 1. In the latter case median and IQR are 
+
+  o Promoted error_measures() to generic function with methods for both
+    repetitions = 1 and repetitions > 1. In the latter case median and IQR are
     reported. The only situation where we can not report error measures is if
     repetitions = 1 and method = "warp3".
-    
-  o Added summary() (and corresponding print.summary) methods for bridge and 
-    bridge_list objects. These methods now always invoke error_measures() and 
-    return a data.frame with both log marginal likelihood and error information. 
+
+  o Added summary() (and corresponding print.summary) methods for bridge and
+    bridge_list objects. These methods now always invoke error_measures() and
+    return a data.frame with both log marginal likelihood and error information.
     These methods are described in ?`bridge-methods`.
-    
+
   o Updated bridgesampling vignette to latest version.
 
   Bugfixes

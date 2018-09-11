@@ -144,3 +144,140 @@ test_that("bridge sampler matches anlytical value normal example", {
                "do not sum to one")
 
 })
+
+
+context('non-standard parameter spaces')
+
+test_that("bridge sampler functions for non-standard parameter spaces", {
+
+
+  # Test with only simplex
+  ru <- replicate(10, runif(10))
+  theta <- (ru / rowSums(ru))[, -10]
+  colnames(theta) <- paste0("sim", 1:9)
+  theta_t <- .transform2Real(theta,
+                                   lb = rep(0, 9), ub = rep(1, 9),
+                                   theta_types = rep("simplex", 9))
+
+  expect_equal(theta_t$transTypes[1], c(sim1 = "simplex"))
+
+  theta_t_t <- .invTransform2Real(theta_t$theta_t,
+                                              lb = rep(0, 9), ub = rep(1, 9),
+                                              theta_types = rep("simplex", 9))
+  expect_equal(theta, theta_t_t)
+
+
+  # tranformations work for different input shapes
+  nsimp <- 4
+  n     <- 100
+  sum_to_one <- function(x) x / sum(x)
+  ru <- t(replicate(n, c(rnorm(2), # unbounded
+                       sum_to_one(runif(nsimp)), # simplex
+                       runif(3), # double-bounded
+                       abs(rnorm(1)), # lower-bounded
+                       rnorm(2) %% (2*pi)))) # circular
+  theta_original <- ru[, -(nsimp + 2)]
+  pt <- c(rep("real", 2),
+          rep("simplex", nsimp - 1),
+          rep("real", 4),
+          rep("circular", 2))
+  lb <- c(rep(-Inf, 2),
+          rep(0, nsimp - 1),
+          rep(0, 4),
+          rep(0, 2))
+  ub <- c(rep(Inf, 2),
+          rep(1, nsimp - 1),
+          rep(1, 3),
+          rep(Inf, 1),
+          rep(2*pi, 2))
+  nm <- c(paste0("unbounded", 1:2),
+          paste0("simplex", 1:(nsimp - 1)),
+          paste0("doublebounded", 1:3),
+          paste0("lower", 1),
+          paste0("circular", 1:2))
+  colnames(theta_original) <- names(lb) <- names(ub) <- names(pt) <- nm
+
+
+  theta_t <- .transform2Real(theta_original, lb, ub, pt)
+  theta_t_t <- .invTransform2Real(theta_t$theta_t, lb, ub, pt)
+
+  # The modulus is to force the circular variables to be equal if they lie on
+  # the same place on the circle. The modulus is also taken for the linear
+  # variables, for simplicity of programming.
+  expect_equal(theta_original %% (2*pi), theta_t_t %% (2*pi))
+
+  # Works with one row
+  theta <- theta_original[1, , drop = FALSE]
+  theta_t <- .transform2Real(theta, lb, ub, pt)
+  theta_t_t <- .invTransform2Real(theta_t$theta_t, lb, ub, pt)
+
+  # The modulus is to force the circular variables to be equal if they lie on
+  # the same place on the circle.
+  expect_equal(theta %% (2*pi), theta_t_t %% (2*pi))
+
+
+  # Test bridge sampler function with non-standard sample spaces
+  bs_ns <- bridge_sampler.matrix(
+    theta_original,
+    data = rnorm(10),
+    log_posterior = function(s, data) -.5*t(s) %*% s,
+    lb = lb, ub = ub, silent = TRUE, verbose = FALSE)
+
+  expect_true(class(bs_ns) == "bridge")
+
+
+
+  ############ TEST JACOBIAN
+  n <- 2
+
+  theta_full <- t(c(.4, .6))
+  theta <- theta_full[, -n, drop = FALSE]
+  colnames(theta) <- paste0("sim", (1:(n - 1)))
+
+  y <- bridgesampling:::.transform2Real(theta,
+                                        lb = rep(0, n - 1),
+                                        ub = rep(1, n - 1),
+                                        theta_types = rep("simplex", n - 1))$theta_t
+  tt <- rep("simplex", n - 1)
+  colnames(y) <- paste0("trans_sim", (1:(n - 1)))
+  names(tt) <- paste0("sim", (1:(n - 1)))
+  jacob <- .logJacobian(y, tt,
+                        lb = rep(0, n),
+                        ub = rep(1, n))
+
+  expect_true(is.numeric(jacob))
+
+
+  skip_if_not_installed("MCMCpack")
+
+  invsimplex <- function(y) {
+    y <- as.matrix(y)
+    n <- length(y)
+    colnames(y) <- paste0("trans_sim", (1:n))
+    out1 <- .invTransform2Real(y,
+                                        lb = rep(0, n),
+                                        ub = rep(1, n),
+                                     theta_types = rep("simplex", n))
+    c(out1, 1 - sum(out1))
+  }
+  invsimplex(100)
+  p_y <- function(y) {
+    y <- as.matrix(y)
+    n <- length(y)
+    tt <- rep("simplex", n)
+    colnames(y) <- paste0("trans_sim", (1:n))
+    names(tt) <- paste0("sim", (1:n))
+    MCMCpack::ddirichlet(invsimplex(y), theta_full*10) *
+      exp(.logJacobian(y,
+                                        tt,
+                                        lb = rep(0, n),
+                                        ub = rep(1, n)))
+  }
+
+  # The jaobian corrects for the transformation
+  expect_equal(integrate(Vectorize(p_y), -100, 100)$value, 1)
+
+})
+
+
+

@@ -12,6 +12,7 @@ addons:
       - jags
 r_binary_packages:
    - rstan
+   - rstanarm
    - Matrix
    - coda
    - testthat
@@ -19,6 +20,5 @@ r_binary_packages:
    - knitr
    - stringr
    - mvtnorm
-   - nimble
 r_build_args: --compact-vignettes="gs+qpdf"
 
