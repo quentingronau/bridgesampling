@@ -9,6 +9,10 @@ roxygen2::roxygenize()
 
 build_vignettes()
 
+
+Sys.setenv(`_R_CHECK_FORCE_SUGGESTS_` = "false")
+devtools::check()
+
 ### check reverse dependencies:
 
 #revdep()
