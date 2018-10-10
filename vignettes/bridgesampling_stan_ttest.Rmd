@@ -123,9 +123,13 @@ BF10 <- bf(H1, H0)
 print(BF10)
 ```
 We can compare the bridge sampling result to the `BayesFactor` package result:
-```{r, message=FALSE}
+```{r, eval=FALSE}
 library(BayesFactor)
-print(ttestBF(y))
+BF10.BayesFactor <- extractBF(ttestBF(y), onlybf = TRUE)
+```
+We obtain:
+```{r, message=FALSE}
+print(BF10.BayesFactor)
 ```
 
 ## One-sided Test
@@ -178,8 +182,12 @@ print(BFplus0)
 ```
 
 We can compare the bridge sampling result to the `BayesFactor` package result:
+```{r, eval=FALSE}
+BFplus0.BayesFactor <- extractBF(ttestBF(y, nullInterval = c(0, Inf)), onlybf = TRUE)[1]
+```
+We obtain:
 ```{r}
-print(ttestBF(y, nullInterval = c(0, Inf)))
+print(BFplus0.BayesFactor)
 ```
 
 ## References
