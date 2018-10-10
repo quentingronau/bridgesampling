@@ -11,8 +11,6 @@ addons:
     packages:
       - jags
 r_binary_packages:
-   - rstan
-   - rstanarm
    - Matrix
    - coda
    - testthat
