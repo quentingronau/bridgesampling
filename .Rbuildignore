@@ -5,3 +5,4 @@ examples
 ^\.travis\.yml$
 README.md
 CONDUCT.md
+^vignettes/bridgesampling_example_simplex_or_circular_parameter_spaces\.Rmd$
