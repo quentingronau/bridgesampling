@@ -37,7 +37,7 @@ y <- rnorm(n, theta, sqrt(sigma2))
 
 Next, we specify the prior parameters $\mu_0$, $\tau^2_0$, $\alpha$, and $\beta$:
 
-```{r,eval=TRUE}
+```{r,eval=FALSE}
 ### set prior parameters ###
 mu0 <- 0
 tau20 <- 1
@@ -48,7 +48,7 @@ beta <- 1
 ## Specifying the Models
 Next, we implement the models in `nimble`. This requires to first transform the code into a `nimbleModel`, then we need to set the data, and then we can compile the model. Given that `nimble` is build on BUGS, the similarity between the `nimble` code and the [`Jags` code](bridgesampling_example_jags.html) is not too surprising.
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 library("nimble")
 
 # models
@@ -86,7 +86,7 @@ Fitting a model with `nimble` requires one to first create an MCMC function from
 
 One usually requires a larger number of posterior samples for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples for these simple models.
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 
 # build MCMC functions, skipping customization of the configuration.
 mcmcH0 <- buildMCMC(modelH0,
@@ -108,10 +108,13 @@ samplesH1 <- runMCMC(cmcmcH1, niter = 1e5, nburnin = 1000, nchains = 2,
 ```
 
 ## Computing the (Log) Marginal Likelihoods
-
 Computing the (log) marginal likelihoods via the `bridge_sampler` function is now easy: we only need to pass the compiled MCMC function objects (of class `"MCMC_refClass"`) which contain all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
+```{r, echo=FALSE}
+load(system.file("extdata/", "vignette_example_nimble.RData",
+                     package = "bridgesampling"))
+```
 
-```{r,eval=TRUE}
+```{r,eval=FALSE}
 # compute log marginal likelihood via bridge sampling for H0
 H0.bridge <- bridge_sampler(cmcmcH0, silent = TRUE)
 
@@ -124,7 +127,7 @@ print(H0.bridge)
 print(H1.bridge)
 ```
 We can use the `error_measures` function to compute an approximate percentage error of the estimates:
-```{r,eval=TRUE}
+```{r,eval=FALSE}
 # compute percentage errors
 H0.error <- error_measures(H0.bridge)$percentage
 H1.error <- error_measures(H1.bridge)$percentage
