@@ -7,14 +7,10 @@
 
   Bugfixes
 
-  o R CMD check on the package should now run without most packages that are in 
-    suggests. The exceptions are the packages necessary to create the vignettes
-    (i.e., kntir, rmarkdown, R.rsp). Also, all vignettes should compile without
-    the suggested packages (achieved by precalculating the results and loading 
-    them in). This is, the following suggested packages are not necessary for 
-    checking: ‘R2jags’ ‘rjags’ ‘runjags’ ‘BayesFactor’ ‘rstan’ ‘rstanarm’ 
-    ‘nimble’ ‘MCMCpack’
- 
+  o R CMD check on the package tar.gz should now run without packages that are  
+    in suggests installed (if the corresponding environment variable is set). 
+    Also, all vignettes should compile without suggested packages (achieved by
+    precalculating the results and then loading them).  
 
                        ***********************************
                        ** bridgesampling VERSION 0.5-x **
