@@ -1,4 +1,22 @@
                        ***********************************
+                       ** bridgesampling VERSION 0.6-x **
+                       ***********************************
+
+                    Changes in bridgesampling Version 0.6-x
+                    Released October 2018
+
+  Bugfixes
+
+  o R CMD check on the package should now run without most packages that are in 
+    suggests. The exceptions are the packages necessary to create the vignettes
+    (i.e., kntir, rmarkdown, R.rsp). Also, all vignettes should compile without
+    the suggested packages (achieved by precalculating the results and loading 
+    them in). This is, the following suggested packages are not necessary for 
+    checking: ‘R2jags’ ‘rjags’ ‘runjags’ ‘BayesFactor’ ‘rstan’ ‘rstanarm’ 
+    ‘nimble’ ‘MCMCpack’
+ 
+
+                       ***********************************
                        ** bridgesampling VERSION 0.5-x **
                        ***********************************
 
