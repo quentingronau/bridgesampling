@@ -124,7 +124,12 @@ test_that("bridge sampler yields correct results", {
 
     }
 
-    exact_logmlH1 <- log(mH1(data_H1))
+    exact_logmlH1 <- log(mH1(list(y = y, n = n,
+                                  mu0 = mu0,
+                                  tau20 = tau20,
+                                  alpha = alpha,
+                                  beta = beta,
+                                  sigma2 = sigma2)))
 
     # "exact" ml H1
     mH0 <- function(data, rel.tol = 1e-10) {
@@ -152,7 +157,10 @@ test_that("bridge sampler yields correct results", {
 
     }
 
-    exact_logmlH0 <- log(mH0(data_H0))
+    exact_logmlH0 <- log(mH0(list(y = y, n = n,
+                                  alpha = alpha,
+                                  beta = beta,
+                                  sigma2 = sigma2)))
 
     exact_BF01 <- exp(exact_logmlH0 - exact_logmlH1)
 
@@ -162,8 +170,8 @@ test_that("bridge sampler yields correct results", {
     post1.curr <- post1
     post2.curr <- post2
 
-    load(system.file("extdata/", "vignette_example_nimble.RData",
-                     package = "bridgesampling"))
+    # load(system.file("extdata/", "vignette_example_nimble.RData",
+    #                  package = "bridgesampling"))
 
     expect_equal(
       H0.bridge.curr$logml,
