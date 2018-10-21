@@ -8,7 +8,7 @@ devtools::test()
 roxygen2::roxygenize()
 
 build_vignettes()
-devtools::build()
+devtools::build(args = '--compact-vignettes="gs+qpdf"')
 
 Sys.setenv(`_R_CHECK_FORCE_SUGGESTS_` = "false")
 devtools::check()

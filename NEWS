@@ -5,12 +5,20 @@
                     Changes in bridgesampling Version 0.6-x
                     Released October 2018
 
+  Significant User Visible Changes and New Features
+
+  o Added nimble vignette (Hierarchical Normal Example)
+
+  o Added accepted JSS version of introductory paper, but kept existing version 
+    as extended version. 
+
   Bugfixes
 
   o R CMD check on the package tar.gz should now run without packages that are  
     in suggests installed (if the corresponding environment variable is set). 
     Also, all vignettes should compile without suggested packages (achieved by
     precalculating the results and then loading them).  
+
 
                        ***********************************
                        ** bridgesampling VERSION 0.5-x **
