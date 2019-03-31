@@ -19,7 +19,7 @@ Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
 Depends:
     R (>= 3.0.0)
 Imports:
-    mvtnorm,
+    mvnfast,
     Matrix,
     Brobdingnag,
     stringr,
