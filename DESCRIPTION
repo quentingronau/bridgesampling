@@ -1,7 +1,7 @@
 Package: bridgesampling
 Type: Package
 Title: Bridge Sampling for Marginal Likelihoods and Bayes Factors
-Version: 0.6-0
+Version: 0.7-0
 Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
              email="Quentin.F.Gronau@gmail.com",
              comment=c(ORCID="0000-0001-5510-6943")),
@@ -49,6 +49,6 @@ Description: Provides functions for estimating marginal likelihoods, Bayes
     <http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm>).
 License: GPL (>=2)
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr, R.rsp
 URL: https://github.com/quentingronau/bridgesampling
