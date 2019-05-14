@@ -1,4 +1,21 @@
                        ***********************************
+                       ** bridgesampling VERSION 0.7-x **
+                       ***********************************
+
+                    Changes in bridgesampling Version 0.7-x
+                    Released XXX 2019
+
+  Significant User Visible Changes and New Features
+
+  o Better error message in case all samples from proposal distribution 
+    evaluate to NA with log_posterior.
+  
+  o verbose = TRUE now writes all samples from proposal distribution to 
+    .GlobalEnv as .PROPOSALS.
+
+
+
+                       ***********************************
                        ** bridgesampling VERSION 0.6-x **
                        ***********************************
 
