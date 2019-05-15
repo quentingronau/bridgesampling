@@ -56,6 +56,14 @@
       theta_t[,i] <- .gaplessCircular(theta[,i])
 
     } else if (theta_types[[p]] == "real") {
+      if (any(theta[,i] < lb[[p]])) {
+        stop("Parameter values (samples) cannot be smaller than lb: ", p,
+             call. = FALSE)
+      }
+      if (any(theta[,i] > ub[[p]])) {
+        stop("Parameter values (samples) cannot be larger than ub: ", p,
+             call. = FALSE)
+      }
       if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
         transTypes[[p]] <- "unbounded"
         theta_t[,i] <- theta[,i]
