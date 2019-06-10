@@ -104,11 +104,11 @@
     print("summary(q21): (log_dens of posterior (i.e., with log_posterior) for generated samples)")
     print(lapply(q21, summary))
     .PROPOSALS <- vector("list", repetitions)
-    for (i in seq_len(repetitions)) {
-      .PROPOSALS[[i]] <- .invTransform2Real(gen_samples[[i]], lb, ub, param_types)
-    }
-    assign(".PROPOSALS", .PROPOSALS, pos = .GlobalEnv)
-    message("All proposal samples written to .GlobalEnv as .PROPOSALS")
+    # for (i in seq_len(repetitions)) {
+    #   .PROPOSALS[[i]] <- .invTransform2Real(gen_samples[[i]], lb, ub, param_types)
+    # }
+    # assign(".PROPOSALS", .PROPOSALS, pos = .GlobalEnv)
+    # message("All proposal samples written to .GlobalEnv as .PROPOSALS")
   }
   if (any(is.infinite(q11))) {
     warning(sum(is.infinite(q11)), " of the ", length(q11)," log_prob() evaluations on the posterior draws produced -Inf/Inf.", call. = FALSE)
