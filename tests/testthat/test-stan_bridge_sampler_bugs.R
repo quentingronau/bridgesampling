@@ -42,6 +42,8 @@ test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
     ######### bridge sampling ###########
     suppressWarnings(H0 <- bridge_sampler(stanfitH0, cores = 2, silent = TRUE))
 
+    expect_s3_class(H0, "bridge")
+
   }
 })
 
