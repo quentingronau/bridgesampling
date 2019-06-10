@@ -259,10 +259,11 @@
 
     rold <- r
     logmlold <- logml
-    numi <- as.numeric( e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r) )
-    deni <- as.numeric( 1/(s1 * e^(l1 - lstar) + s2 * r) )
+    numi <-  e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r)
+    deni <- 1/(s1 * e^(l1 - lstar) + s2 * r)
 
-    if (any(is.infinite(numi)) || any(is.infinite(deni))) {
+    if (any(is.infinite(as.numeric(numi))) ||
+        any(is.infinite(as.numeric((deni))))) {
       warning("Infinite value in iterative scheme, returning NA.\n Try rerunning with more samples.", call. = FALSE)
       return(list(logml = NA, niter = i))
 
