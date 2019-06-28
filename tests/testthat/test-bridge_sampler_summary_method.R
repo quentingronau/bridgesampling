@@ -4,9 +4,9 @@ context('bridge sampling summary method')
 test_that("bridge sampler summary method correctly displayed", {
 
   # library(bridgesampling)
-  library(mvtnorm)
+  library(mvnfast)
 
-  x <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
+  x <- rmvn(1e4, mu = rep(0, 2), sigma = diag(2))
   colnames(x) <- c("x1", "x2")
   log_density <- function(s, data) {
     -.5*t(s)%*%s
