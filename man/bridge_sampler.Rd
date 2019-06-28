@@ -236,10 +236,10 @@ To be able to use a \code{stanreg} object for \code{samples}, the user
 ##            Standard Normal Distribution
 ## ------------------------------------------------------------------------
 
-library(bridgesampling)
-library(mvtnorm)
+library("bridgesampling")
+library("mvnfast")
 
-samples <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
+samples <- rmvn(1e4, mu = rep(0, 2), sigma = diag(2))
 colnames(samples) <- c("x1", "x2")
 log_density <- function(samples.row, data) {
   -.5*t(samples.row) \%*\% samples.row
