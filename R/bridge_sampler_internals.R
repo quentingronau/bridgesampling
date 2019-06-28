@@ -56,6 +56,14 @@
       theta_t[,i] <- .gaplessCircular(theta[,i])
 
     } else if (theta_types[[p]] == "real") {
+      if (any(theta[,i] < lb[[p]])) {
+        stop("Parameter values (samples) cannot be smaller than lb: ", p,
+             call. = FALSE)
+      }
+      if (any(theta[,i] > ub[[p]])) {
+        stop("Parameter values (samples) cannot be larger than ub: ", p,
+             call. = FALSE)
+      }
       if (lb[[p]] < ub[[p]] && is.infinite(lb[[p]]) && is.infinite(ub[[p]])) {
         transTypes[[p]] <- "unbounded"
         theta_t[,i] <- theta[,i]
@@ -251,10 +259,11 @@
 
     rold <- r
     logmlold <- logml
-    numi <- as.numeric( e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r) )
-    deni <- as.numeric( 1/(s1 * e^(l1 - lstar) + s2 * r) )
+    numi <-  e^(l2 - lstar)/(s1 * e^(l2 - lstar) + s2 *  r)
+    deni <- 1/(s1 * e^(l1 - lstar) + s2 * r)
 
-    if (any(is.infinite(numi)) || any(is.infinite(deni))) {
+    if (any(is.infinite(as.numeric(numi))) ||
+        any(is.infinite(as.numeric((deni))))) {
       warning("Infinite value in iterative scheme, returning NA.\n Try rerunning with more samples.", call. = FALSE)
       return(list(logml = NA, niter = i))
 

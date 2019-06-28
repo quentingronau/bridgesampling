@@ -1,4 +1,25 @@
                        ***********************************
+                       ** bridgesampling VERSION 0.7-x **
+                       ***********************************
+
+                    Changes in bridgesampling Version 0.7-x
+                    Released June 2019
+
+  Significant User Visible Changes and New Features
+
+  o Better error message in case all samples from proposal distribution 
+    evaluate to NA with log_posterior.
+  
+  Bugfixes
+  
+  o bridge_sampler more robust in case of extreme numerical values while 
+    running iterative scheme. Addresses #14.
+    
+  o Better error message in case samples are outside parameter bounds.
+
+
+
+                       ***********************************
                        ** bridgesampling VERSION 0.6-x **
                        ***********************************
 

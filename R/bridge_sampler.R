@@ -69,7 +69,7 @@
 #'@param silent Boolean which determines whether to print the number of
 #'  iterations of the updating scheme to the console. Default is FALSE.
 #'@param verbose Boolean. Should internal debug information be printed to
-#'  console? Default is FALSE.
+#'  console? Default is \code{FALSE}.
 #'@details Bridge sampling is implemented as described in Meng and Wong (1996,
 #'  see equation 4.1) using the "optimal" bridge function. When \code{method =
 #'  "normal"}, the proposal distribution is a multivariate normal distribution
