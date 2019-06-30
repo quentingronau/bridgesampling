@@ -82,9 +82,12 @@ print(H1.error)
 BF10 <- bf(H1, H0)
 print(BF10)
 
+## ---- eval=FALSE---------------------------------------------------------
+#  library(BayesFactor)
+#  BF10.BayesFactor <- extractBF(ttestBF(y), onlybf = TRUE)
+
 ## ---- message=FALSE------------------------------------------------------
-library(BayesFactor)
-print(ttestBF(y))
+print(BF10.BayesFactor)
 
 ## ---- eval=FALSE---------------------------------------------------------
 #  stancodeHplus <- '
@@ -126,6 +129,9 @@ print(Hplus.error)
 BFplus0 <- bf(Hplus, H0)
 print(BFplus0)
 
+## ---- eval=FALSE---------------------------------------------------------
+#  BFplus0.BayesFactor <- extractBF(ttestBF(y, nullInterval = c(0, Inf)), onlybf = TRUE)[1]
+
 ## ------------------------------------------------------------------------
-print(ttestBF(y, nullInterval = c(0, Inf)))
+print(BFplus0.BayesFactor)
 

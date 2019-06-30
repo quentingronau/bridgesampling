@@ -105,7 +105,7 @@ Default is 1,000 to avoid infinite loops.}
 iterations of the updating scheme to the console. Default is FALSE.}
 
 \item{verbose}{Boolean. Should internal debug information be printed to
-console? Default is FALSE.}
+console? Default is \code{FALSE}.}
 
 \item{log_posterior}{function or name of function that takes a parameter
 vector and the \code{data} as input and returns the log of the unnormalized

@@ -1,0 +1,161 @@
+---
+title: "Hierarchical Normal Example (nimble)"
+author: "Quentin F. Gronau, Henrik Singmann & Perry de Valpine"
+date: "`r Sys.Date()`"
+show_toc: true
+output:
+  knitr:::html_vignette:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Hierarchical Normal Example Nimble}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model implemented in `nimble`. The [`nimble` documentation](https://r-nimble.org/html_manual/cha-welcome-nimble.html) provides a comprehensive overview.  This vignette uses the same models and data as the [`Stan` vignette](bridgesampling_example_stan.html) and [`Jags` vignette](bridgesampling_example_jags.html).
+
+## Model and Data
+The model that we will use assumes that each of the $n$ observations $y_i$ (where $i$ indexes the observation, $i = 1,2,...,n$) is normally distributed with corresponding mean $\theta_i$ and a common known variance $\sigma^2$: $y_i \sim \mathcal{N}(\theta_i, \sigma^2)$. Each $\theta_i$ is drawn from a normal group-level distribution with mean $\mu$ and variance $\tau^2$: $\theta_i \sim \mathcal{N}(\mu, \tau^2)$. For the group-level mean $\mu$, we use a normal prior distribution of the form $\mathcal{N}(\mu_0, \tau^2_0)$. For the group-level variance $\tau^2$, we use an inverse-gamma prior of the form $\text{Inv-Gamma}(\alpha, \beta)$.
+
+In this example, we are interested in comparing the null model $\mathcal{H}_0$, which posits that the group-level mean $\mu = 0$, to the alternative model $\mathcal{H}_1$, which allows $\mu$ to be different from zero. First, we generate some data from the null model:
+
+```{r}
+library(bridgesampling)
+
+### generate data ###
+set.seed(12345)
+
+mu <- 0
+tau2 <- 0.5
+sigma2 <- 1
+
+n <- 20
+theta <- rnorm(n, mu, sqrt(tau2))
+y <- rnorm(n, theta, sqrt(sigma2))
+  
+```
+
+Next, we specify the prior parameters $\mu_0$, $\tau^2_0$, $\alpha$, and $\beta$:
+
+```{r,eval=FALSE}
+### set prior parameters ###
+mu0 <- 0
+tau20 <- 1
+alpha <- 1
+beta <- 1
+```
+
+## Specifying the Models
+Next, we implement the models in `nimble`. This requires to first transform the code into a `nimbleModel`, then we need to set the data, and then we can compile the model. Given that `nimble` is build on BUGS, the similarity between the `nimble` code and the [`Jags` code](bridgesampling_example_jags.html) is not too surprising.
+
+```{r, eval=FALSE}
+library("nimble")
+
+# models
+codeH0 <- nimbleCode({
+  invTau2 ~ dgamma(1, 1)
+  tau2 <- 1/invTau2
+  for (i in 1:20) {
+    theta[i] ~ dnorm(0, sd = sqrt(tau2))
+    y[i] ~ dnorm(theta[i], sd = 1)
+  }
+})
+codeH1 <- nimbleCode({
+  mu ~ dnorm(0, sd = 1)
+  invTau2 ~ dgamma(1, 1)
+  tau2 <- 1/invTau2
+  for (i in 1:20) {
+    theta[i] ~ dnorm(mu, sd = sqrt(tau2))
+    y[i] ~ dnorm(theta[i], sd = 1)
+  }
+})
+
+## steps for H0:
+modelH0 <- nimbleModel(codeH0)
+modelH0$setData(y = y) # set data
+cmodelH0 <- compileNimble(modelH0) # make compiled version from generated C++
+
+## steps for H1:
+modelH1 <- nimbleModel(codeH1)
+modelH1$setData(y = y) # set data
+cmodelH1 <- compileNimble(modelH1) # make compiled version from generated C++
+
+```
+## Fitting the Models
+Fitting a model with `nimble` requires one to first create an MCMC function from the (compiled or uncompiled) model. This function then needs to be compiled again. With this object we can then create the samples. Note that nimble uses a reference object semantic so we do not actually need the samples object, as the samples will be saved in the MCMC function objects. But as `runMCMC` returns them anyway, we nevertheless save them.
+
+One usually requires a larger number of posterior samples for estimating the marginal likelihood than for simply estimating the model parameters. This is the reason for using a comparatively large number of samples for these simple models.
+
+```{r, eval=FALSE}
+
+# build MCMC functions, skipping customization of the configuration.
+mcmcH0 <- buildMCMC(modelH0,
+                    monitors = modelH0$getNodeNames(stochOnly = TRUE,
+                                                    includeData = FALSE))
+mcmcH1 <- buildMCMC(modelH1,
+                    monitors = modelH1$getNodeNames(stochOnly = TRUE,
+                                                    includeData = FALSE))
+# compile the MCMC function via generated C++
+cmcmcH0 <- compileNimble(mcmcH0, project = modelH0)
+cmcmcH1 <- compileNimble(mcmcH1, project = modelH1)
+
+# run the MCMC.  This is a wrapper for cmcmc$run() and extraction of samples.
+# the object samplesH1 is actually not needed as the samples are also in cmcmcH1
+samplesH0 <- runMCMC(cmcmcH0, niter = 1e5, nburnin = 1000, nchains = 2,
+                     progressBar = FALSE)
+samplesH1 <- runMCMC(cmcmcH1, niter = 1e5, nburnin = 1000, nchains = 2,
+                     progressBar = FALSE)
+```
+
+## Computing the (Log) Marginal Likelihoods
+Computing the (log) marginal likelihoods via the `bridge_sampler` function is now easy: we only need to pass the compiled MCMC function objects (of class `"MCMC_refClass"`) which contain all information necessary. We use `silent = TRUE` to suppress printing the number of iterations to the console:
+```{r, echo=FALSE}
+load(system.file("extdata/", "vignette_example_nimble.RData",
+                     package = "bridgesampling"))
+```
+
+```{r,eval=FALSE}
+# compute log marginal likelihood via bridge sampling for H0
+H0.bridge <- bridge_sampler(cmcmcH0, silent = TRUE)
+
+# compute log marginal likelihood via bridge sampling for H1
+H1.bridge <- bridge_sampler(cmcmcH1, silent = TRUE)
+```
+We obtain:
+```{r}
+print(H0.bridge)
+print(H1.bridge)
+```
+We can use the `error_measures` function to compute an approximate percentage error of the estimates:
+```{r,eval=FALSE}
+# compute percentage errors
+H0.error <- error_measures(H0.bridge)$percentage
+H1.error <- error_measures(H1.bridge)$percentage
+```
+
+We obtain:
+```{r}
+print(H0.error)
+print(H1.error)
+```
+
+## Bayesian Model Comparison
+To compare the null model and the alternative model, we can compute the Bayes factor by using the `bf` function.
+In our case, we compute $\text{BF}_{01}$, that is, the Bayes factor which quantifies how much more likely the data are under the null versus the alternative model:
+```{r}
+# compute Bayes factor
+BF01 <- bf(H0.bridge, H1.bridge)
+print(BF01)
+```
+In this case, the Bayes factor is close to one, indicating that there is not much evidence for either model. We can also compute posterior model probabilities by using the `post_prob` function:
+```{r}
+# compute posterior model probabilities (assuming equal prior model probabilities)
+post1 <- post_prob(H0.bridge, H1.bridge)
+print(post1)
+```
+When the argument `prior_prob` is not specified, as is the case here, the prior model probabilities of all models under consideration are set equal (i.e., in this case with two models to 0.5). However, if we had prior knowledge about how likely both models are, we could use the `prior_prob` argument to specify different prior model probabilities:
+```{r}
+# compute posterior model probabilities (using user-specified prior model probabilities)
+post2 <- post_prob(H0.bridge, H1.bridge, prior_prob = c(.6, .4))
+print(post2)
+```

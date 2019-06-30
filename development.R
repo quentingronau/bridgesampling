@@ -5,7 +5,7 @@ options(error = NULL)
 load_all()
 devtools::test()
 
-roxygen2::roxygenize()
+devtools::document()
 
 build_vignettes()
 devtools::build(args = '--compact-vignettes="gs+qpdf"')
