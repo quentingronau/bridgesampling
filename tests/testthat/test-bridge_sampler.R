@@ -4,9 +4,9 @@ context('basic bridge sampling behavior normal')
 test_that("bridge sampler matches anlytical value normal example", {
 
   # library(bridgesampling)
-  library(mvtnorm)
+  library(mvnfast)
 
-  x <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
+  x <- rmvn(1e4, mu = rep(0, 2), sigma = diag(2))
   colnames(x) <- c("x1", "x2")
   log_density <- function(s, data) {
     -.5*t(s)%*%s
@@ -61,7 +61,7 @@ test_that("bridge sampler matches anlytical value normal example", {
 
   # check using dots repetitions > 1
   mu <- c(1, 2)
-  x <- rmvnorm(1e4, mean = mu, sigma = diag(2))
+  x <- rmvn(1e4, mu = mu, sigma = diag(2))
   colnames(x) <- c("x1", "x2")
   log_density <- function(s, data, ...) {
     -.5*t(s - mu) %*% (s - mu)
@@ -90,7 +90,7 @@ test_that("bridge sampler matches anlytical value normal example", {
 
   # check using dots
   mu <- c(1, 2)
-  x <- rmvnorm(1e4, mean = mu, sigma = diag(2))
+  x <- rmvn(1e4, mu = mu, sigma = diag(2))
   colnames(x) <- c("x1", "x2")
   log_density <- function(s, data, ...) {
     -.5*t(s - mu) %*% (s - mu)

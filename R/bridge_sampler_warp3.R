@@ -38,14 +38,19 @@
   L <- t(chol(V))
 
   # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
-  q12 <- dmvnorm((samples_4_iter - matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE)) %*%
-                   t(solve(L)), sigma = diag(ncol(samples_4_fit)), log = TRUE)
+  tmp_mu <- rep(0, ncol(samples_4_fit))
+  tmp_sigma <- diag(ncol(samples_4_fit))
+  q12 <- mvnfast::dmvn(
+    (samples_4_iter - matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE)) %*%
+      t(solve(L)), mu = tmp_mu, sigma = tmp_sigma, log = TRUE, ncores = cores)
   q22 <- vector(mode = "list", length = repetitions)
   gen_samples <- vector(mode = "list", length = repetitions)
   for (i in seq_len(repetitions)) {
-    gen_samples[[i]] <- rmvnorm(n_post, sigma = diag(ncol(samples_4_fit)))
+    gen_samples[[i]] <- mvnfast::rmvn(n_post, mu = tmp_mu, sigma = tmp_sigma,
+                                      ncores = cores)
     colnames(gen_samples[[i]]) <- colnames(samples_4_iter)
-    q22[[i]] <- dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE)
+    q22[[i]] <- mvnfast::dmvn(gen_samples[[i]], mu = tmp_mu, sigma = tmp_sigma,
+                              log = TRUE, ncores = cores)
   }
 
   e <- as.brob( exp(1) )

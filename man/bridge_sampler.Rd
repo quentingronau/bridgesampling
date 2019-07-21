@@ -83,13 +83,14 @@ done before \code{samples} is loaded).}
 
 \item{method}{either \code{"normal"} or \code{"warp3"}.}
 
-\item{cores}{number of cores used for evaluating \code{log_posterior}. On
+\item{cores}{number of cores used for evaluating \code{log_posterior} and when
+calling \pkg{mvnfast} functions. For evaluating \code{log_posterior}, on
 unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to
 \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is
-used. Hence elements needed for evaluation should be in the
+used. Hence, elements needed for evaluation should be in the
 \code{\link{.GlobalEnv}}. For other systems (e.g., Windows)
 \code{\link{makeCluster}} is used and further arguments specified below will
-be used.}
+be used. \pkg{mvnfast} uses OpenMP.}
 
 \item{use_neff}{Boolean which determines whether the effective sample size is
 used in the optimal bridge function. Default is TRUE. If FALSE, the number
@@ -235,10 +236,10 @@ To be able to use a \code{stanreg} object for \code{samples}, the user
 ##            Standard Normal Distribution
 ## ------------------------------------------------------------------------
 
-library(bridgesampling)
-library(mvtnorm)
+library("bridgesampling")
+library("mvnfast")
 
-samples <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
+samples <- rmvn(1e4, mu = rep(0, 2), sigma = diag(2))
 colnames(samples) <- c("x1", "x2")
 log_density <- function(samples.row, data) {
   -.5*t(samples.row) \%*\% samples.row
