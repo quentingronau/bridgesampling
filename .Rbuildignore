@@ -1,5 +1,3 @@
-^Meta$
-^doc$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 development.R

@@ -7,10 +7,10 @@ test_that("bridge sampler matches anlytical value normal example", {
   testthat::skip_on_travis()
 
   # library(bridgesampling)
-  library(mvnfast)
+  library(mvtnorm)
   if(require(RcppEigen)) {
 
-    x <- rmvn(1e4, mu = rep(0, 2), sigma = diag(2))
+    x <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
     colnames(x) <- c("x1", "x2")
 
     lb <- rep(-Inf, 2)
@@ -34,7 +34,7 @@ test_that("bridge sampler matches anlytical value normal example", {
 
     # test dots argument
     mu <- c(1, 2)
-    x <- rmvn(1e4, mu = mu, sigma = diag(2))
+    x <- rmvnorm(1e4, mean = mu, sigma = diag(2))
     colnames(x) <- c("x1", "x2")
 
     lb <- rep(-Inf, 2)

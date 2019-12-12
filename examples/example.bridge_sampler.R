@@ -3,10 +3,10 @@
 ##            Standard Normal Distribution
 ## ------------------------------------------------------------------------
 
-library("bridgesampling")
-library("mvnfast")
+library(bridgesampling)
+library(mvtnorm)
 
-samples <- rmvn(1e4, mu = rep(0, 2), sigma = diag(2))
+samples <- rmvnorm(1e4, mean = rep(0, 2), sigma = diag(2))
 colnames(samples) <- c("x1", "x2")
 log_density <- function(samples.row, data) {
   -.5*t(samples.row) %*% samples.row

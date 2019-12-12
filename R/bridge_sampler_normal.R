@@ -37,16 +37,13 @@
   V <- as.matrix(nearPD(V_tmp)$mat) # make sure that V is positive-definite
 
   # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
-  q12 <- mvnfast::dmvn(samples_4_iter, mu = m, sigma = V, log = TRUE,
-                       ncores = cores)
+  q12 <- dmvnorm(samples_4_iter, mean = m, sigma = V, log = TRUE)
   gen_samples <- vector(mode = "list", length = repetitions)
   q22 <- vector(mode = "list", length = repetitions)
   for (i in seq_len(repetitions)) {
-    gen_samples[[i]] <- mvnfast::rmvn(n_post, mu = m, sigma = V,
-                                      ncores = cores)
+    gen_samples[[i]] <- rmvnorm(n_post, mean = m, sigma = V)
     colnames(gen_samples[[i]]) <- colnames(samples_4_iter)
-    q22[[i]] <- mvnfast::dmvn(gen_samples[[i]], mu = m, sigma = V, log = TRUE,
-                              ncores = cores)
+    q22[[i]] <- dmvnorm(gen_samples[[i]], mean = m, sigma = V, log = TRUE)
   }
 
   # evaluate log of likelihood times prior for posterior samples and generated samples

@@ -26,14 +26,13 @@
 #'@param ub named vector with upper bounds for parameters.
 #'@param repetitions number of repetitions.
 #'@param method either \code{"normal"} or \code{"warp3"}.
-#'@param cores number of cores used for evaluating \code{log_posterior} and when
-#'  calling \pkg{mvnfast} functions. For evaluating \code{log_posterior}, on
+#'@param cores number of cores used for evaluating \code{log_posterior}. On
 #'  unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to
 #'  \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is
-#'  used. Hence, elements needed for evaluation should be in the
+#'  used. Hence elements needed for evaluation should be in the
 #'  \code{\link{.GlobalEnv}}. For other systems (e.g., Windows)
 #'  \code{\link{makeCluster}} is used and further arguments specified below will
-#'  be used. \pkg{mvnfast} uses OpenMP.
+#'  be used.
 #'@param use_neff Boolean which determines whether the effective sample size is
 #'  used in the optimal bridge function. Default is TRUE. If FALSE, the number
 #'  of samples is used instead. If \code{samples} is a \code{matrix}, it is
@@ -177,6 +176,7 @@
 #'  lists some additional methods that automatically invoke the
 #'  \code{\link{error_measures}} function.
 #'
+#'@importFrom mvtnorm rmvnorm dmvnorm
 #'@importFrom Matrix nearPD
 #'@import Brobdingnag
 #'@importFrom stringr str_sub
