@@ -1,4 +1,21 @@
                        ***********************************
+                       ** bridgesampling VERSION 0.8-x **
+                       ***********************************
+
+                    Changes in bridgesampling Version 0.8-x
+                    Released December 2019
+                    
+  Significant User Visible Changes and New Features
+  
+    o Disabled use of mvnfast and revetred back to mvtnorn. see also:
+      https://github.com/quentingronau/bridgesampling/issues/20
+
+
+  Bugfixes
+  
+  
+
+                       ***********************************
                        ** bridgesampling VERSION 0.7-x **
                        ***********************************
 
