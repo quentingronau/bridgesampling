@@ -237,6 +237,14 @@
     l1 <- -log(2) + determinant(L)$modulus + (q11 - q12) # log(l)
     l2 <-  -log(2) + determinant(L)$modulus + (q21 - q22) # log(ltilde)
   }
+  ## for dbugging:
+  # save(
+  #   l1, l2,
+  #   r0, tol, L,
+  #   method, maxiter, silent,
+  #   criterion, neff,
+  #   file = "iterative_scheme.rda"
+  # )
 
   lstar <- median(l1)
   n.1 <- length(l1)

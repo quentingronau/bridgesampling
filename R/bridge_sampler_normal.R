@@ -148,7 +148,7 @@
       warning("logml could not be estimated within maxiter, rerunning with adjusted starting value. \nEstimate might be more variable than usual.", call. = FALSE)
       lr <- length(tmp$r_vals)
       # use geometric mean as starting value
-      r0_2 <- sqrt(tmp$r_vals[lr - 1]*tmp$r_vals[lr])
+      r0_2 <- sqrt(tmp$r_vals[[lr - 1]] * tmp$r_vals[[lr]])
       tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
                                    r0 = r0_2, tol = tol2, L = NULL, method = "normal",
                                    maxiter = maxiter, silent = silent,
