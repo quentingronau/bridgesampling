@@ -1,23 +1,35 @@
                        ***********************************
+                       ** bridgesampling VERSION 1.0-0 **
+                       ***********************************
+
+                    Changes in bridgesampling Version 1.0-0
+                    Released February 2020
+
+  Significant User Visible Changes and New Features
+
+  o Included citation file and references to JSS article
+
+
+                       ***********************************
                        ** bridgesampling VERSION 0.8-x **
                        ***********************************
 
                     Changes in bridgesampling Version 0.8-x
                     Released December 2019
-                    
+
   Significant User Visible Changes and New Features
-  
+
   o Disabled use of mvnfast and revetred back to mvtnorn. see also:
     https://github.com/quentingronau/bridgesampling/issues/20
 
 
   Bugfixes
-  
-  o Version 0.7-x introduced a bug that prevented a rerunning of the 
-    iterative scheme based on harmonic mean in case maxit was reached. 
-    This bug should now be removed. See: 
+
+  o Version 0.7-x introduced a bug that prevented a rerunning of the
+    iterative scheme based on harmonic mean in case maxit was reached.
+    This bug should now be removed. See:
     https://github.com/quentingronau/bridgesampling/issues/18
-  
+
 
                        ***********************************
                        ** bridgesampling VERSION 0.7-x **
@@ -28,14 +40,14 @@
 
   Significant User Visible Changes and New Features
 
-  o Better error message in case all samples from proposal distribution 
+  o Better error message in case all samples from proposal distribution
     evaluate to NA with log_posterior.
-  
+
   Bugfixes
-  
-  o bridge_sampler more robust in case of extreme numerical values while 
+
+  o bridge_sampler more robust in case of extreme numerical values while
     running iterative scheme. Addresses #14.
-    
+
   o Better error message in case samples are outside parameter bounds.
 
 
@@ -51,15 +63,15 @@
 
   o Added nimble vignette (Hierarchical Normal Example)
 
-  o Added accepted JSS version of introductory paper, but kept existing version 
-    as extended version. 
+  o Added accepted JSS version of introductory paper, but kept existing version
+    as extended version.
 
   Bugfixes
 
-  o R CMD check on the package tar.gz should now run without packages that are  
-    in suggests installed (if the corresponding environment variable is set). 
+  o R CMD check on the package tar.gz should now run without packages that are
+    in suggests installed (if the corresponding environment variable is set).
     Also, all vignettes should compile without suggested packages (achieved by
-    precalculating the results and then loading them).  
+    precalculating the results and then loading them).
 
 
                        ***********************************

@@ -1,0 +1,21 @@
+bibentry(bibtype = "Article",
+  title        = "{bridgesampling}: An {R} Package for Estimating Normalizing Constants",
+  author       = c(person(given = c("Quentin", "F."),
+                          family = "Gronau",
+                          email = "Quentin.F.Gronau@gmail.com"),
+                   person(given = "Henrik",
+                          family = "Singmann",
+                          email = "Henrik.Singmann@warwick.ac.uk"),
+                   person(given = "Eric-Jan",
+                          family = "Wagenmakers",
+                          email = "EJ.Wagenmakers@gmail.com")),
+  journal      = "Journal of Statistical Software",
+  year         = "2020",
+  volume       = "92",
+  number       = "10",
+  pages        = "1--29",
+  doi          = "10.18637/jss.v092.i10",
+
+  header       = "To cite bridgesampling in publications use:"
+)
+

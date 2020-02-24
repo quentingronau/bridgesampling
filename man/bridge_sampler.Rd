@@ -14,145 +14,51 @@
 \usage{
 bridge_sampler(samples, ...)
 
-\method{bridge_sampler}{stanfit}(
-  samples = NULL,
-  stanfit_model = samples,
-  repetitions = 1,
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  maxiter = 1000,
-  silent = FALSE,
-  verbose = FALSE,
-  ...
-)
+\method{bridge_sampler}{stanfit}(samples = NULL,
+  stanfit_model = samples, repetitions = 1, method = "normal",
+  cores = 1, use_neff = TRUE, maxiter = 1000, silent = FALSE,
+  verbose = FALSE, ...)
 
-\method{bridge_sampler}{mcmc.list}(
-  samples = NULL,
-  log_posterior = NULL,
-  ...,
-  data = NULL,
-  lb = NULL,
-  ub = NULL,
-  repetitions = 1,
-  param_types = rep("real", ncol(samples[[1]])),
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  packages = NULL,
-  varlist = NULL,
-  envir = .GlobalEnv,
-  rcppFile = NULL,
-  maxiter = 1000,
-  silent = FALSE,
-  verbose = FALSE
-)
+\method{bridge_sampler}{mcmc.list}(samples = NULL,
+  log_posterior = NULL, ..., data = NULL, lb = NULL, ub = NULL,
+  repetitions = 1, param_types = rep("real", ncol(samples[[1]])),
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+  maxiter = 1000, silent = FALSE, verbose = FALSE)
 
-\method{bridge_sampler}{mcmc}(
-  samples = NULL,
-  log_posterior = NULL,
-  ...,
-  data = NULL,
-  lb = NULL,
-  ub = NULL,
-  repetitions = 1,
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  packages = NULL,
-  varlist = NULL,
-  envir = .GlobalEnv,
-  rcppFile = NULL,
-  maxiter = 1000,
-  param_types = rep("real", ncol(samples)),
-  silent = FALSE,
-  verbose = FALSE
-)
+\method{bridge_sampler}{mcmc}(samples = NULL, log_posterior = NULL,
+  ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+  maxiter = 1000, param_types = rep("real", ncol(samples)),
+  silent = FALSE, verbose = FALSE)
 
-\method{bridge_sampler}{matrix}(
-  samples = NULL,
-  log_posterior = NULL,
-  ...,
-  data = NULL,
-  lb = NULL,
-  ub = NULL,
-  repetitions = 1,
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  packages = NULL,
-  varlist = NULL,
-  envir = .GlobalEnv,
-  rcppFile = NULL,
-  maxiter = 1000,
-  param_types = rep("real", ncol(samples)),
-  silent = FALSE,
-  verbose = FALSE
-)
+\method{bridge_sampler}{matrix}(samples = NULL, log_posterior = NULL,
+  ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+  maxiter = 1000, param_types = rep("real", ncol(samples)),
+  silent = FALSE, verbose = FALSE)
 
-\method{bridge_sampler}{stanreg}(
-  samples,
-  repetitions = 1,
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  maxiter = 1000,
-  silent = FALSE,
-  verbose = FALSE,
-  ...
-)
+\method{bridge_sampler}{stanreg}(samples, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, maxiter = 1000,
+  silent = FALSE, verbose = FALSE, ...)
 
-\method{bridge_sampler}{rjags}(
-  samples = NULL,
-  log_posterior = NULL,
-  ...,
-  data = NULL,
-  lb = NULL,
-  ub = NULL,
-  repetitions = 1,
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  packages = NULL,
-  varlist = NULL,
-  envir = .GlobalEnv,
-  rcppFile = NULL,
-  maxiter = 1000,
-  silent = FALSE,
-  verbose = FALSE
-)
+\method{bridge_sampler}{rjags}(samples = NULL, log_posterior = NULL,
+  ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+  maxiter = 1000, silent = FALSE, verbose = FALSE)
 
-\method{bridge_sampler}{runjags}(
-  samples = NULL,
-  log_posterior = NULL,
-  ...,
-  data = NULL,
-  lb = NULL,
-  ub = NULL,
-  repetitions = 1,
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  packages = NULL,
-  varlist = NULL,
-  envir = .GlobalEnv,
-  rcppFile = NULL,
-  maxiter = 1000,
-  silent = FALSE,
-  verbose = FALSE
-)
+\method{bridge_sampler}{runjags}(samples = NULL, log_posterior = NULL,
+  ..., data = NULL, lb = NULL, ub = NULL, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, packages = NULL,
+  varlist = NULL, envir = .GlobalEnv, rcppFile = NULL,
+  maxiter = 1000, silent = FALSE, verbose = FALSE)
 
-\method{bridge_sampler}{MCMC_refClass}(
-  samples,
-  repetitions = 1,
-  method = "normal",
-  cores = 1,
-  use_neff = TRUE,
-  maxiter = 1000,
-  silent = FALSE,
-  verbose = FALSE,
-  ...
-)
+\method{bridge_sampler}{MCMC_refClass}(samples, repetitions = 1,
+  method = "normal", cores = 1, use_neff = TRUE, maxiter = 1000,
+  silent = FALSE, verbose = FALSE, ...)
 }
 \arguments{
 \item{samples}{an \code{mcmc.list} object, a fitted \code{stanfit} object, a
@@ -534,7 +440,11 @@ bf(bridge_1, bridge_2)
 
 }
 \references{
-Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U.,
+Gronau, Q. F., Singmann, H., & Wagenmakers, E.-J. (2020). bridgesampling: An
+ R Package for Estimating Normalizing Constants. \emph{Journal of Statistical
+ Software, 92}. \doi{10.18637/jss.v092.i10}
+
+ Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U.,
  Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., &
  Steingroever, H. (in press). A tutorial on bridge sampling. \emph{Journal of
  Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr

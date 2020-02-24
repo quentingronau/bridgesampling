@@ -143,7 +143,12 @@
 #'  by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the
 #'  \code{stanreg} method. Kees Mulder added methods for simplex and circular
 #'  variables.
-#'@references Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U.,
+#'@references
+#'  Gronau, Q. F., Singmann, H., & Wagenmakers, E.-J. (2020). bridgesampling: An
+#'  R Package for Estimating Normalizing Constants. \emph{Journal of Statistical
+#'  Software, 92}. \doi{10.18637/jss.v092.i10}
+#'
+#'  Gronau, Q. F., Sarafoglou, A., Matzke, D., Ly, A., Boehm, U.,
 #'  Marsman, M., Leslie, D. S., Forster, J. J., Wagenmakers, E.-J., &
 #'  Steingroever, H. (in press). A tutorial on bridge sampling. \emph{Journal of
 #'  Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr
