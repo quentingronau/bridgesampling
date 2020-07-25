@@ -1,5 +1,7 @@
+<!-- badges: start -->
+[![R build status](https://github.com/quentingronau/bridgesampling/workflows/R-CMD-check/badge.svg)](https://github.com/quentingronau/bridgesampling/actions)
 [![Travis-CI Build Status](https://travis-ci.org/quentingronau/bridgesampling.svg?branch=master)](https://travis-ci.org/quentingronau/bridgesampling)
-
+<!-- badges: end -->
 
 bridgesampling: Bridge Sampling for Marginal Likelihoods and Bayes Factors
 ====
