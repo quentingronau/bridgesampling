@@ -1,4 +1,22 @@
                        ***********************************
+                       ** bridgesampling VERSION 1.1-0 **
+                       ***********************************
+
+                    Changes in bridgesampling Version 1.1-0
+                    Released XXX 2020
+
+  Significant User Visible Changes and New Features
+
+  o
+
+    Bugfixes
+
+  o Fixed subscript out of bounds error, see
+    https://github.com/quentingronau/bridgesampling/issues/26
+
+
+
+                       ***********************************
                        ** bridgesampling VERSION 1.0-0 **
                        ***********************************
 

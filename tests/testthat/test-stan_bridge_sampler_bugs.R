@@ -1,6 +1,81 @@
 
 context('Stan Bridge Sampler Bugs')
 
+test_that("subscript out of bounds error", {
+  ## https://github.com/quentingronau/bridgesampling/issues/26
+  stan_mod = "
+  data{
+    int M;
+    int J;
+    int T;
+    int E;
+    int G;
+    int N[G];
+    int ii[M];
+    int jj[M];
+    int gg[M];
+    int g_all[sum(N)];
+    int y[M];
+    matrix[J,J] obs_corr[G];
+  }
+
+  transformed data{
+    int N_all = sum(N);
+  }
+
+  parameters{
+    ordered[T] thresholds_raw[G,J];
+    matrix<multiplier=5>[E,J] lam[G];
+    matrix[N_all,E] eta;
+    matrix[N_all,J] ystar_raw;
+  }
+
+  transformed parameters {
+    ordered[T] thresholds[G,J];
+
+    for(g in 1:G)
+      for(j in 1:J)
+        thresholds[g,j] = thresholds_raw[g,j] * 5;
+  }
+
+
+  model{
+    matrix[N_all,J] ystar;
+    int pos = 1;
+
+    target += std_normal_lpdf(to_vector(ystar_raw));
+    target += std_normal_lpdf(to_vector(eta));
+
+    for(g in 1:G){
+      int g_ids[N[g]] = segment(g_all,pos,N[g]);
+      target += normal_lpdf(to_vector(eta)| 0,5);
+
+      for(j in 1:J)
+        target += std_normal_lpdf(thresholds_raw[g,j]);
+
+      ystar[g_ids,] = eta[g_ids,] * lam[g] + ystar_raw[g_ids,];
+      pos += N[g];
+    }
+
+    for(m in 1:M)
+      target += ordered_logistic_lpmf(y[m] | ystar[ii[m],jj[m]],
+                                             thresholds[gg[m],jj[m]]);
+  }
+  "
+  testthat::skip_on_cran()
+  testthat::skip_on_travis()
+  testthat::skip_if_not_installed("rstan")
+  library("rstan")
+  # source("tests/testthat/test_dat.txt")
+  source("test_dat.txt")
+
+  suppressWarnings(capture.output(
+    mod <- stan(model_code=stan_mod,data=test_dat, chains = 2)
+  ))
+
+  expect_warning(object = bridge_sampler(mod, silent=TRUE),
+                 regexp = "Infinite value in iterative scheme, returning NA.")
+})
 
 test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
 

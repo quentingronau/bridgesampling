@@ -193,7 +193,7 @@
                                  r0 = r0, tol = tol1, L = L, method = "warp3",
                                  maxiter = maxiter, silent = silent,
                                  criterion = "r", neff = neff)
-    if (is.na(tmp$logml)) {
+    if (is.na(tmp$logml) & !is.null(tmp$r_vals)) {
       warning("logml could not be estimated within maxiter, rerunning with adjusted starting value. \nEstimate might be more variable than usual.", call. = FALSE)
       lr <- length(tmp$r_vals)
       # use geometric mean as starting value
