@@ -53,39 +53,56 @@ test_that("stan_bridge_sampler", {
     '
 
     # compile models
-    tmp <- capture.output(suppressMessages(
-    stanmodelH0 <- stan_model(model_code = stancodeH0, model_name="stanmodel")
-    ))
+    stanmodelH0 <- suppressWarnings(
+      stan_model(model_code = stancodeH0, model_name="stanmodel")
+    )
+
 
     # fit models
-    tmp <- capture.output(
     stanobjectH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                       alpha = alpha,
-                                                      beta = beta),
-                             iter = 3500, warmup = 500, chains = 4, show_messages = FALSE))
+                                                      beta = beta,
+                                                      sigma2 = sigma2),
+                             iter = 3500, warmup = 500, chains = 4,
+                             show_messages = FALSE, refresh = 0)
     expect_is(
-    H0_bridge_norm <- bridge_sampler(stanobjectH0, method = "normal", silent = TRUE)
-    , "bridge")
+      H0_bridge_norm <- bridge_sampler(samples = stanobjectH0,
+                                       method = "normal",
+                                       silent = TRUE)
+      , "bridge")
 
     expect_is(
-      H0_bridge_norm_rep <-bridge_sampler(stanobjectH0, method = "normal", repetitions = 2, silent = TRUE)
+      H0_bridge_norm_rep <-bridge_sampler(stanobjectH0,
+                                          method = "normal",
+                                          repetitions = 2, silent = TRUE)
       , "bridge_list")
 
     expect_is(
-    H0_bridge_warp3 <- bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE)
-    , "bridge")
+      H0_bridge_warp3 <- bridge_sampler(stanobjectH0, method = "warp3",
+                                        silent = TRUE)
+      , "bridge")
 
     expect_is(
       H0_bridge_warp3_rep <- bridge_sampler(stanobjectH0, method = "warp3", repetitions = 2, silent = TRUE)
       , "bridge_list")
 
-    expect_equal(H0_bridge_norm$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
-    expect_equal(H0_bridge_warp3$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
+    expect_equal(
+      H0_bridge_norm$logml,
+      log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)),
+      tolerance = 0.1)
+    expect_equal(
+      H0_bridge_warp3$logml,
+      log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)),
+      tolerance = 0.1)
 
-    expect_equal(H0_bridge_norm_rep$logml, rep(log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), 2),
-                 tolerance = 0.1)
-    expect_equal(H0_bridge_warp3_rep$logml, rep(log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), 2),
-                 tolerance = 0.1)
+    expect_equal(
+      H0_bridge_norm_rep$logml,
+      rep(log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), 2),
+      tolerance = 0.1)
+    expect_equal(
+      H0_bridge_warp3_rep$logml,
+      rep(log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), 2),
+      tolerance = 0.1)
 
   }
 })
@@ -132,26 +149,36 @@ test_that("stan_bridge_sampler in multicore", {
     '
 
     # compile models
-    tmp <- capture.output(suppressMessages(
-    stanmodelH0 <- stan_model(model_code = stancodeH0, model_name="stanmodel")
-    ))
+    stanmodelH0 <- suppressWarnings(
+      stan_model(model_code = stancodeH0, model_name="stanmodel")
+    )
 
     # fit models
-    tmp <- capture.output(
     stanobjectH0 <- sampling(stanmodelH0, data = list(y = y, n = n,
                                                       alpha = alpha,
-                                                      beta = beta),
-                             iter = 2500, warmup = 500, chains = 4, show_messages = FALSE))
+                                                      beta = beta,
+                                                      sigma2 = sigma2),
+                             iter = 2500, warmup = 500, chains = 4,
+                             show_messages = FALSE, refresh = 0)
     expect_is(
-    H0_bridge_norm <- bridge_sampler(stanobjectH0, method = "normal", silent = TRUE, cores = 2)
+    H0_bridge_norm <- bridge_sampler(stanobjectH0,
+                                     method = "normal",
+                                     silent = TRUE, cores = 2)
     , "bridge")
 
     expect_is(
-    H0_bridge_warp3 <- bridge_sampler(stanobjectH0, method = "warp3", silent = TRUE, cores = 2)
+    H0_bridge_warp3 <- bridge_sampler(stanobjectH0, method = "warp3",
+                                      silent = TRUE, cores = 2)
     , "bridge")
 
-    expect_equal(H0_bridge_norm$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
-    expect_equal(H0_bridge_warp3$logml, log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)), tolerance = 0.1)
+    expect_equal(
+      H0_bridge_norm$logml,
+      log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)),
+      tolerance = 0.1)
+    expect_equal(
+      H0_bridge_warp3$logml,
+      log(mH0(y = y, sigma2 = sigma2, alpha = alpha, beta = beta)),
+      tolerance = 0.1)
 
   }
 })

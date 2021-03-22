@@ -69,9 +69,9 @@ test_that("subscript out of bounds error", {
   # source("tests/testthat/test_dat.txt")
   source("test_dat.txt")
 
-  suppressWarnings(capture.output(
-    mod <- stan(model_code=stan_mod,data=test_dat, chains = 2)
-  ))
+  suppressWarnings(
+    mod <- stan(model_code=stan_mod,data=test_dat, chains = 2, refresh = 0)
+  )
 
   expect_warning(object = bridge_sampler(mod, silent=TRUE),
                  regexp = "Infinite value in iterative scheme, returning NA.")
@@ -105,15 +105,15 @@ test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
     }
     '
     # compile models
-    tmp <- capture.output(
-    stanmodelH0 <- stan_model(model_code = stancodeH0, model_name="stanmodel")
+    suppressWarnings(
+      stanmodelH0 <- stan_model(model_code = stancodeH0, model_name="stanmodel")
     )
     # fit models
-    tmp <- capture.output(
     stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n),
                           iter = 10000, warmup = 1000, chains = 4,
-                          control = list(adapt_delta = 0.95))
-    )
+                          control = list(adapt_delta = 0.95),
+                          refresh = 0)
+
     ######### bridge sampling ###########
     suppressWarnings(H0 <- bridge_sampler(stanfitH0, cores = 2, silent = TRUE))
 
@@ -167,14 +167,17 @@ test_that("turtle example",{
         target += bernoulli_lpmf(y[i] | Phi(alpha0 + alpha1*x[i] + b[clutch[i]]));
   }"
 
-  tmp <- capture.output(stanobject_m1_nc <- stan(model_code = m1_code_nc,
-                           data = list(y = turtles$y, x = turtles$x,
-                                       nobs = nrow(turtles),
-                                       m = max(turtles$clutch),
-                                       clutch = turtles$clutch),
-                           iter = 10500, warmup = 500, chains = 4))
-  bs_m1_nc <- bridge_sampler(stanobject_m1_nc, method = "warp3",
-                             repetitions = 25, silent=TRUE)
+    suppressWarnings(
+      stanobject_m1_nc <- stan(model_code = m1_code_nc,
+                               data = list(y = turtles$y, x = turtles$x,
+                                           nobs = nrow(turtles),
+                                           m = max(turtles$clutch),
+                                           clutch = turtles$clutch),
+                               iter = 10500, warmup = 500, chains = 4,
+                               refresh = 0)
+    )
+    bs_m1_nc <- bridge_sampler(stanobject_m1_nc, method = "warp3",
+                               repetitions = 25, silent=TRUE)
 
   m0_code_nc <-
     "data {
@@ -200,12 +203,15 @@ test_that("turtle example",{
         target += bernoulli_lpmf(y[i] | Phi(alpha0 + alpha1*x[i]));
     }"
 
-  tmp <- capture.output(stanobject_m0_nc <- stan(model_code = m0_code_nc,
-                           data = list(y = turtles$y, x = turtles$x,
-                                       nobs = nrow(turtles),
-                                       m = max(turtles$clutch),
-                                       clutch = turtles$clucth),
-                           iter = 10500, warmup = 500, chains = 4))
+  suppressWarnings(
+    stanobject_m0_nc <- stan(model_code = m0_code_nc,
+                             data = list(y = turtles$y, x = turtles$x,
+                                         nobs = nrow(turtles),
+                                         m = max(turtles$clutch),
+                                         clutch = turtles$clucth),
+                             iter = 10500, warmup = 500, chains = 4,
+                             refresh = 0)
+  )
 
   bs_m0_nc <- bridge_sampler(stanobject_m0_nc, method = "warp3",
                              repetitions = 25, silent=TRUE)
