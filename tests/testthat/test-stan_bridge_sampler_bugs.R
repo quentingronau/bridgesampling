@@ -124,6 +124,8 @@ test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
 
 test_that("turtle example",{
   skip_on_cran()
+  skip_on_travis()
+
 
   if (require(rstan)) {
 
