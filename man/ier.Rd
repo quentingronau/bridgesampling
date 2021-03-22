@@ -5,7 +5,9 @@
 \name{ier}
 \alias{ier}
 \title{Standardized International Exchange Rate Changes from 1975 to 1986}
-\format{A matrix with 143 rows and 6 columns.}
+\format{
+A matrix with 143 rows and 6 columns.
+}
 \source{
 West, M., Harrison, J. (1997). \emph{Bayesian forecasting and dynamic models} (2nd ed.). Springer-Verlag, New York.
 

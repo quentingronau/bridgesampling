@@ -197,6 +197,11 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
                                    repetitions = 1, method = "normal", cores = 1,
                                    use_neff = TRUE, maxiter = 1000, silent = FALSE,
                                    verbose = FALSE, ...) {
+    # cores > 1 only for unix:
+  if (!(.Platform$OS.type == "unix") & (cores != 1)) {
+    warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.", call. = FALSE)
+    cores <- 1L
+  }
 
   # convert samples into matrix
   if (!requireNamespace("rstan")) stop("package rstan required")
@@ -245,12 +250,6 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
 
   colnames(samples_4_iter) <- paste0("trans_", parameters)
   colnames(samples_4_fit) <- paste0("trans_", parameters)
-
-  # cores > 1 only for unix:
-  if (!(.Platform$OS.type == "unix") & (cores != 1)) {
-    warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.", call. = FALSE)
-    cores <- 1L
-  }
 
   # run bridge sampling
   if (cores == 1) {

@@ -5,7 +5,9 @@
 \name{turtles}
 \alias{turtles}
 \title{Turtles Data from Janzen, Tucker, and Paukstis (2000)}
-\format{A data.frame with 244 rows and 3 variables.}
+\format{
+A data.frame with 244 rows and 3 variables.
+}
 \source{
 Janzen, F. J., Tucker,  J. K., & Paukstis, G. L. (2000). Experimental
   analysis of an early life-history stage: Selection on size of hatchling

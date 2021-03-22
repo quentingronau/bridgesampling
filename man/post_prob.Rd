@@ -9,14 +9,11 @@
 \usage{
 post_prob(x, ..., prior_prob = NULL, model_names = NULL)
 
-\method{post_prob}{bridge}(x, ..., prior_prob = NULL,
-  model_names = NULL)
+\method{post_prob}{bridge}(x, ..., prior_prob = NULL, model_names = NULL)
 
-\method{post_prob}{bridge_list}(x, ..., prior_prob = NULL,
-  model_names = NULL)
+\method{post_prob}{bridge_list}(x, ..., prior_prob = NULL, model_names = NULL)
 
-\method{post_prob}{default}(x, ..., prior_prob = NULL,
-  model_names = NULL)
+\method{post_prob}{default}(x, ..., prior_prob = NULL, model_names = NULL)
 }
 \arguments{
 \item{x}{Object of class \code{"bridge"} or \code{"bridge_list"} as returned
