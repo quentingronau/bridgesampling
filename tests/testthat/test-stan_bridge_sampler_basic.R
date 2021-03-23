@@ -16,6 +16,7 @@ mH0 <- function(y, sigma2 = 1, alpha = 2, beta = 3, rel.tol = 10^(-10)) {
 
 
 test_that("stan_bridge_sampler", {
+  testthat::skip_on_os("windows")
   if (require(rstan)) {
     set.seed(12345)
 
@@ -111,7 +112,7 @@ test_that("stan_bridge_sampler", {
 test_that("stan_bridge_sampler in multicore", {
   testthat::skip_on_cran()
   testthat::skip_on_travis()
-  #testthat::skip_on_os("windows")
+  testthat::skip_on_os("windows")
   if (require(rstan)) {
     set.seed(12345)
 

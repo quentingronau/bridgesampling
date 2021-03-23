@@ -3,7 +3,7 @@
                        ***********************************
 
                     Changes in bridgesampling Version 1.1-0
-                    Released XXX 2020
+                    Released March 2021
 
   Significant User Visible Changes and New Features
 
@@ -13,6 +13,8 @@
 
   o Fixed subscript out of bounds error, see
     https://github.com/quentingronau/bridgesampling/issues/26
+
+  o Deactivated stan tests on Windows to avoid CRAN check issues.
 
 
 
