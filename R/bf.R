@@ -29,7 +29,7 @@
 #' @author Quentin F. Gronau
 #' @note For examples, see \code{\link{bridge_sampler}} and the accompanying vignettes: \cr \code{vignette("bridgesampling_example_jags")} \cr \code{vignette("bridgesampling_example_stan")}
 #' @references
-#' Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association, 90(430)}, 773-795. \url{http://dx.doi.org/10.1080/01621459.1995.10476572}
+#' Kass, R. E., & Raftery, A. E. (1995). Bayes factors. \emph{Journal of the American Statistical Association, 90(430)}, 773-795. \doi{10.1080/01621459.1995.10476572}
 #' @importFrom methods is
 bf <- function(x1, x2, log = FALSE, ...) {
   UseMethod("bf", x1)

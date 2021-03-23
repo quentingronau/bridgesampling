@@ -15,17 +15,17 @@
 #' @source Janzen, F. J., Tucker,  J. K., & Paukstis, G. L. (2000). Experimental
 #'   analysis of an early life-history stage: Selection on size of hatchling
 #'   turtles. \emph{Ecology, 81(8)}, 2290-2304.
-#'   \url{http://doi.org/10.2307/177115}
+#'   \doi{10.2307/177115}
 #'
 #'   Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model
 #'   determination methods for generalised linear mixed models.
 #'   \emph{Computational Statistics & Data Analysis, 54}, 3269-3288.
-#'   \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
+#'   \doi{10.1016/j.csda.2010.03.008}
 #'
 #'   Sinharay, S., & Stern, H. S. (2005). An empirical comparison of methods for
 #'   computing Bayes factors in generalized linear mixed models. \emph{Journal
 #'   of Computational and Graphical Statistics, 14(2)}, 415-435.
-#'   \url{http://dx.doi.org/10.1198/106186005X47471}
+#'   \doi{10.1198/106186005X47471}
 #' @encoding UTF-8
 #'
 #' @example examples/example.turtles.R

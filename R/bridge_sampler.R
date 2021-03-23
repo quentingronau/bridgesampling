@@ -167,12 +167,12 @@
 #'
 #'  Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of
 #'  Computational and Graphical Statistics, 11(3)}, 552-586.
-#'  \url{http://dx.doi.org/10.1198/106186002457}
+#'  \doi{10.1198/106186002457}
 #'
 #'  Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model
 #'  determination methods for generalised linear mixed models.
 #'  \emph{Computational Statistics & Data Analysis, 54}, 3269-3288.
-#'  \url{http://dx.doi.org/10.1016/j.csda.2010.03.008}
+#'  \doi{10.1016/j.csda.2010.03.008}
 #'@example examples/example.bridge_sampler.R
 #'
 #'@seealso \code{\link{bf}} allows the user to calculate Bayes factors and
