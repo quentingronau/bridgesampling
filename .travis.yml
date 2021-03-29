@@ -14,6 +14,11 @@ warnings_are_errors: TRUE
 
 r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
+
+install:
+  - R -e "remove.packages(c('StanHeaders', 'rstan'))"
+  - R -e "install.packages('StanHeaders', type = 'source')"
+  - R -e "install.packages('rstan', type = 'source')"
   
 addons:
   apt:
