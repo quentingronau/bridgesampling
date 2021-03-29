@@ -63,8 +63,8 @@ jobs:
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
-          remove.packages(c("StanHeaders", "rstan", "RcppParallel", "Rcpp"))
-          install.packages("Rcpp", type = "source")
+          remove.packages(c("StanHeaders", "rstan", "RcppParallel", "RcppEigen"))
+          install.packages("RcppEigen", type = "source")
           install.packages("RcppParallel", type = "source")
           install.packages("StanHeaders", type = "source")
           install.packages("rstan", type = "source")
