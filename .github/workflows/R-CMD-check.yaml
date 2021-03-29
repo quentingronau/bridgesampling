@@ -64,8 +64,8 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remove.packages(c("StanHeaders", "rstan"))
-          install.packages("StanHeaders", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
-          install.packages("rstan", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+          install.packages("StanHeaders", type = "source")
+          install.packages("rstan", type = "source")
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
