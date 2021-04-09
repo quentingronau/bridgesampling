@@ -1,7 +1,7 @@
 Package: bridgesampling
 Type: Package
 Title: Bridge Sampling for Marginal Likelihoods and Bayes Factors
-Version: 1.1-0
+Version: 1.1-1
 Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
              email="Quentin.F.Gronau@gmail.com",
              comment=c(ORCID="0000-0001-5510-6943")),
