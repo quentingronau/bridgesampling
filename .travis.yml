@@ -14,9 +14,6 @@ warnings_are_errors: TRUE
 
 r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
-
-before_script:
-  - R -e "install.packages('RcppParallel', type = 'source')"
   
 addons:
   apt:
