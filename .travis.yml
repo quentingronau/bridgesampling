@@ -16,8 +16,7 @@ r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
 
 before_script:
-  - R -e "install.packages('StanHeaders', type = 'source')"
-  - R -e "install.packages('rstan', type = 'source')"
+  - R -e "update.packages(ask = FALSE)"
   
 addons:
   apt:
