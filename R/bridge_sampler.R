@@ -517,8 +517,8 @@ bridge_sampler.rjags <- function(samples = NULL, log_posterior = NULL, ..., data
 
 
   # convert to mcmc.list
-  cn <- colnames(samples$BUGSoutput$sims.matrix)
   samples <- coda::as.mcmc(samples)
+  cn <- coda::varnames(samples)
   samples <- samples[,cn != "deviance", drop = FALSE]
 
   # run bridge sampling
