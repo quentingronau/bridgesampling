@@ -263,9 +263,10 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
                                          param_types = rep("real", ncol(samples_4_fit)),
                                          transTypes = transTypes,
                                          repetitions = repetitions, cores = cores,
-                                         packages = "rstan", maxiter = maxiter, silent = silent,
-                                         verbose = verbose,
-                                         r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
+                                         packages = c("rstan", "mvtnorm"), 
+                                         maxiter = maxiter, silent = silent,
+                                         verbose = verbose, r0 = 0.5, tol1 = 1e-10, 
+                                         tol2 = 1e-4))
   } else {
     bridge_output <- do.call(what = paste0(".bridge.sampler.", method),
                              args = list(samples_4_fit = samples_4_fit,
@@ -278,9 +279,10 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
                                          transTypes = transTypes,
                                          repetitions = repetitions, varlist = "stanfit",
                                          envir = sys.frame(sys.nframe()),
-                                         cores = cores, packages = "rstan", maxiter = maxiter,
-                                         silent = silent, verbose = verbose,
-                                         r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4))
+                                         cores = cores, packages = c("rstan", "mvtnorm"), 
+                                         maxiter = maxiter, silent = silent, 
+                                         verbose = verbose, r0 = 0.5, tol1 = 1e-10, 
+                                         tol2 = 1e-4))
   }
 
   return(bridge_output)
@@ -490,7 +492,7 @@ bridge_sampler.stanreg <-
       bridge_output <- bridge_sampler(samples = samples, log_posterior = .stan_log_posterior,
                                       data = list(stanfit = sf), lb = lb, ub = ub,
                                       repetitions = repetitions, method = method, cores = cores,
-                                      use_neff = use_neff, packages = "rstan",
+                                      use_neff = use_neff, packages = c("rstan", "mvtnorm"),
                                       maxiter = maxiter, silent = silent,
                                       verbose = verbose)
     } else {
@@ -500,7 +502,7 @@ bridge_sampler.stanreg <-
                                       repetitions = repetitions, varlist = "stanfit",
                                       envir = sys.frame(sys.nframe()), method = method,
                                       cores = cores, use_neff = use_neff,
-                                      packages = "rstan", maxiter = maxiter,
+                                      packages = c("rstan", "mvtnorm"), maxiter = maxiter,
                                       silent = silent, verbose = verbose)
     }
     return(bridge_output)
