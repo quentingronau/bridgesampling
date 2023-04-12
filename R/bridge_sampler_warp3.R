@@ -81,8 +81,6 @@
   } else if (cores > 1) {
         if ( .Platform$OS.type == "unix") {
       # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
-      q22 <- vector(mode = "list", length = repetitions)
-      gen_samples <- vector(mode = "list", length = repetitions)
       gen_samples <- parallel::mclapply(seq_len(repetitions), FUN =
                                         function(x) rmvnorm(n_post, sigma = diag(ncol(samples_4_fit))))
       sapply(seq_along(gen_samples), function(i) colnames(gen_samples[[i]]) <- colnames(samples_4_iter))
