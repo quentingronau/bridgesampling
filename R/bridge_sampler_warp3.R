@@ -82,10 +82,14 @@
         if ( .Platform$OS.type == "unix") {
       # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
       gen_samples <- parallel::mclapply(seq_len(repetitions), FUN =
-                                        function(x) rmvnorm(n_post, sigma = diag(ncol(samples_4_fit))))
+                                        function(x) rmvnorm(n_post, sigma = diag(ncol(samples_4_fit))),
+                                        mc.preschedule = FALSE,
+                                        mc.cores = cores)
       sapply(seq_along(gen_samples), function(i) colnames(gen_samples[[i]]) <- colnames(samples_4_iter))
       q22 <- parallel::mclapply(seq_along(gen_samples), FUN =
-                                function(i) dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE)
+                                function(i) dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE),
+                                mc.preschedule = FALSE,
+                                mc.cores = cores)
       
       split1a <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub, param_types), cores=cores)
       split1b <- .split_matrix(matrix=.invTransform2Real(
