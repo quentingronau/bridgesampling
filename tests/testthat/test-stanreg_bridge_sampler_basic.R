@@ -2,6 +2,10 @@
 context('bridge_sampler.stanreg works.')
 
 test_that("stan_bridge_sampler", {
+
+  testthat::skip_on_cran()
+  testthat::skip_on_travis()
+
   if (require(rstanarm)) {
 
     fit_1 <- stan_glm(mpg ~ wt + qsec + am, data = mtcars,
