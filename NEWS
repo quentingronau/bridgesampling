@@ -1,8 +1,8 @@
                        ***********************************
-                       ** bridgesampling VERSION 1.1-3 **
+                       ** bridgesampling VERSION 1.1-4 **
                        ***********************************
 
-                    Changes in bridgesampling Version 1.1-3
+                    Changes in bridgesampling Version 1.1-4
                     Released June 2023
 
   o Deactivated stanreg tests to avoid CRAN check issues.
