@@ -11,7 +11,7 @@ A matrix with 143 rows and 6 columns.
 \source{
 West, M., Harrison, J. (1997). \emph{Bayesian forecasting and dynamic models} (2nd ed.). Springer-Verlag, New York.
 
-Lopes, H. F., West, M. (2004). Bayesian model assessment in factor analysis. \emph{Statistica Sinica, 14}, 41-67. \url{https://www.jstor.org/stable/24307179}
+Lopes, H. F., West, M. (2004). Bayesian model assessment in factor analysis. \emph{Statistica Sinica, 14}, 41-67.
 }
 \usage{
 ier

@@ -553,7 +553,7 @@ Gronau, Q. F., Singmann, H., & Wagenmakers, E.-J. (2020). bridgesampling: An
  Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing
  constants via a simple identity: A theoretical exploration. \emph{Statistica
  Sinica, 6}, 831-860.
- \url{http://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm}
+ \url{https://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm}
 
  Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of
  Computational and Graphical Statistics, 11(3)}, 552-586.
