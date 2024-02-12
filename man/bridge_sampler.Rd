@@ -3,6 +3,7 @@
 \name{bridge_sampler}
 \alias{bridge_sampler}
 \alias{bridge_sampler.stanfit}
+\alias{bridge_sampler.CmdStanFit}
 \alias{bridge_sampler.mcmc.list}
 \alias{bridge_sampler.mcmc}
 \alias{bridge_sampler.matrix}
@@ -17,6 +18,18 @@ bridge_sampler(samples, ...)
 \method{bridge_sampler}{stanfit}(
   samples = NULL,
   stanfit_model = samples,
+  repetitions = 1,
+  method = "normal",
+  cores = 1,
+  use_neff = TRUE,
+  maxiter = 1000,
+  silent = FALSE,
+  verbose = FALSE,
+  ...
+)
+
+\method{bridge_sampler}{CmdStanFit}(
+  samples = NULL,
   repetitions = 1,
   method = "normal",
   cores = 1,
@@ -156,9 +169,10 @@ bridge_sampler(samples, ...)
 }
 \arguments{
 \item{samples}{an \code{mcmc.list} object, a fitted \code{stanfit} object, a
-\code{stanreg} object, an \code{rjags} object, a \code{runjags} object, or a
-\code{matrix} with posterior samples (\code{colnames} need to correspond to
-parameter names in \code{lb} and \code{ub})  with posterior samples.}
+\object{CmdStanFit} object, a \code{stanreg} object, an \code{rjags} 
+object, a \code{runjags} object, or a \code{matrix} with posterior samples 
+(\code{colnames} need to correspond to parameter names in \code{lb} and   
+\code{ub})  with posterior samples.}
 
 \item{...}{additional arguments passed to \code{log_posterior}. Ignored for
 the \code{stanfit} and \code{stanreg} methods.}
