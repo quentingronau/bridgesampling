@@ -77,6 +77,16 @@
   )
 }
 
+.validate_cores <- function(cores) {
+  # cores > 1 only for unix:
+  if (!(.Platform$OS.type == "unix") & (cores != 1)) {
+    warning("cores > 1 only possible on Unix/MacOs. Uses 'cores = 1' instead.", call. = FALSE)
+    return(1L)
+  } else {
+    return(cores)
+  }
+}
+
 
 #--------------------------------------------------------------------------
 # functions for CmdStan support via cmdstanr

@@ -199,10 +199,7 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
                                    use_neff = TRUE, maxiter = 1000, silent = FALSE,
                                    verbose = FALSE, ...) {
   # cores > 1 only for unix:
-  if (!(.Platform$OS.type == "unix") & (cores != 1)) {
-    warning("cores > 1 only possible on Unix/MacOs. Uses 'core = 1' instead.", call. = FALSE)
-    cores <- 1L
-  }
+  cores <- .validate_cores(cores)
 
   # convert samples into matrix
   if (!requireNamespace("rstan")) stop("package rstan required")
@@ -236,14 +233,8 @@ bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
     bridge_output <- do.call(what = paste0(".bridge.sampler.", method),
                              args = c(upars_args, bs_args,
                                       list(
-                                         log_posterior = .stan_log_posterior,
-                                         data = list(stanfit = stanfit_model),
-                                         repetitions = repetitions, cores = cores,
-                                         packages = "rstan", maxiter = maxiter,
-                                         silent = silent,
-                                         verbose = verbose,
-                                         r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4, varlist = "stanfit",
-                                         envir = sys.frame(sys.nframe()
+                                        varlist = "stanfit",
+                                        envir = sys.frame(sys.nframe()
                                         ))))
   }
 
@@ -262,6 +253,9 @@ bridge_sampler.CmdStanFit <- function(samples = NULL, repetitions = 1,
   if(is.null(samples$.__enclos_env__$private$model_methods_env_$model_ptr)) {
     samples$init_model_methods()
   }
+
+  # cores > 1 only for unix:
+  cores <- .validate_cores(cores)
 
   samples_md <- samples$metadata()
   upars <- samples$unconstrain_draws()
@@ -294,13 +288,7 @@ bridge_sampler.CmdStanFit <- function(samples = NULL, repetitions = 1,
     bridge_output <- do.call(what = paste0(".bridge.sampler.", method),
                              args = c(upars_args, bs_args,
                                       list(
-                                         log_posterior = .stan_log_posterior,
-                                         data = list(stanfit = samples),
-                                         repetitions = repetitions, cores = cores,
-                                         packages = "rstan", maxiter = maxiter,
-                                         silent = silent,
-                                         verbose = verbose,
-                                         r0 = 0.5, tol1 = 1e-10, tol2 = 1e-4, varlist = "stanfit",
+                                         varlist = "stanfit",
                                          envir = sys.frame(sys.nframe()
                                         ))))
   }
