@@ -258,17 +258,9 @@ bridge_sampler.CmdStanFit <- function(samples = NULL, repetitions = 1,
   cores <- .validate_cores(cores)
 
   samples_md <- samples$metadata()
-  upars <- samples$unconstrain_draws()
-
-  samples_dims <- c(
-    samples_md$stan_variable_sizes[!samples_md$stan_variables %in% c("lp__", "log_lik")] |>
-      unlist() |>
-      sum()
-    , samples_md$iter_sampling
-    , length(samples_md$id)
-  )
-
-  upars <- array(unlist(upars), dim = samples_dims)
+  upars <- samples$unconstrain_draws() # array: iter x chain x param
+  
+  upars <- aperm(upars, c(3, 1, 2)) # array: param x iter x chain
   upars_args <- .restructure_upars(upars, use_neff)
 
   bs_args <- list(
