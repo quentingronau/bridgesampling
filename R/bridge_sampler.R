@@ -29,8 +29,7 @@
 #'@param use_ess Logical. If \code{TRUE}, the iterative scheme’s uncertainty
 #'   calculations replace the nominal sample size with the effective sample size (ESS)
 #'   to account for autocorrelation in MCMC draws (via \code{posterior::ess_mean()}).
-#'   This adjusts variance/covariance terms used for convergence checks and SEs;
-#'   point estimates and update weights are unchanged. Default is \code{FALSE}.
+#'   This make MCSE computation to take into account autocorrelation MCMC sample
 #'@param cores number of cores used for evaluating \code{log_posterior}. On
 #'  unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to
 #'  \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is
