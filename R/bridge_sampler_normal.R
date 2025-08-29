@@ -22,6 +22,7 @@
   maxiter,
   silent,
   verbose,
+  use_ess,
   r0,
   tol1,
   tol2) {
@@ -138,11 +139,12 @@
   }
   logml <- numeric(repetitions)
   niter <- numeric(repetitions)
+  mcse_logmls <- numeric(repetitions)
   # run iterative updating scheme to compute log of marginal likelihood
   for (i in seq_len(repetitions)) {
     tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
                                  r0 = r0, tol = tol1, L = NULL, method = "normal",
-                                 maxiter = maxiter, silent = silent,
+                                 maxiter = maxiter, silent = silent, use_ess = use_ess,
                                  criterion = "r", neff = neff)
     if (is.na(tmp$logml) & !is.null(tmp$r_vals)) {
       warning("logml could not be estimated within maxiter, rerunning with adjusted starting value. \nEstimate might be more variable than usual.", call. = FALSE)
@@ -151,12 +153,13 @@
       r0_2 <- sqrt(tmp$r_vals[[lr - 1]] * tmp$r_vals[[lr]])
       tmp <- .run.iterative.scheme(q11 = q11, q12 = q12, q21 = q21[[i]], q22 = q22[[i]],
                                    r0 = r0_2, tol = tol2, L = NULL, method = "normal",
-                                   maxiter = maxiter, silent = silent,
+                                   maxiter = maxiter, silent = silent, use_ess = use_ess,
                                    criterion = "logml", neff = neff)
       tmp$niter <- maxiter + tmp$niter
     }
 
     logml[i] <- tmp$logml
+    mcse_logmls[i] <- tmp$mcse_logml
     niter[i] <- tmp$niter
     if (niter[i] == maxiter)
       warning("logml could not be estimated within maxiter, returning NA.", call. = FALSE)
@@ -164,10 +167,10 @@
 
   if (repetitions == 1) {
     out <- list(logml = logml, niter = niter, method = "normal", q11 = q11,
-                q12 = q12, q21 = q21[[1]], q22 = q22[[1]])
+                q12 = q12, q21 = q21[[1]], q22 = q22[[1]], mcse_logml = mcse_logmls)
     class(out) <- "bridge"
   } else if (repetitions > 1) {
-    out <- list(logml = logml, niter = niter, method = "normal", repetitions = repetitions)
+    out <- list(logml = logml, niter = niter, method = "normal", repetitions = repetitions, mcse_logml = mcse_logmls)
     class(out) <- "bridge_list"
   }
 
