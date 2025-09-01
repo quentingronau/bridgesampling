@@ -49,6 +49,7 @@ Description: Provides functions for estimating marginal likelihoods, Bayes
     <https://www3.stat.sinica.edu.tw/statistica/j6n4/j6n43/j6n43.htm>).
     Gronau, Singmann, & Wagenmakers (2020) <doi:10.18637/jss.v092.i10>.
 License: GPL (>=2)
+Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr, R.rsp
