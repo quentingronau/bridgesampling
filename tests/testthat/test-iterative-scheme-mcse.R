@@ -10,7 +10,7 @@ test_that("MCSE is finite, positive, and returned for normal method", {
   q22 <- c(0.01, 0.07, 0.11, 0.12)
 
   L <- diag(2)
-  out <- .run.iterative.scheme(
+  out <- bridgesampling:::.run.iterative.scheme(
     q11 = q11, q12 = q12, q21 = q21, q22 = q22,
     r0 = 1, tol = 1e-10, L = L,
     method = "normal", maxiter = 1000, silent = TRUE,
@@ -34,14 +34,14 @@ test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
 
   L <- diag(2)
 
-  out_normal <- .run.iterative.scheme(
+  out_normal <- bridgesampling:::.run.iterative.scheme(
     q11 = q11, q12 = q12, q21 = q21, q22 = q22,
     r0 = 1, tol = 1e-10, L = L,
     method = "normal", maxiter = 1000, silent = TRUE,
     criterion = "r", neff = length(q11), use_ess = FALSE
   )
 
-  out_warp3 <- .run.iterative.scheme(
+  out_warp3 <- bridgesampling:::.run.iterative.scheme(
     q11 = q11, q12 = q12, q21 = q21, q22 = q22,
     r0 = 1, tol = 1e-10, L = L,
     method = "warp3", maxiter = 1000, silent = TRUE,
@@ -62,7 +62,7 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
   L <- diag(2)
 
   # n
-  out_n <- .run.iterative.scheme(
+  out_n <- bridgesampling:::.run.iterative.scheme(
     q11 = base_q11, q12 = base_q12, q21 = base_q21, q22 = base_q22,
     r0 = 1, tol = 1e-10, L = L,
     method = "normal", maxiter = 1000, silent = TRUE,
@@ -71,7 +71,7 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
 
   # 4n (replicate samples 4x)
   k <- 4
-  out_4n <- .run.iterative.scheme(
+  out_4n <- bridgesampling:::.run.iterative.scheme(
     q11 = rep(base_q11, k), q12 = rep(base_q12, k),
     q21 = rep(base_q21, k), q22 = rep(base_q22, k),
     r0 = 1, tol = 1e-10, L = L,
@@ -96,7 +96,7 @@ test_that("Function runs with use_ess = TRUE (if posterior installed)", {
   q22 <- c(0.01, 0.07, 0.11, 0.12, 0.14, 0.15)
   L <- diag(2)
 
-  out <- .run.iterative.scheme(
+  out <- bridgesampling:::.run.iterative.scheme(
     q11 = q11, q12 = q12, q21 = q21, q22 = q22,
     r0 = 1, tol = 1e-10, L = L,
     method = "normal", maxiter = 1000, silent = TRUE,
