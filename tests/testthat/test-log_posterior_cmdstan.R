@@ -1,22 +1,25 @@
-context(".cmdstan_log_posterior helper function for CmdStanMCMC objects")
+context(".cmdstan_log_posterior helper function for CmdStanMCMC")
 
-testthat::test_that(".cmdstan_log_posterior matches lp__ and is wired the same way bridge_sampler uses it", {
-  testthat::skip_on_cran()
-  testthat::skip_if_not_installed("cmdstanr")
-  testthat::skip_if_not_installed("posterior")
-  testthat::skip_if_not_installed("bridgesampling")
+test_that(".cmdstan_log_posterior and bridge_sampler agree with analytical results", {
+  skip_on_cran()
+  skip_if_not_installed("cmdstanr")
+  skip_if_not_installed("posterior")
+  skip_if_not_installed("bridgesampling")
 
   if (!file.exists(cmdstanr::cmdstan_path())) {
-    testthat::skip("CmdStan is not installed in the expected path for cmdstanr.")
+    skip("CmdStan is not installed in the expected path for cmdstanr.")
   }
 
+  # Access the internal helper from bridgesampling
   pkg <- "bridgesampling"
-  testthat::expect_true(
+  expect_true(
     exists(".cmdstan_log_posterior", envir = asNamespace(pkg), inherits = FALSE),
     info = "Internal function .cmdstan_log_posterior not found in 'bridgesampling'."
   )
   .cmdstan_log_posterior <- get(".cmdstan_log_posterior", envir = asNamespace(pkg))
 
+
+  # Normal - Normal Data Model
   set.seed(321)
   N     <- 40L
   sigma <- 1
@@ -26,7 +29,10 @@ testthat::test_that(".cmdstan_log_posterior matches lp__ and is wired the same w
   stan_code <- "
   data { int<lower=1> N; vector[N] y; real<lower=0> sigma; }
   parameters { real mu; }
-  model { mu ~ normal(0, 1); y ~ normal(mu, sigma); }"
+  model {
+    mu ~ normal(0, 1);
+    y ~ normal(mu, sigma);
+  }"
 
   tf <- withr::local_tempfile(fileext = ".stan")
   writeLines(stan_code, tf)
@@ -36,62 +42,85 @@ testthat::test_that(".cmdstan_log_posterior matches lp__ and is wired the same w
   fit <- mod$sample(
     data = data_list,
     seed = 404,
-    chains = 2,
-    parallel_chains = 2,
-    iter_warmup = 300,
-    iter_sampling = 800,
+    chains = 20,
+    parallel_chains = 4,
+    iter_warmup = 1000,
+    iter_sampling = 10000,
     refresh = 0
   )
 
-  # CmdStan's lp__
-  draws_df <- fit$draws(variables = "lp__", format = "df")
-  testthat::expect_true(nrow(draws_df) > 0)
-  lp_vec_all <- draws_df$lp__
-  n_all <- length(lp_vec_all)
-  testthat::expect_true(n_all > 10)
+  # 1) lp__ vs analytical log posterior (up to a constant)
+  # Prior: mu ~ N(0,1); likelihood: y_i | mu ~ N(mu, sigma^2)
+  logpost_mu <- function(mu, y, sigma) {
+    -0.5 * mu^2 - sum((y - mu)^2) / (2 * sigma^2)
+  }
 
-  # How bridge_sampler splits internally 
-  n_fit <- round(n_all / 2)
-  idx_iter <- seq.int(n_fit + 1L, n_all)  # indices corresponding to q11
+  # Extract draws
+  lp_df <- fit$draws(variables = "lp__", format = "df")
+  expect_true(nrow(lp_df) > 10)
+  lp_vec_all <- lp_df$lp__
 
-  # Run the actual method that wires the helper into the pipeline
+  mu_df <- fit$draws(variables = "mu", format = "df")
+  expect_equal(nrow(mu_df), length(lp_vec_all))
+  mu_vec_all <- mu_df$mu
+
+  lp_anal_all <- vapply(mu_vec_all, logpost_mu, numeric(1), y = y, sigma = sigma)
+
+  # Compare up to additive constant: center both and compare
+  lp_cent <- lp_vec_all - mean(lp_vec_all)
+  anal_cent <- lp_anal_all - mean(lp_anal_all)
+
+  expect_equal(lp_cent, anal_cent, tolerance = 1e-4)
+  expect_gt(stats::cor(lp_vec_all, lp_anal_all), 0.99) # sanity check on correlation
+
+  # 2) bridgesampling's internal q11 agrees with analytical log posterior
   bs_out <- bridgesampling::bridge_sampler(
     samples     = fit,
     repetitions = 1,
     method      = "normal",
     cores       = 1L,
-    use_neff    = FALSE,  
+    use_neff    = FALSE,
     silent      = TRUE,
     verbose     = FALSE
   )
 
-  # q11 are the posterior log-densities for the iterative half, should match lp__
-  testthat::expect_equal(length(bs_out$q11), length(idx_iter))
-  testthat::expect_equal(
-    unname(bs_out$q11),
-    unname(lp_vec_all[idx_iter]),
-    tolerance = 1e-4
-  )
+  n_all   <- length(lp_vec_all)
+  n_fit   <- round(n_all / 2)
+  idx_iter <- seq.int(n_fit + 1L, n_all)
 
-  # The helper is applied row-wise to unconstrained parameters, with `data = fit`.
+  expect_equal(length(bs_out$q11), length(idx_iter))
+
+  # Compute analytical log posterior for the same subset of draws
+  mu_iter       <- mu_vec_all[idx_iter]
+  lp_anal_iter  <- vapply(mu_iter, logpost_mu, numeric(1), y = y, sigma = sigma)
+
+  # Compare up to an additive constant by centering both
+  q11_cent        <- bs_out$q11 - mean(bs_out$q11)
+  anal_iter_cent  <- lp_anal_iter - mean(lp_anal_iter)
+
+  expect_equal(unname(q11_cent), unname(anal_iter_cent), tolerance = 1e-4)
+  expect_gt(stats::cor(bs_out$q11, lp_anal_iter), 0.99) # additional sanity check
+
+
+  # 3) Spot-check the internal helper against lp__ directly
   upars <- fit$unconstrain_draws(format = "matrix")
-  testthat::expect_true(nrow(upars) == n_all)
+  expect_equal(nrow(upars), length(lp_vec_all))
 
-  # pick a few rows from the iterative half to validate direct calls
-  take <- idx_iter[seq_len(min(5L, length(idx_iter)))]
+  take <- seq_len(min(100L, nrow(upars)))
   direct_vals <- apply(upars[take, , drop = FALSE], 1, .cmdstan_log_posterior, data = fit)
 
-  testthat::expect_type(direct_vals, "double")
-  testthat::expect_length(direct_vals, length(take))
-  testthat::expect_equal(
-    unname(direct_vals),
-    unname(lp_vec_all[take]),
-    tolerance = 1e-4
+  expect_type(direct_vals, "double")
+  expect_length(direct_vals, length(take))
+  expect_equal(unname(direct_vals), unname(lp_vec_all[take]), tolerance = 1e-4)
+
+  # 4) Basic input validation on the helper
+  expect_error(
+    .cmdstan_log_posterior(fit = "not-a-fit", data = list()),
+    info = "Helper should reject invalid input when mis-called with named args."
   )
 
-  # Basic input validation
-  testthat::expect_error(.cmdstan_log_posterior(fit = "not-a-fit", data = list()),
-                         info = "Helper should reject invalid input when mis-called with named args.")
-  # Proper signature rejects badly shaped x
-  testthat::expect_error(.cmdstan_log_posterior(x = numeric(), data = fit))
+  expect_error(
+    .cmdstan_log_posterior(x = numeric(), data = fit),
+    info = "Proper signature should reject badly shaped x."
+  )
 })
