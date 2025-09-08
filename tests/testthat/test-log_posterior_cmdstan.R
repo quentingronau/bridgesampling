@@ -34,7 +34,8 @@ test_that(".cmdstan_log_posterior and bridge_sampler agree with analytical resul
     y ~ normal(mu, sigma);
   }"
 
-  tf <- withr::local_tempfile(fileext = ".stan")
+  tf <- tempfile(fileext = ".stan")
+  on.exit(unlink(tf), add = TRUE)
   writeLines(stan_code, tf)
 
   mod <- cmdstanr::cmdstan_model(tf, quiet = TRUE, force_recompile = TRUE)
@@ -160,8 +161,9 @@ test_that("bridgesampling and .cmdstan_log_posterior handle constrained paramete
     target += bernoulli_lpmf(y | theta);          // likelihood
   }"
 
-  tf <- withr::local_tempfile(fileext = ".stan")
-  writeLines(bern_code, tf)
+  tf <- tempfile(fileext = ".stan")
+  on.exit(unlink(tf), add = TRUE)
+  writeLines(stan_code, tf)
   mod <- cmdstanr::cmdstan_model(tf, quiet = TRUE, force_recompile = TRUE)
 
   # Data
