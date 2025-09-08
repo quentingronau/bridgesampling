@@ -46,7 +46,9 @@ test_that(".cmdstan_log_posterior and bridge_sampler agree with analytical resul
     parallel_chains = 4,
     iter_warmup = 1000,
     iter_sampling = 10000,
-    refresh = 0
+    refresh = 0,
+    show_messages = FALSE,
+    show_exceptions = FALSE
   )
 
   # 1) lp__ vs analytical log posterior (up to a constant)
@@ -171,7 +173,9 @@ test_that("bridgesampling and .cmdstan_log_posterior handle constrained paramete
     parallel_chains = 4,
     iter_warmup = 1000,
     iter_sampling = 8000,
-    refresh = 0
+    refresh = 0,
+    show_messages = FALSE,
+    show_exceptions = FALSE
   )
 
   # Analytical log-posterior on the UNCONSTRAINED space
