@@ -163,7 +163,7 @@ test_that("bridgesampling and .cmdstan_log_posterior handle constrained paramete
 
   tf <- tempfile(fileext = ".stan")
   on.exit(unlink(tf), add = TRUE)
-  writeLines(stan_code, tf)
+  writeLines(bern_code, tf)
   mod <- cmdstanr::cmdstan_model(tf, quiet = TRUE, force_recompile = TRUE)
 
   # Data
