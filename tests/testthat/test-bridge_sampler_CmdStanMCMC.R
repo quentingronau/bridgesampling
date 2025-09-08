@@ -33,7 +33,8 @@ testthat::test_that("bridge_sampler() works for CmdStanMCMC and basic sanity che
     y ~ normal(mu, sigma);
   }"
 
-  tf <- withr::local_tempfile(fileext = ".stan")
+  tf <- tempfile(fileext = ".stan")
+  on.exit(unlink(tf), add = TRUE)
   writeLines(stan_code, tf)
   mod <- cmdstanr::cmdstan_model(tf, quiet = TRUE, force_recompile = TRUE)
 
@@ -103,7 +104,8 @@ testthat::test_that("CmdStanMCMC bridge estimate roughly agrees with rstan", {
   }"
 
   # --- CmdStanR/RStan fit ---
-  tf <- withr::local_tempfile(fileext = ".stan")
+  tf <- tempfile(fileext = ".stan")
+  on.exit(unlink(tf), add = TRUE)
   writeLines(stan_code, tf)
   mod_cs <- cmdstanr::cmdstan_model(tf, quiet = TRUE)
   fit_cs <- mod_cs$sample(
