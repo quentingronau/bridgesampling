@@ -49,7 +49,7 @@ testthat::test_that("bridge_sampler() works for CmdStanMCMC and basic sanity che
     show_exceptions = FALSE
   )
 
-  bs <- bridgesampling::bridge_sampler(fit, silent = TRUE)
+  bs <- bridgesampling::bridge_sampler(fit, silent = TRUE, use_neff = FALSE)
 
   testthat::expect_s3_class(fit, "CmdStanMCMC")
   testthat::expect_true(is.list(bs))
@@ -66,7 +66,7 @@ testthat::test_that("bridge_sampler() works for CmdStanMCMC and basic sanity che
     show_messages = FALSE,
     show_exceptions = FALSE
   )
-  bs2 <- bridgesampling::bridge_sampler(fit2, silent = TRUE)
+  bs2 <- bridgesampling::bridge_sampler(fit2, silent = TRUE, use_neff = FALSE)
   testthat::expect_true(is.finite(bs2$logml))
 })
 
@@ -117,7 +117,7 @@ testthat::test_that("CmdStanMCMC bridge estimate roughly agrees with rstan", {
     show_messages = FALSE,
     show_exceptions = FALSE
   )
-  bs_cmd <- bridgesampling::bridge_sampler(fit_cs, silent = TRUE)
+  bs_cmd <- bridgesampling::bridge_sampler(fit_cs, silent = TRUE, use_neff = FALSE)
   testthat::expect_true(is.finite(bs_cmd$logml))
 
   sm <- rstan::stan_model(model_code = stan_code)
@@ -125,7 +125,7 @@ testthat::test_that("CmdStanMCMC bridge estimate roughly agrees with rstan", {
     sm, data = data_list, seed = 777,
     chains = 4, iter = 10000, warmup = 3000, refresh = 0
   )
-  bs_rstan <- bridgesampling::bridge_sampler(fit_rs, silent = TRUE)
+  bs_rstan <- bridgesampling::bridge_sampler(fit_rs, silent = TRUE, use_neff = FALSE)
   testthat::expect_true(is.finite(bs_rstan$logml))
 
   # Compare the two bridge estimates. Tolerance accounts for MC/bridge variance.
