@@ -68,6 +68,7 @@ jobs:
             rstanarm
             nimble
             MCMCpack
+            BH
 
       - name: Build Cmdstan
         run: |
