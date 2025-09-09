@@ -18,9 +18,11 @@ test_that("MCSE is finite, positive, and returned for normal method", {
   )
 
   expect_type(out, "list")
-  expect_true(is.finite(out$std_logml))
-  expect_gt(out$std_logml, 0)
-  expect_true(is.finite(out$logml) || is.na(out$logml)) # either converged or hit maxiter
+  expect_true(is.finite(out$mcse_logml))
+  expect_gt(out$mcse_logml, 0)
+  # Deterministic value checks for the toy example
+  expect_equal(out$logml,      0.13248979618200290, tolerance = 1e-12)
+  expect_equal(out$mcse_logml, 0.02353233284705807, tolerance = 1e-12)
 })
 
 test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
@@ -48,8 +50,8 @@ test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
     criterion = "r", neff = length(q11), use_ess = FALSE
   )
 
-  # warp3 adds a constant to both l1 and l2 and shifts l*; the e^(l - l*) terms are invariant
-  expect_equal(out_warp3$std_logml, out_normal$std_logml, tolerance = 1e-10)
+  # warp3 adds a constant to both l1 and l2 and shifts l*, the e^(l - l*) terms are invariant
+  expect_equal(out_warp3$mcse_logml, out_normal$mcse_logml, tolerance = 1e-10)
 })
 
 test_that("MCSE roughly scales like 1/sqrt(n)", {
@@ -80,8 +82,11 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
   )
 
   # Expect MCSE to drop by ~ 1/sqrt(k)
-  expect_lt(out_4n$std_logml, out_n$std_logml)
-  expect_equal(out_4n$std_logml, out_n$std_logml / sqrt(k), tolerance = 0.05)
+  expect_lt(out_4n$mcse_logml, out_n$mcse_logml)
+  expect_equal(out_4n$mcse_logml, out_n$mcse_logml / sqrt(k), tolerance = 0.05)
+
+  # Deterministic value for the 4x replicated case
+  expect_equal(out_4n$mcse_logml, 0.01052514482181162, tolerance = 1e-12)
 })
 
 test_that("Function runs with use_ess = TRUE (if posterior installed)", {
@@ -103,6 +108,6 @@ test_that("Function runs with use_ess = TRUE (if posterior installed)", {
     criterion = "r", neff = length(q11), use_ess = TRUE
   )
 
-  expect_true(is.finite(out$std_logml))
-  expect_gt(out$std_logml, 0)
+  expect_true(is.finite(out$mcse_logml))
+  expect_gt(out$mcse_logml, 0)
 })
