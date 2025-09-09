@@ -43,8 +43,31 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
-          needs: check
+          dependencies: NA
+          extra-packages: |
+            R.rsp
+            knitr
+            rcmdcheck
+            rmarkdown
+            mvtnorm
+            Matrix
+            Brobdingnag
+            stringr
+            coda
+            scales
+            stan-dev/cmdstanr
+            testthat
+            Rcpp
+            RcppEigen
+            R2jags
+            rjags
+            runjags
+            knitr
+            BayesFactor
+            rstan
+            rstanarm
+            nimble
+            MCMCpack
 
       - name: Build Cmdstan
         run: |
