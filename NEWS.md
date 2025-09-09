@@ -20,5 +20,5 @@
 
 * Disabled use of mvnfast and revetred back to mvtnorn. see also: https://github.com/quentingronau/bridgesampling/issues/20
 * Version 0.7-x introduced a bug that prevented a rerunning of the iterative scheme based on harmonic mean in case maxit was reached. This bug should now be removed. See: https://github.com/quentingronau/bridgesampling/issues/18
-* For older news see NEWS.old file on GitHub
+* For older news see NEWS.old file on GitHub: https://github.com/quentingronau/bridgesampling/blob/master/NEWS.old
 

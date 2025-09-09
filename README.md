@@ -1,6 +1,5 @@
 <!-- badges: start -->
-[![R build status](https://github.com/quentingronau/bridgesampling/workflows/R-CMD-check/badge.svg)](https://github.com/quentingronau/bridgesampling/actions)
-[![Travis-CI Build Status](https://travis-ci.org/quentingronau/bridgesampling.svg?branch=master)](https://travis-ci.org/quentingronau/bridgesampling)
+[![CRAN status](https://www.r-pkg.org/badges/version/bridgesampling)](https://CRAN.R-project.org/package=bridgesampling)
 <!-- badges: end -->
 
 bridgesampling: Bridge Sampling for Marginal Likelihoods and Bayes Factors
@@ -16,9 +15,9 @@ For additional information, see the vignettes with a hierarchical normal example
 
 ## Installation
 
-- `bridgesampling` is [available from CRAN](https://cloud.r-project.org/package=bridgesampling) so the current stable version can be installed directly via: `install.packages("bridgesampling")`
+- `bridgesampling` is [available from CRAN](https://cran.r-project.org/package=bridgesampling) so the current stable version can be installed directly via: `install.packages("bridgesampling")`
 
-- To install the latest development version you will need the [`devtools`](https://github.com/hadley/devtools) package: 
+- To install the latest development version you will need the [`devtools`](https://github.com/r-lib/devtools) package: 
   `devtools::install_github("quentingronau/bridgesampling@master")`
   
 - For building, use `--compact-vignettes="gs+qpdf"`
