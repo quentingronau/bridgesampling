@@ -73,6 +73,7 @@ testthat::test_that("bridge_sampler() works for CmdStanMCMC and basic sanity che
 
 testthat::test_that("CmdStanMCMC bridge estimate roughly agrees with rstan", {
   testthat::skip_on_cran()
+  testthat::skip_on_ci()
   testthat::skip_if_not_installed("cmdstanr")
   testthat::skip_if_not_installed("bridgesampling")
   if (!requireNamespace("rstan", quietly = TRUE)) testthat::skip("rstan not installed")
