@@ -14,7 +14,9 @@ Authors@R: c(person(given="Quentin F.", family="Gronau", role=c("aut", "cre"),
              person("Jonah", "Gabry", role = "ctb"),
              person("Ben", "Goodrich", role = c("ctb")),
              person("Kees", "Mulder", role = c("ctb")),
-             person("Perry", "de Valpine", role = c("ctb"))
+             person("Perry", "de Valpine", role = c("ctb")),
+             person(given="Aki", family="Vehtari", role = c("ctb")),
+             person(given="Giorgio", family="Micaletto", role = c("ctb"))
              )
 Depends:
     R (>= 3.0.0)
