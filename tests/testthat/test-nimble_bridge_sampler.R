@@ -3,7 +3,7 @@ context('bridge_sampler.nimble works.')
 
 test_that("nimble support works", {
   testthat::skip_on_cran()
-  testthat::skip_on_travis()
+  testthat::skip_on_ci()
 
   testthat::skip_if_not_installed("nimble")
   if (require(nimble)) {

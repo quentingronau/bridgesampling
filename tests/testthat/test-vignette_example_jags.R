@@ -4,7 +4,7 @@ context('test vignette bridgesampling_example_jags.Rmd')
 test_that("bridge sampler yields correct results", {
 
   testthat::skip_on_cran()
-  testthat::skip_on_travis()
+  testthat::skip_on_ci()
 
   # library(bridgesampling)
   if (require(R2jags)) {

@@ -4,7 +4,7 @@ context('test bridge_sampler mcmc.list method')
 test_that("bridge sampler matches analytical value", {
 
   testthat::skip_on_cran()
-  testthat::skip_on_travis()
+  testthat::skip_on_ci()
 
   # library(bridgesampling)
   if (require(R2jags) && require(runjags)) {

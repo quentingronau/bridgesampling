@@ -4,7 +4,7 @@ context('bridge_sampler.stanreg works.')
 test_that("stan_bridge_sampler", {
 
   testthat::skip_on_cran()
-  testthat::skip_on_travis()
+  testthat::skip_on_ci()
 
   if (require(rstanarm)) {
 
@@ -23,7 +23,7 @@ test_that("stan_bridge_sampler", {
 
 test_that("stan_bridge_sampler in multicore", {
   testthat::skip_on_cran()
-  testthat::skip_on_travis()
+  testthat::skip_on_ci()
   #testthat::skip_on_os("windows")
   if (require(rstanarm)) {
     fit_1 <- stan_glm(mpg ~ wt + qsec + am, data = mtcars,
