@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model implemented in `nimble`. The [`nimble` documentation](https://r-nimble.org/html_manual/cha-welcome-nimble.html) provides a comprehensive overview.  This vignette uses the same models and data as the [`Stan` vignette](bridgesampling_example_stan.html) and [`Jags` vignette](bridgesampling_example_jags.html).
+In this vignette, we explain how one can compute marginal likelihoods, Bayes factors, and posterior model probabilities using a simple hierarchical normal model implemented in `nimble`. The [`nimble` documentation](https://r-nimble.org/manual/cha-welcome-nimble.html) provides a comprehensive overview.  This vignette uses the same models and data as the [`Stan` vignette](bridgesampling_example_stan.html) and [`Jags` vignette](bridgesampling_example_jags.html).
 
 ## Model and Data
 The model that we will use assumes that each of the $n$ observations $y_i$ (where $i$ indexes the observation, $i = 1,2,...,n$) is normally distributed with corresponding mean $\theta_i$ and a common known variance $\sigma^2$: $y_i \sim \mathcal{N}(\theta_i, \sigma^2)$. Each $\theta_i$ is drawn from a normal group-level distribution with mean $\mu$ and variance $\tau^2$: $\theta_i \sim \mathcal{N}(\mu, \tau^2)$. For the group-level mean $\mu$, we use a normal prior distribution of the form $\mathcal{N}(\mu_0, \tau^2_0)$. For the group-level variance $\tau^2$, we use an inverse-gamma prior of the form $\text{Inv-Gamma}(\alpha, \beta)$.

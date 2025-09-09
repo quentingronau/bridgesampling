@@ -213,6 +213,25 @@ bridge_sampler <- function(samples, ...) {
 
 #' @rdname bridge_sampler
 #' @export
+bridge_sampler.CmdStanMCMC <- function(samples = NULL, repetitions = 1, method = "normal", 
+                                       cores = 1, use_neff = TRUE, maxiter = 1000, 
+                                       silent = FALSE, verbose = FALSE, ...) {
+   draws <- samples$unconstrain_draws(format = "matrix")
+   parameters <- colnames(draws)
+   lb <- rep(-Inf, length(parameters))
+   ub <- rep(Inf, length(parameters))
+   names(lb) <- names(ub) <- parameters
+   bridge_out <- bridge_sampler.matrix(samples = draws, ..., maxiter = maxiter, silent = silent,
+                                       lb = lb, ub = ub, repetitions = repetitions,
+                                       method = method, log_posterior = .cmdstan_log_posterior,
+                                       cores = cores, data = samples, use_neff = use_neff,
+                                       verbose = verbose)
+   
+   return(bridge_out)
+}
+
+#' @rdname bridge_sampler
+#' @export
 bridge_sampler.stanfit <- function(samples = NULL, stanfit_model = samples,
                                    repetitions = 1, method = "normal", cores = 1,
                                    use_neff = TRUE, maxiter = 1000, silent = FALSE,

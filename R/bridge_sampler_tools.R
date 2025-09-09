@@ -27,5 +27,28 @@
   if (is.na(out)) out <- -Inf
   return(out)
 }
-
-
+     
+.cmdstan_log_posterior <- function(s.row, data) {
+  if("lp__" %in% names(s.row)) {
+    s.row <- s.row[!names(s.row) %in% "lp__"]
+    }
+  
+  if(!is.numeric(s.row)) {
+    s.row <- as.numeric(s.row)
+  }
+  out <- tryCatch({
+    log_prob <- data$log_prob(s.row, jacobian = TRUE)
+    log_prob
+  }, error = function(e) {
+    print(e)
+    -Inf
+  })
+  
+  if (is.na(out)) {
+    out <- -Inf
+  }
+  result <- data.frame(matrix(s.row, nrow = 1))
+  result$log_posterior <- out
+  
+  return(out)
+}
