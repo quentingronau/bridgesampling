@@ -1,5 +1,6 @@
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/bridgesampling)](https://CRAN.R-project.org/package=bridgesampling)
+[![R-CMD-check](https://github.com/quentingronau/bridgesampling/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/quentingronau/bridgesampling/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 bridgesampling: Bridge Sampling for Marginal Likelihoods and Bayes Factors
