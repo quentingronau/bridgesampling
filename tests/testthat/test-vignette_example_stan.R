@@ -74,14 +74,16 @@ test_that("bridge sampler yields correct results", {
                                                    alpha = alpha,
                                                    beta = beta,
                                                    sigma2 = sigma2),
-                          iter = 50000, warmup = 1000, chains = 3, cores = 1)
+                          iter = 50000, warmup = 1000, chains = 3, cores = 1,
+                          refresh = 0)
     stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n,
                                                    mu0 = mu0,
                                                    tau20 = tau20,
                                                    alpha = alpha,
                                                    beta = beta,
                                                    sigma2 = sigma2),
-                          iter = 50000, warmup = 1000, chains = 3, cores = 1)
+                          iter = 50000, warmup = 1000, chains = 3, cores = 1,
+                          refresh = 0)
 
     # compute log marginal likelihood via bridge sampling for H0
     H0.bridge <- bridge_sampler(stanfitH0, silent = TRUE)

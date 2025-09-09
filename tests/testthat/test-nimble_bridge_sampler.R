@@ -25,6 +25,8 @@ test_that("nimble support works", {
       }
     })
 
+    capture.output(suppressMessages({
+
     modelH1 <- nimbleModel(codeH1)
     modelH1$setData(y = y) # set data
 
@@ -42,12 +44,13 @@ test_that("nimble support works", {
     # the object samplesH1 is actually not needed as the samples are also in cmcmcH1
     samplesH1 <- runMCMC(cmcmcH1, niter = 1e5, nburnin = 1000, nchains = 2,
                          progressBar = FALSE)
+    }))
 
     # bridge sampling
     bridge_H1 <- bridge_sampler(samples = cmcmcH1,
                                 cores = 1,
                                 method = "warp3",
-                                repetitions = 2)
+                                repetitions = 2, silent = TRUE)
 
     expect_equal(bridge_H1$logml, rep(-37.7983064265064, 2), tolerance = 0.01)
 

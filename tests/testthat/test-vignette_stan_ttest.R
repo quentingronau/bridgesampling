@@ -55,10 +55,10 @@ test_that("bridge sampler yields correct results", {
     # fit models
     stanfitH0 <- sampling(stanmodelH0, data = list(y = y, n = n),
                           iter = 20000, warmup = 1000, chains = 4, cores = 1,
-                          control = list(adapt_delta = .99))
+                          control = list(adapt_delta = .99), refresh = 0)
     stanfitH1 <- sampling(stanmodelH1, data = list(y = y, n = n, r = 1/sqrt(2)),
                           iter = 20000, warmup = 1000, chains = 4, cores = 1,
-                          control = list(adapt_delta = .99))
+                          control = list(adapt_delta = .99), refresh = 0)
 
     set.seed(12345)
     suppressWarnings(H0 <- bridge_sampler(stanfitH0, silent = TRUE))
@@ -95,7 +95,7 @@ test_that("bridge sampler yields correct results", {
     stanmodelHplus <- stan_model(model_code = stancodeHplus, model_name="stanmodel")
     stanfitHplus <- sampling(stanmodelHplus, data = list(y = y, n = n, r = 1/sqrt(2)),
                              iter = 30000, warmup = 1000, chains = 4,
-                             control = list(adapt_delta = .99))
+                             control = list(adapt_delta = .99), refresh = 0)
 
     Hplus <- bridge_sampler(stanfitHplus, silent = TRUE)
     Hplus.error <- error_measures(Hplus)$percentage

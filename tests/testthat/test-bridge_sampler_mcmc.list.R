@@ -46,7 +46,8 @@ test_that("bridge sampler matches analytical value", {
       s <- jags(data, parameters.to.save = c("theta", "mu", "invTau2"),
                 model.file = textConnection(model),
                 n.chains = nchains, n.iter = niter,
-                n.burnin = nburnin, n.thin = 1, progress.bar = "none")
+                n.burnin = nburnin, n.thin = 1, progress.bar = "none",
+                quiet = TRUE)
       return(s)
 
     }
@@ -65,10 +66,10 @@ test_that("bridge sampler matches analytical value", {
       tau2 <- 1/invTau2
       }"
 
-      s <- suppressWarnings(runjags::run.jags(model = model, data = data,
+      capture_output(s <- suppressWarnings(runjags::run.jags(model = model, data = data,
                                      monitor = c("theta", "mu", "invTau2"),
                                      n.chains = 3, burnin = 2000,
-                                     sample = 10000, silent.jags = TRUE))
+                                     sample = 10000, silent.jags = TRUE)))
       return(s)
 
     }

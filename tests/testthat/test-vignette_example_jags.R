@@ -47,7 +47,8 @@ test_that("bridge sampler yields correct results", {
       s <- jags(data, parameters.to.save = c("theta", "invTau2"),
                 model.file = textConnection(model),
                 n.chains = nchains, n.iter = niter,
-                n.burnin = nburnin, n.thin = 1)
+                n.burnin = nburnin, n.thin = 1,
+                progress.bar = "none", quiet = TRUE)
 
       return(s)
 
@@ -73,7 +74,8 @@ test_that("bridge sampler yields correct results", {
       s <- jags(data, parameters.to.save = c("theta", "mu", "invTau2"),
                 model.file = textConnection(model),
                 n.chains = nchains, n.iter = niter,
-                n.burnin = nburnin, n.thin = 1)
+                n.burnin = nburnin, n.thin = 1,
+                progress.bar = "none", quiet = TRUE)
 
       return(s)
 

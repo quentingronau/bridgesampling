@@ -47,5 +47,5 @@ test_that("prints with NAs with warning.", {
 16, 52, 8, 1000, 1000, 167, 16, 21, 44), method = "normal", repetitions = 10), .Names = c("logml",
 "niter", "method", "repetitions"), class = "bridge_list")
 
-  expect_warning(print(bridge_o), "NA")
+  expect_output(expect_warning(print(bridge_o), "NA"))
 })

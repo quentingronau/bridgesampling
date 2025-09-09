@@ -123,10 +123,12 @@ testthat::test_that("CmdStanMCMC bridge estimate roughly agrees with rstan", {
   bs_cmd <- bridgesampling::bridge_sampler(fit_cs, silent = TRUE, use_neff = FALSE)
   testthat::expect_true(is.finite(bs_cmd$logml))
 
+  Sys.sleep(2.5)
+
   sm <- rstan::stan_model(model_code = stan_code)
   fit_rs <- rstan::sampling(
     sm, data = data_list, seed = 777,
-    chains = 4, iter = 10000, warmup = 3000, refresh = 0
+    chains = 4, iter = 10000, warmup = 3000, refresh = 0, cores = 4
   )
   bs_rstan <- bridgesampling::bridge_sampler(fit_rs, silent = TRUE, use_neff = FALSE)
   testthat::expect_true(is.finite(bs_rstan$logml))

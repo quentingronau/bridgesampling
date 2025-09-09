@@ -46,22 +46,24 @@ test_that("bridge sampler yields correct results", {
     })
 
     ## steps for H0:
-    modelH0 <- nimbleModel(codeH0)
+    capture.output(suppressMessages(modelH0 <- nimbleModel(codeH0)))
     modelH0$setData(y = y) # set data
     cmodelH0 <- compileNimble(modelH0) # make compiled version from generated C++
 
     ## steps for H1:
-    modelH1 <- nimbleModel(codeH1)
+    capture.output(suppressMessages(modelH1 <- nimbleModel(codeH1)))
     modelH1$setData(y = y) # set data
     cmodelH1 <- compileNimble(modelH1) # make compiled version from generated C++
 
     # build MCMC functions, skipping customization of the configuration.
-    mcmcH0 <- buildMCMC(modelH0,
-                        monitors = modelH0$getNodeNames(stochOnly = TRUE,
-                                                        includeData = FALSE))
-    mcmcH1 <- buildMCMC(modelH1,
-                        monitors = modelH1$getNodeNames(stochOnly = TRUE,
-                                                        includeData = FALSE))
+    capture.output(suppressMessages({
+      mcmcH0 <- buildMCMC(modelH0,
+                          monitors = modelH0$getNodeNames(stochOnly = TRUE,
+                                                          includeData = FALSE))
+      mcmcH1 <- buildMCMC(modelH1,
+                          monitors = modelH1$getNodeNames(stochOnly = TRUE,
+                                                          includeData = FALSE))
+    }))
     # compile the MCMC function via generated C++
     cmcmcH0 <- compileNimble(mcmcH0, project = modelH0)
     cmcmcH1 <- compileNimble(mcmcH1, project = modelH1)
