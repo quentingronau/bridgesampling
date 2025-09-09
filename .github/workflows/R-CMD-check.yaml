@@ -59,6 +59,7 @@ jobs:
             testthat
             Rcpp
             RcppEigen
+            BH
             R2jags
             rjags
             runjags
@@ -68,7 +69,6 @@ jobs:
             rstanarm
             nimble
             MCMCpack
-            BH
 
       - name: Build Cmdstan
         run: |
