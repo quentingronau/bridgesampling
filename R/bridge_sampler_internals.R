@@ -225,7 +225,7 @@
 
 .run.iterative.scheme <- function(q11, q12, q21, q22, r0, tol, L,
                                   method, maxiter, silent,
-                                  criterion, neff) {
+                                  criterion, neff, use_ess) {
 
   ### run iterative updating scheme (using "optimal" bridge function,
   ### see Meng & Wong, 1996)
@@ -273,24 +273,38 @@
     if (any(is.infinite(as.numeric(numi))) ||
         any(is.infinite(as.numeric((deni))))) {
       warning("Infinite value in iterative scheme, returning NA.\n Try rerunning with more samples.", call. = FALSE)
-      return(list(logml = NA, niter = i))
+      return(list(logml = NA, niter = i, mcse_logml = NA_real_))
 
     }
-
-    r <- (n.1/n.2) * sum(numi)/sum(deni)
+    mean_numi <- mean(as.numeric(numi))
+    mean_deni <- mean(as.numeric(deni))
+    var_numi <- var(as.numeric(numi))
+    if (use_ess == TRUE){
+      var_deni <- var(as.numeric(deni)) * length(deni) / posterior::ess_mean(as.numeric(deni))
+    } else {
+      var_deni <- var(as.numeric(deni))
+    }
+    r <- mean_numi/mean_deni
     r_vals <- c(r_vals, r)
     logml <- log(r) + lstar
     logml_vals <- c(logml_vals, logml)
     criterion_val <- switch(criterion, "r" = abs((r - rold)/r),
                             "logml" = abs((logml - logmlold)/logml))
     i <- i + 1
-
+    var_r <- (mean_numi^2)/(mean_deni^2)*(var_numi/(mean_numi)^2 + var_deni/mean_deni^2)
+    var_r <- var_r / length(numi)
+    
+    ## Compute variance in log scale by match the variance of a
+    ## log-normal approximation
+    ## https://en.wikipedia.org/wiki/Log-normal_distribution#Arithmetic_moments
+    var_logml <- log(1 + var_r / r^2)
+    mcse_logml <- sqrt(var_logml)
   }
 
   if (i >= maxiter) {
-    return(list(logml = NA, niter = i-1, r_vals = r_vals))
+    return(list(logml = NA, niter = i-1, r_vals = r_vals, mcse_logml = mcse_logml))
   }
 
-  return(list(logml = logml, niter = i-1))
+  return(list(logml = logml, niter = i-1, mcse_logml = mcse_logml))
 
 }
