@@ -1,6 +1,8 @@
-# bridgesampling 1.2-0 (2025-09-09)
+# bridgesampling 1.2-0 (2025-09-10)
 
 * Added CmdStanR method and corresponding tests (thanks to @GiorgioMB and @avehtari #44).
+* Added Monte-Carlo Standard Error (MCSE) to bridgesampling, see: https://arxiv.org/abs/2508.14487 (thanks to @GiorgioMB and @avehtari #43).
+* Fixed bug in simplex with small dimensionality (thanks to @FBartos #31).
 * Added a `NEWS.md` file to track changes to the package.
 
 # bridgesampling 1.1-5 (2023-06-01)
