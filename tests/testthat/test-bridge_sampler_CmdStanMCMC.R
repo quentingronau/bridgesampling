@@ -60,7 +60,7 @@ testthat::test_that("bridge_sampler() works for CmdStanMCMC and basic sanity che
     data = data_list,
     seed = 203,
     chains = 4,
-    parallel_chains = 4,
+    parallel_chains = 2,
     iter_warmup = 750,
     iter_sampling = 2000,
     refresh = 0,
@@ -113,7 +113,7 @@ testthat::test_that("CmdStanMCMC bridge estimate roughly agrees with rstan", {
     data = data_list,
     seed = 777,
     chains = 4,
-    parallel_chains = 4,
+    parallel_chains = 2,
     iter_warmup = 10000,
     iter_sampling = 3000,
     refresh = 0,
@@ -128,7 +128,7 @@ testthat::test_that("CmdStanMCMC bridge estimate roughly agrees with rstan", {
   sm <- rstan::stan_model(model_code = stan_code)
   fit_rs <- rstan::sampling(
     sm, data = data_list, seed = 777,
-    chains = 4, iter = 10000, warmup = 3000, refresh = 0, cores = 4
+    chains = 4, iter = 10000, warmup = 3000, refresh = 0, cores = 2
   )
   bs_rstan <- bridgesampling::bridge_sampler(fit_rs, silent = TRUE, use_neff = FALSE)
   testthat::expect_true(is.finite(bs_rstan$logml))
