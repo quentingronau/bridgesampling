@@ -2,6 +2,7 @@
 % Please edit documentation in R/bridge_sampler.R
 \name{bridge_sampler}
 \alias{bridge_sampler}
+\alias{bridge_sampler.CmdStanMCMC}
 \alias{bridge_sampler.stanfit}
 \alias{bridge_sampler.mcmc.list}
 \alias{bridge_sampler.mcmc}
@@ -14,6 +15,19 @@
 \usage{
 bridge_sampler(samples, ...)
 
+\method{bridge_sampler}{CmdStanMCMC}(
+  samples = NULL,
+  repetitions = 1,
+  method = "normal",
+  cores = 1,
+  use_neff = TRUE,
+  maxiter = 1000,
+  silent = FALSE,
+  use_ess = TRUE,
+  verbose = FALSE,
+  ...
+)
+
 \method{bridge_sampler}{stanfit}(
   samples = NULL,
   stanfit_model = samples,
@@ -23,6 +37,7 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
+  use_ess = TRUE,
   verbose = FALSE,
   ...
 )
@@ -45,7 +60,8 @@ bridge_sampler(samples, ...)
   rcppFile = NULL,
   maxiter = 1000,
   silent = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  use_ess = TRUE
 )
 
 \method{bridge_sampler}{mcmc}(
@@ -64,6 +80,7 @@ bridge_sampler(samples, ...)
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
+  use_ess = TRUE,
   param_types = rep("real", ncol(samples)),
   silent = FALSE,
   verbose = FALSE
@@ -85,6 +102,7 @@ bridge_sampler(samples, ...)
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
+  use_ess = TRUE,
   param_types = rep("real", ncol(samples)),
   silent = FALSE,
   verbose = FALSE
@@ -98,6 +116,7 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
+  use_ess = TRUE,
   verbose = FALSE,
   ...
 )
@@ -110,6 +129,7 @@ bridge_sampler(samples, ...)
   lb = NULL,
   ub = NULL,
   repetitions = 1,
+  use_ess = TRUE,
   method = "normal",
   cores = 1,
   use_neff = TRUE,
@@ -135,6 +155,7 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   packages = NULL,
   varlist = NULL,
+  use_ess = TRUE,
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
@@ -150,6 +171,7 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
+  use_ess = TRUE,
   verbose = FALSE,
   ...
 )
@@ -162,16 +184,6 @@ parameter names in \code{lb} and \code{ub})  with posterior samples.}
 
 \item{...}{additional arguments passed to \code{log_posterior}. Ignored for
 the \code{stanfit} and \code{stanreg} methods.}
-
-\item{stanfit_model}{for the \code{stanfit} method, an additional object of
-class \code{"stanfit"} with the same model as \code{samples}, which will be
-used for evaluating the \code{log_posterior} (i.e., it does not need to
-contain any samples). The default is to use \code{samples}. In case
-\code{samples} was compiled in a different R session or on another computer
-with a different OS or setup, the \code{samples} model usually cannot be
-used for evaluation. In this case, one can compile the model on the current
-computer with \code{iter = 0} and pass it here (this usually needs to be
-done before \code{samples} is loaded).}
 
 \item{repetitions}{number of repetitions.}
 
@@ -198,8 +210,23 @@ Default is 1,000 to avoid infinite loops.}
 \item{silent}{Boolean which determines whether to print the number of
 iterations of the updating scheme to the console. Default is FALSE.}
 
+\item{use_ess}{Logical. If \code{TRUE}, the iterative scheme's uncertainty
+calculations replace the nominal sample size with the effective sample size
+(ESS), making MCSE computation take into account autocorrelation in MCMC
+samples.}
+
 \item{verbose}{Boolean. Should internal debug information be printed to
 console? Default is \code{FALSE}.}
+
+\item{stanfit_model}{for the \code{stanfit} method, an additional object of
+class \code{"stanfit"} with the same model as \code{samples}, which will be
+used for evaluating the \code{log_posterior} (i.e., it does not need to
+contain any samples). The default is to use \code{samples}. In case
+\code{samples} was compiled in a different R session or on another computer
+with a different OS or setup, the \code{samples} model usually cannot be
+used for evaluation. In this case, one can compile the model on the current
+computer with \code{iter = 0} and pass it here (this usually needs to be
+done before \code{samples} is loaded).}
 
 \item{log_posterior}{function or name of function that takes a parameter
 vector and the \code{data} as input and returns the log of the unnormalized
@@ -243,21 +270,33 @@ will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 (will be compiled on all cores).}
 }
 \value{
-if \code{repetitions = 1}, returns a list of class \code{"bridge"}
- with components: \itemize{ \item \code{logml}: estimate of log marginal
- likelihood. \item \code{niter}: number of iterations of the iterative
- updating scheme. \item \code{method}: bridge sampling method that was used
- to obtain the estimate. \item \code{q11}: log posterior evaluations for
- posterior samples. \item \code{q12}: log proposal evaluations for posterior
- samples. \item \code{q21}: log posterior evaluations for samples from
- proposal. \item \code{q22}: log proposal evaluations for samples from
- proposal. } if \code{repetitions > 1}, returns a list of class
- \code{"bridge_list"} with components: \itemize{ \item \code{logml}: numeric
- vector with estimates of log marginal likelihood. \item \code{niter}:
- numeric vector with number of iterations of the iterative updating scheme
- for each repetition. \item \code{method}: bridge sampling method that was
- used to obtain the estimates. \item \code{repetitions}: number of
- repetitions. }
+If \code{repetitions = 1}, returns a list of class \code{"bridge"}
+ with components:
+ \itemize{
+   \item \code{logml}: estimate of the log marginal likelihood.
+   \item \code{niter}: number of iterations of the iterative
+         updating scheme.
+   \item \code{method}: bridge sampling method that was used
+         to obtain the estimate.
+   \item \code{q11}: log posterior evaluations for posterior samples.
+   \item \code{q12}: log proposal evaluations for posterior samples.
+   \item \code{q21}: log posterior evaluations for samples from the proposal.
+   \item \code{q22}: log proposal evaluations for samples from the proposal.
+   \item \code{mcse_logml}: Monte Carlo standard error of \code{logml}
+         on the log-scale (Micaletto & Vehtari, 2025).
+ }
+ If \code{repetitions > 1}, returns a list of class \code{"bridge_list"}
+ with components:
+ \itemize{
+   \item \code{logml}: numeric vector of log marginal likelihood estimates.
+   \item \code{niter}: numeric vector with the number of iterations of the
+         iterative updating scheme for each repetition.
+   \item \code{method}: bridge sampling method that was used to obtain
+         the estimates.
+   \item \code{repetitions}: number of repetitions.
+   \item \code{mcse_logml}: numeric vector of Monte Carlo standard errors
+         on the log-scale (Micaletto & Vehtari, 2025), one per repetition.
+}
 }
 \description{
 Computes log marginal likelihood via bridge sampling.
@@ -558,6 +597,10 @@ Gronau, Q. F., Singmann, H., & Wagenmakers, E.-J. (2020). bridgesampling: An
  Meng, X.-L., & Schilling, S. (2002). Warp bridge sampling. \emph{Journal of
  Computational and Graphical Statistics, 11(3)}, 552-586.
  \doi{10.1198/106186002457}
+
+ Micaletto, G., & Vehtari, A. (2025). Monte Carlo standard errors for bridge
+ sampling marginal likelihood estimation. \emph{arXiv preprint},
+ arXiv:2508.14487. \url{https://arxiv.org/abs/2508.14487}
 
  Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model
  determination methods for generalised linear mixed models.

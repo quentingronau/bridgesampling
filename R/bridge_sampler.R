@@ -119,8 +119,6 @@
 #'  with components:
 #'  \itemize{
 #'    \item \code{logml}: estimate of the log marginal likelihood.
-#'    \item \code{mcse_logml}: Monte Carlo standard error of \code{logml}
-#'          on the log-scale (Micaletto & Vehtari, 2025).
 #'    \item \code{niter}: number of iterations of the iterative
 #'          updating scheme.
 #'    \item \code{method}: bridge sampling method that was used
@@ -129,18 +127,20 @@
 #'    \item \code{q12}: log proposal evaluations for posterior samples.
 #'    \item \code{q21}: log posterior evaluations for samples from the proposal.
 #'    \item \code{q22}: log proposal evaluations for samples from the proposal.
+#'    \item \code{mcse_logml}: Monte Carlo standard error of \code{logml}
+#'          on the log-scale (Micaletto & Vehtari, 2025).
 #'  }
 #'  If \code{repetitions > 1}, returns a list of class \code{"bridge_list"}
 #'  with components:
 #'  \itemize{
 #'    \item \code{logml}: numeric vector of log marginal likelihood estimates.
-#'    \item \code{mcse_logml}: numeric vector of Monte Carlo standard errors
-#'          on the log-scale (Micaletto & Vehtari, 2025), one per repetition.
 #'    \item \code{niter}: numeric vector with the number of iterations of the
 #'          iterative updating scheme for each repetition.
 #'    \item \code{method}: bridge sampling method that was used to obtain
 #'          the estimates.
 #'    \item \code{repetitions}: number of repetitions.
+#'    \item \code{mcse_logml}: numeric vector of Monte Carlo standard errors
+#'          on the log-scale (Micaletto & Vehtari, 2025), one per repetition.
 #' }
 #'@section Warning: Note that the results depend strongly on the parameter
 #'  priors. Therefore, it is strongly advised to think carefully about the
@@ -213,8 +213,8 @@ bridge_sampler <- function(samples, ...) {
 
 #' @rdname bridge_sampler
 #' @export
-bridge_sampler.CmdStanMCMC <- function(samples = NULL, repetitions = 1, method = "normal", 
-                                       cores = 1, use_neff = TRUE, maxiter = 1000, 
+bridge_sampler.CmdStanMCMC <- function(samples = NULL, repetitions = 1, method = "normal",
+                                       cores = 1, use_neff = TRUE, maxiter = 1000,
                                        silent = FALSE, use_ess = TRUE, verbose = FALSE, ...) {
    draws <- samples$unconstrain_draws(format = "matrix")
    parameters <- colnames(draws)
@@ -226,7 +226,7 @@ bridge_sampler.CmdStanMCMC <- function(samples = NULL, repetitions = 1, method =
                                        method = method, log_posterior = .cmdstan_log_posterior,
                                        cores = cores, data = samples, use_neff = use_neff,
                                        verbose = verbose)
-   
+
    return(bridge_out)
 }
 

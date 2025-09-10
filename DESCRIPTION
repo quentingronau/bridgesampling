@@ -53,6 +53,7 @@ Description: Provides functions for estimating marginal likelihoods, Bayes
     Gronau, Singmann, & Wagenmakers (2020) <doi:10.18637/jss.v092.i10>.
 License: GPL (>=2)
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
+Encoding: UTF-8
 VignetteBuilder: knitr, R.rsp
 URL: https://github.com/quentingronau/bridgesampling
