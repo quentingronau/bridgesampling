@@ -619,5 +619,5 @@ Quentin F. Gronau and Henrik Singmann. Parallel computing (i.e.,
  \code{cores > 1}) and the \code{stanfit} method use code from \code{rstan}
  by Jiaqing Guo, Jonah Gabry, and Ben Goodrich. Ben Goodrich added the
  \code{stanreg} method. Kees Mulder added methods for simplex and circular
- variables.
+ variables. Giorgio Micaletto and Aki Vehtari added the \code{CmdStanMCMC} method (for \code{cmdstanr}) and calculation of the Monte Carlo Standard Error (MCSE).
 }
