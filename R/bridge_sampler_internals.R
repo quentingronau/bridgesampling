@@ -273,7 +273,7 @@
     if (any(is.infinite(as.numeric(numi))) ||
         any(is.infinite(as.numeric((deni))))) {
       warning("Infinite value in iterative scheme, returning NA.\n Try rerunning with more samples.", call. = FALSE)
-      return(list(logml = NA, niter = i))
+      return(list(logml = NA, niter = i, mcse_logml = NA_real_))
 
     }
     mean_numi <- mean(as.numeric(numi))
