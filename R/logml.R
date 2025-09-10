@@ -5,25 +5,24 @@
 #' @param ... Further arguments passed to \code{fun}.
 #' @return scalar numeric
 #' @export
-logml <- function (x, ...) {
-   UseMethod("logml", x)
+logml <- function(x, ...) {
+  UseMethod("logml", x)
 }
 
 
 #' @rdname logml
 #' @export
-logml.bridge <- function (x, ...) {
-   x$logml
+logml.bridge <- function(x, ...) {
+  x$logml
 }
 
 #' @rdname logml
 #' @export
-logml.bridge_list <- function (x, fun = median, ...) {
-   out <- fun(x$logml, ...)
-   if (length(out) != 1) {
-     warning("fun returns results of length != 1, only first used.")
-     out <- out[1]
-   }
-   out
+logml.bridge_list <- function(x, fun = median, ...) {
+  out <- fun(x$logml, ...)
+  if (length(out) != 1) {
+    warning("fun returns results of length != 1, only first used.")
+    out <- out[1]
+  }
+  out
 }
-

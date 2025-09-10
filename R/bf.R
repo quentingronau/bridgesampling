@@ -51,25 +51,30 @@ bayes_factor.default <- function(x1, x2, log = FALSE, ...) {
 
 .bf_calc <- function(logml1, logml2, log) {
   bf <- logml1 - logml2
-  if (! log)
+  if (!log) {
     bf <- exp(bf)
+  }
   return(bf)
 }
 
 #' @rdname bf
 #' @export
 bf.bridge <- function(x1, x2, log = FALSE, ...) {
-  if (!inherits(x2, c("bridge", "bridge_list")))
+  if (!inherits(x2, c("bridge", "bridge_list"))) {
     stop("x2 needs to be of class 'bridge' or 'bridge_list'.", call. = FALSE)
+  }
   bf <- .bf_calc(logml(x1), logml(x2), log = log)
   out <- list(bf = bf, log = log)
   class(out) <- "bf_bridge"
-  try({
-    mc <- match.call()
-    name1 <- deparse(mc[["x1"]])
-    name2 <- deparse(mc[["x2"]])
-    attr(out, "model_names") <- c(name1, name2)
-  }, silent = TRUE)
+  try(
+    {
+      mc <- match.call()
+      name1 <- deparse(mc[["x1"]])
+      name2 <- deparse(mc[["x2"]])
+      attr(out, "model_names") <- c(name1, name2)
+    },
+    silent = TRUE
+  )
   return(out)
 }
 
@@ -77,8 +82,9 @@ bf.bridge <- function(x1, x2, log = FALSE, ...) {
 #' @rdname bf
 #' @export
 bf.bridge_list <- function(x1, x2, log = FALSE, ...) {
-  if (!inherits(x2, c("bridge", "bridge_list")))
+  if (!inherits(x2, c("bridge", "bridge_list"))) {
     stop("x2 needs to be of class 'bridge' or 'bridge_list'.", call. = FALSE)
+  }
   logml1 <- x1$logml
   logml2 <- x2$logml
   median1 <- median(logml1, na.rm = TRUE)
@@ -87,8 +93,12 @@ bf.bridge_list <- function(x1, x2, log = FALSE, ...) {
   len2 <- length(logml2)
   max_len <- max(c(len1, len2))
   if (!all(c(len1, len2) == max_len)) {
-    warning("Not all objects provide ", max_len,
-            " logmls. Some values are recycled.", call. = FALSE)
+    warning(
+      "Not all objects provide ",
+      max_len,
+      " logmls. Some values are recycled.",
+      call. = FALSE
+    )
     logml1 <- rep(logml1, length.out = max_len)
     logml2 <- rep(logml2, length.out = max_len)
   }
@@ -96,12 +106,15 @@ bf.bridge_list <- function(x1, x2, log = FALSE, ...) {
   bf_median_based <- .bf_calc(median1, median2, log = log)
   out <- list(bf = bf, bf_median_based = bf_median_based, log = log)
   class(out) <- "bf_bridge_list"
-  try({
-    mc <- match.call()
-    name1 <- deparse(mc[["x1"]])
-    name2 <- deparse(mc[["x2"]])
-    attr(out, "model_names") <- c(name1, name2)
-  }, silent = TRUE)
+  try(
+    {
+      mc <- match.call()
+      name1 <- deparse(mc[["x1"]])
+      name2 <- deparse(mc[["x2"]])
+      attr(out, "model_names") <- c(name1, name2)
+    },
+    silent = TRUE
+  )
   return(out)
 }
 
@@ -117,12 +130,15 @@ bf.default <- function(x1, x2, log = FALSE, ...) {
   bf <- .bf_calc(x1, x2, log = log)
   out <- list(bf = bf, log = log)
   class(out) <- "bf_default"
-  try({
-    mc <- match.call()
-    name1 <- deparse(mc[["x1"]])
-    name2 <- deparse(mc[["x2"]])
-    attr(out, "model_names") <- c(name1, name2)
-  }, silent = TRUE)
+  try(
+    {
+      mc <- match.call()
+      name1 <- deparse(mc[["x1"]])
+      name2 <- deparse(mc[["x2"]])
+      attr(out, "model_names") <- c(name1, name2)
+    },
+    silent = TRUE
+  )
   return(out)
 }
 
@@ -131,52 +147,78 @@ bf.default <- function(x1, x2, log = FALSE, ...) {
 #' @method print bf_bridge
 #' @export
 print.bf_bridge <- function(x, ...) {
-  if(!is.null(attr(x, "model_names"))) {
+  if (!is.null(attr(x, "model_names"))) {
     model_names <- attr(x, "model_names")
   } else {
     model_names <- c("x1", "x2")
   }
-  cat("Estimated ", if (x$log) "log " else NULL ,
-      "Bayes factor in favor of ", model_names[1],
-      " over ",  model_names[2], ": ",
-      formatC(x$bf, digits = 5, format = "f"),
-      "\n", sep = "")
+  cat(
+    "Estimated ",
+    if (x$log) "log " else NULL,
+    "Bayes factor in favor of ",
+    model_names[1],
+    " over ",
+    model_names[2],
+    ": ",
+    formatC(x$bf, digits = 5, format = "f"),
+    "\n",
+    sep = ""
+  )
 }
 
 #' @method print bf_bridge_list
 #' @export
-print.bf_bridge_list <- function(x, na.rm = TRUE,...) {
-  if(!is.null(attr(x, "model_names"))) {
+print.bf_bridge_list <- function(x, na.rm = TRUE, ...) {
+  if (!is.null(attr(x, "model_names"))) {
     model_names <- attr(x, "model_names")
   } else {
     model_names <- c("x1", "x2")
   }
-  cat("Estimated ", if (x$log) "log " else NULL ,
-      "Bayes factor (based on medians of log marginal likelihood estimates)\n",
-      " in favor of ", model_names[1], " over ", model_names[2], ": ",
-      formatC(x$bf_median_based, digits = 5, format = "f"),
-      "\nRange of estimates: ",
-      formatC(range(x$bf, na.rm=na.rm)[1], digits = 5, format = "f"), " to ",
-      formatC(range(x$bf, na.rm = na.rm)[2], digits = 5, format = "f"),
-      "\nInterquartile range: ",
-      formatC(stats::IQR(x$bf, na.rm = na.rm), digits = 5, format = "f"),
-      "\n", sep = "")
-  if (any(is.na(x$bf))) warning(sum(is.na(x$bf)),
-                                " log Bayes factor estimate(s) are NAs.",
-                                call. = FALSE)
+  cat(
+    "Estimated ",
+    if (x$log) "log " else NULL,
+    "Bayes factor (based on medians of log marginal likelihood estimates)\n",
+    " in favor of ",
+    model_names[1],
+    " over ",
+    model_names[2],
+    ": ",
+    formatC(x$bf_median_based, digits = 5, format = "f"),
+    "\nRange of estimates: ",
+    formatC(range(x$bf, na.rm = na.rm)[1], digits = 5, format = "f"),
+    " to ",
+    formatC(range(x$bf, na.rm = na.rm)[2], digits = 5, format = "f"),
+    "\nInterquartile range: ",
+    formatC(stats::IQR(x$bf, na.rm = na.rm), digits = 5, format = "f"),
+    "\n",
+    sep = ""
+  )
+  if (any(is.na(x$bf))) {
+    warning(
+      sum(is.na(x$bf)),
+      " log Bayes factor estimate(s) are NAs.",
+      call. = FALSE
+    )
+  }
 }
 
 #' @method print bf_default
 #' @export
 print.bf_default <- function(x, ...) {
-  if(!is.null(attr(x, "model_names"))) {
+  if (!is.null(attr(x, "model_names"))) {
     model_names <- attr(x, "model_names")
   } else {
     model_names <- c("Model 1", "Model 2")
   }
-  cat(if (x$log) "Log " else NULL ,
-      "Bayes factor in favor of ", model_names[1],
-      " over ",  model_names[2], ": ",
-      formatC(x$bf, digits = 5, format = "f"),
-      "\n", sep = "")
+  cat(
+    if (x$log) "Log " else NULL,
+    "Bayes factor in favor of ",
+    model_names[1],
+    " over ",
+    model_names[2],
+    ": ",
+    formatC(x$bf, digits = 5, format = "f"),
+    "\n",
+    sep = ""
+  )
 }
