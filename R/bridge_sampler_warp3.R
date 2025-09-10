@@ -40,21 +40,23 @@
 
   # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
   q12 <- dmvnorm((samples_4_iter - matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE)) %*%
-                   t(solve(L)), sigma = diag(ncol(samples_4_fit)), log = TRUE)
-  q22 <- vector(mode = "list", length = repetitions)
-  gen_samples <- vector(mode = "list", length = repetitions)
-  for (i in seq_len(repetitions)) {
-    gen_samples[[i]] <- rmvnorm(n_post, sigma = diag(ncol(samples_4_fit)))
-    colnames(gen_samples[[i]]) <- colnames(samples_4_iter)
-    q22[[i]] <- dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE)
+                    t(solve(L)), sigma = diag(ncol(samples_4_fit)), log = TRUE)
+  if (cores == 1 || repetitions == 1) {
+    # if cores > 1 or repetitions > 1, we do this below using parallelization
+    q22 <- vector(mode = "list", length = repetitions)
+    gen_samples <- vector(mode = "list", length = repetitions)
+    for (i in seq_len(repetitions)) {
+      gen_samples[[i]] <- rmvnorm(n_post, sigma = diag(ncol(samples_4_fit)))
+      colnames(gen_samples[[i]]) <- colnames(samples_4_iter)
+      q22[[i]] <- dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE)
+    }
   }
 
   e <- as.brob( exp(1) )
-
+  
   # evaluate log of likelihood times prior for posterior samples and generated samples
   q21 <- vector(mode = "list", length = repetitions)
   if (cores == 1) {
-
     q11 <- log(e^(apply(.invTransform2Real(samples_4_iter, lb, ub, param_types), 1, log_posterior,
                         data = data,...) + .logJacobian(samples_4_iter, transTypes, lb, ub)) +
                  e^(apply(.invTransform2Real(matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) -
@@ -73,6 +75,18 @@
     }
   } else if (cores > 1) {
         if ( .Platform$OS.type == "unix") {
+      if (repetitions > 1) {
+        gen_samples <- parallel::mclapply(seq_len(repetitions), FUN =
+                                          function(x) rmvnorm(n_post, sigma = diag(ncol(samples_4_fit))),
+                                          mc.preschedule = FALSE,
+                                          mc.cores = cores)
+        sapply(seq_along(gen_samples), function(i) colnames(gen_samples[[i]]) <- colnames(samples_4_iter))
+        q22 <- parallel::mclapply(seq_along(gen_samples), FUN =
+                                  function(i) dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE),
+                                  mc.preschedule = FALSE,
+                                  mc.cores = cores)
+      }
+        
       split1a <- .split_matrix(matrix=.invTransform2Real(samples_4_iter, lb, ub, param_types), cores=cores)
       split1b <- .split_matrix(matrix=.invTransform2Real(
         matrix(2*m, nrow = n_post, ncol = length(m), byrow = TRUE) - samples_4_iter, lb, ub, param_types
@@ -114,9 +128,23 @@
                                          tmp_mat2, transTypes, lb, ub)))
       }
         } else {
+          # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
           cl <- parallel::makeCluster(cores, useXDR = FALSE)
+          on.exit(parallel::stopCluster(cl))
           sapply(packages, function(x) parallel::clusterCall(cl = cl, "require", package = x, character.only = TRUE))
-
+          
+          if (repetitions > 1) {
+            parallel::clusterExport(cl = cl, varlist = c("n_post", "samples_4_fit"), envir = environment())
+            gen_samples <- parallel::clusterApplyLB(cl = cl,
+                                                    x = seq_len(repetitions),
+                                                    fun = function(x) rmvnorm(n_post, sigma = diag(ncol(samples_4_fit))))
+            sapply(seq_along(gen_samples), function(i) colnames(gen_samples[[i]]) <- colnames(samples_4_iter))
+            parallel::clusterExport(cl = cl, varlist = "gen_samples", envir = environment())
+            q22 <- parallel::clusterApplyLB(cl = cl,
+                                            x = seq_along(gen_samples),
+                                            fun = function(i) dmvnorm(gen_samples[[i]], sigma = diag(ncol(samples_4_fit)), log = TRUE))
+          }
+            
           parallel::clusterExport(cl = cl, varlist = varlist, envir = envir)
 
           if ( ! is.null(rcppFile)) {
@@ -153,7 +181,7 @@
                             .logJacobian(matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                                            gen_samples[[i]] %*% t(L), transTypes, lb, ub)))
           }
-          parallel::stopCluster(cl)
+          # parallel::stopCluster(cl)
         }
 
   }
