@@ -1,175 +1,67 @@
-# BayesianFROC
+# bmscstan
 
 <details>
 
-* Version: 
-* Source code: ???
-* URL: https://github.com/quentingronau/bridgesampling
-* Number of recursive dependencies: 0
+* Version: 1.2.1.0
+* GitHub: https://github.com/michelescandola/bmscstan
+* Source code: https://github.com/cran/bmscstan
+* Date/Publication: 2022-09-04 18:00:02 UTC
+* Number of recursive dependencies: 101
 
-Run `revdep_details(,"")` for more info
-
-</details>
-
-## Error before installation
-
-### Devel
-
-```
-
-
-
-
-
-
-```
-### CRAN
-
-```
-
-
-
-
-
-
-```
-# BayesianTools
-
-<details>
-
-* Version: 
-* Source code: ???
-* URL: https://github.com/quentingronau/bridgesampling
-* Number of recursive dependencies: 0
-
-Run `revdep_details(,"")` for more info
+Run `revdepcheck::revdep_details(, "bmscstan")` for more info
 
 </details>
 
-## Error before installation
+## In both
 
-### Devel
+*   R CMD check timed out
+    
 
-```
+*   checking Rd files ... NOTE
+    ```
+    checkRd: (-1) BMSC_pareto_k_table.Rd:54-56: Lost braces in \itemize; \value handles \item{}{} directly
+    checkRd: (-1) BMSC_pareto_k_table.Rd:57-59: Lost braces in \itemize; \value handles \item{}{} directly
+    checkRd: (-1) BMSC_pareto_k_table.Rd:60-63: Lost braces in \itemize; \value handles \item{}{} directly
+    checkRd: (-1) BMSC_pareto_k_table.Rd:64-66: Lost braces in \itemize; \value handles \item{}{} directly
+    checkRd: (-1) BMSC_pareto_k_table.Rd:67-71: Lost braces in \itemize; \value handles \item{}{} directly
+    checkRd: (-1) BMSC_pareto_k_table.Rd:72-74: Lost braces in \itemize; \value handles \item{}{} directly
+    ```
 
-
-
-
-
-
-```
-### CRAN
-
-```
-
-
-
-
-
-
-```
-# bayestestR
-
-<details>
-
-* Version: 
-* Source code: ???
-* URL: https://github.com/quentingronau/bridgesampling
-* Number of recursive dependencies: 0
-
-Run `revdep_details(,"")` for more info
-
-</details>
-
-## Error before installation
-
-### Devel
-
-```
-
-
-
-
-
-
-```
-### CRAN
-
-```
-
-
-
-
-
-
-```
 # brms
 
 <details>
 
-* Version: 
-* Source code: ???
-* URL: https://github.com/quentingronau/bridgesampling
-* Number of recursive dependencies: 0
+* Version: 2.23.0
+* GitHub: https://github.com/paul-buerkner/brms
+* Source code: https://github.com/cran/brms
+* Date/Publication: 2025-09-09 10:50:02 UTC
+* Number of recursive dependencies: 219
 
-Run `revdep_details(,"")` for more info
+Run `revdepcheck::revdep_details(, "brms")` for more info
 
 </details>
 
-## Error before installation
+## In both
 
-### Devel
+*   R CMD check timed out
+    
 
-```
-
-
-
-
-
-
-```
-### CRAN
-
-```
-
-
-
-
-
-
-```
-# metaBMA
+# hbsaems
 
 <details>
 
-* Version: 
-* Source code: ???
-* URL: https://github.com/quentingronau/bridgesampling
-* Number of recursive dependencies: 0
+* Version: 0.1.1
+* GitHub: https://github.com/madsyair/hbsaems
+* Source code: https://github.com/cran/hbsaems
+* Date/Publication: 2025-07-18 14:40:02 UTC
+* Number of recursive dependencies: 178
 
-Run `revdep_details(,"")` for more info
+Run `revdepcheck::revdep_details(, "hbsaems")` for more info
 
 </details>
 
-## Error before installation
+## In both
 
-### Devel
+*   R CMD check timed out
+    
 
-```
-
-
-
-
-
-
-```
-### CRAN
-
-```
-
-
-
-
-
-
-```
