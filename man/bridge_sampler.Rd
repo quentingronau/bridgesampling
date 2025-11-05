@@ -583,11 +583,11 @@ Gronau, Q. F., Singmann, H., & Wagenmakers, E.-J. (2020). bridgesampling: An
  Mathematical Psychology}. \url{https://arxiv.org/abs/1703.05984} \cr
  \code{vignette("bridgesampling_tutorial")}
 
- Gronau, Q. F., Wagenmakers, E.-J., Heck, D. W., & Matzke, D. (2017). \emph{A
- simple method for comparing complex models: Bayesian model comparison for
- hierarchical multinomial processing tree models using Warp-III bridge
- sampling}. Manuscript submitted for publication.
- \url{https://psyarxiv.com/yxhfm}
+ Gronau, Q. F., Wagenmakers, E.-J., Heck, D. W., & Matzke, D. (2019). A
+ Simple Method for Comparing Complex Models: Bayesian Model Comparison for
+ Hierarchical Multinomial Processing Tree Models Using Warp-III Bridge
+ Sampling. \emph{Psychometrika}, 84(1), 261–284.
+ \doi{10.1007/s11336-018-9648-3}
 
  Meng, X.-L., & Wong, W. H. (1996). Simulating ratios of normalizing
  constants via a simple identity: A theoretical exploration. \emph{Statistica

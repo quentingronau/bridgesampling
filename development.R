@@ -6,6 +6,7 @@ load_all()
 devtools::test()
 
 devtools::document()
+tools::check_package_urls(".")
 
 build_vignettes()
 devtools::build(args = '--compact-vignettes=gs+qpdf')
