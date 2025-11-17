@@ -30,13 +30,6 @@
   if (is.null(neff)) {
     neff <- nrow(samples_4_iter)
   }
-  if (!requireNamespace("posterior", quietly = TRUE)) {
-    warning(
-      "use_ess set to FALSE as 'posterior' package is not installed.",
-      call. = FALSE
-    )
-    use_ess <- FALSE
-  }
 
   n_post <- nrow(samples_4_iter)
 

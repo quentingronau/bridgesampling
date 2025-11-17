@@ -315,9 +315,18 @@
     mean_deni <- mean(as.numeric(deni))
     var_numi <- var(as.numeric(numi))
     if (use_ess) {
-      var_deni <- var(as.numeric(deni)) *
-        length(deni) /
-        posterior::ess_mean(as.numeric(deni))
+      var_deni <- tryCatch(
+        var(as.numeric(deni)) *
+          length(deni) /
+          mean(coda::effectiveSize(as.numeric(deni))),
+        error = function(e) {
+          warning(
+            "effective sample size calculation failed in iterative's scheme uncertainty calculation",
+            call. = FALSE
+          )
+          return(var(as.numeric(deni)))
+        }
+      )
     } else {
       var_deni <- var(as.numeric(deni))
     }

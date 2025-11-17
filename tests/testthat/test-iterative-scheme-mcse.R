@@ -11,17 +11,26 @@ test_that("MCSE is finite, positive, and returned for normal method", {
 
   L <- diag(2)
   out <- .run.iterative.scheme(
-    q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-    r0 = 1, tol = 1e-10, L = L,
-    method = "normal", maxiter = 1000, silent = TRUE,
-    criterion = "r", neff = length(q11), use_ess = FALSE
+    q11 = q11,
+    q12 = q12,
+    q21 = q21,
+    q22 = q22,
+    r0 = 1,
+    tol = 1e-10,
+    L = L,
+    method = "normal",
+    maxiter = 1000,
+    silent = TRUE,
+    criterion = "r",
+    neff = length(q11),
+    use_ess = FALSE
   )
 
   expect_type(out, "list")
   expect_true(is.finite(out$mcse_logml))
   expect_gt(out$mcse_logml, 0)
   # Deterministic value checks for the toy example
-  expect_equal(out$logml,      0.13248979618200290, tolerance = 1e-12)
+  expect_equal(out$logml, 0.13248979618200290, tolerance = 1e-12)
   expect_equal(out$mcse_logml, 0.02353233284705807, tolerance = 1e-12)
 })
 
@@ -37,17 +46,35 @@ test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
   L <- diag(2)
 
   out_normal <- .run.iterative.scheme(
-    q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-    r0 = 1, tol = 1e-10, L = L,
-    method = "normal", maxiter = 1000, silent = TRUE,
-    criterion = "r", neff = length(q11), use_ess = FALSE
+    q11 = q11,
+    q12 = q12,
+    q21 = q21,
+    q22 = q22,
+    r0 = 1,
+    tol = 1e-10,
+    L = L,
+    method = "normal",
+    maxiter = 1000,
+    silent = TRUE,
+    criterion = "r",
+    neff = length(q11),
+    use_ess = FALSE
   )
 
   out_warp3 <- .run.iterative.scheme(
-    q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-    r0 = 1, tol = 1e-10, L = L,
-    method = "warp3", maxiter = 1000, silent = TRUE,
-    criterion = "r", neff = length(q11), use_ess = FALSE
+    q11 = q11,
+    q12 = q12,
+    q21 = q21,
+    q22 = q22,
+    r0 = 1,
+    tol = 1e-10,
+    L = L,
+    method = "warp3",
+    maxiter = 1000,
+    silent = TRUE,
+    criterion = "r",
+    neff = length(q11),
+    use_ess = FALSE
   )
 
   # warp3 adds a constant to both l1 and l2 and shifts l*, the e^(l - l*) terms are invariant
@@ -65,20 +92,37 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
 
   # n
   out_n <- .run.iterative.scheme(
-    q11 = base_q11, q12 = base_q12, q21 = base_q21, q22 = base_q22,
-    r0 = 1, tol = 1e-10, L = L,
-    method = "normal", maxiter = 1000, silent = TRUE,
-    criterion = "r", neff = length(base_q11), use_ess = FALSE
+    q11 = base_q11,
+    q12 = base_q12,
+    q21 = base_q21,
+    q22 = base_q22,
+    r0 = 1,
+    tol = 1e-10,
+    L = L,
+    method = "normal",
+    maxiter = 1000,
+    silent = TRUE,
+    criterion = "r",
+    neff = length(base_q11),
+    use_ess = FALSE
   )
 
   # 4n (replicate samples 4x)
   k <- 4
   out_4n <- .run.iterative.scheme(
-    q11 = rep(base_q11, k), q12 = rep(base_q12, k),
-    q21 = rep(base_q21, k), q22 = rep(base_q22, k),
-    r0 = 1, tol = 1e-10, L = L,
-    method = "normal", maxiter = 1000, silent = TRUE,
-    criterion = "r", neff = length(base_q11) * k, use_ess = FALSE
+    q11 = rep(base_q11, k),
+    q12 = rep(base_q12, k),
+    q21 = rep(base_q21, k),
+    q22 = rep(base_q22, k),
+    r0 = 1,
+    tol = 1e-10,
+    L = L,
+    method = "normal",
+    maxiter = 1000,
+    silent = TRUE,
+    criterion = "r",
+    neff = length(base_q11) * k,
+    use_ess = FALSE
   )
 
   # Expect MCSE to drop by ~ 1/sqrt(k)
@@ -91,9 +135,9 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
 
 test_that("Function runs with use_ess = TRUE (if posterior installed)", {
   skip_if_not_installed("Brobdingnag")
-  if (!requireNamespace("posterior", quietly = TRUE)) {
-    skip("posterior not installed")
-  }
+  # if (!requireNamespace("posterior", quietly = TRUE)) {
+  #   skip("posterior not installed")
+  # } ## uses coda currently
 
   q11 <- c(0.10, 0.20, 0.30, 0.40, 0.45, 0.5)
   q12 <- c(0.02, 0.09, 0.10, 0.15, 0.18, 0.2)
@@ -102,10 +146,19 @@ test_that("Function runs with use_ess = TRUE (if posterior installed)", {
   L <- diag(2)
 
   out <- .run.iterative.scheme(
-    q11 = q11, q12 = q12, q21 = q21, q22 = q22,
-    r0 = 1, tol = 1e-10, L = L,
-    method = "normal", maxiter = 1000, silent = TRUE,
-    criterion = "r", neff = length(q11), use_ess = TRUE
+    q11 = q11,
+    q12 = q12,
+    q21 = q21,
+    q22 = q22,
+    r0 = 1,
+    tol = 1e-10,
+    L = L,
+    method = "normal",
+    maxiter = 1000,
+    silent = TRUE,
+    criterion = "r",
+    neff = length(q11),
+    use_ess = TRUE
   )
 
   expect_true(is.finite(out$mcse_logml))

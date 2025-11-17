@@ -26,10 +26,6 @@
 #'@param ub named vector with upper bounds for parameters.
 #'@param repetitions number of repetitions.
 #'@param method either \code{"normal"} or \code{"warp3"}.
-#'@param use_ess Logical. If \code{TRUE}, the iterative scheme's uncertainty
-#'  calculations replace the nominal sample size with the effective sample size
-#'  (ESS), making MCSE computation take into account autocorrelation in MCMC
-#'  samples.
 #'@param cores number of cores used for evaluating \code{log_posterior}. On
 #'  unix-like systems (where \code{.Platform$OS.type == "unix"} evaluates to
 #'  \code{TRUE}; e.g., Linux and Mac OS) forking via \code{\link{mclapply}} is
@@ -37,12 +33,14 @@
 #'  \code{\link{.GlobalEnv}}. For other systems (e.g., Windows)
 #'  \code{\link{makeCluster}} is used and further arguments specified below will
 #'  be used.
-#'@param use_neff Boolean which determines whether the effective sample size is
-#'  used in the optimal bridge function. Default is TRUE. If FALSE, the number
-#'  of samples is used instead. If \code{samples} is a \code{matrix}, it is
-#'  assumed that the \code{matrix} contains the samples of one chain in order.
-#'  If \code{samples} come from more than one chain, we recommend to use an
-#'  \code{mcmc.list} object for optimal performance.
+#'@param use_neff Logical. If \code{TRUE}, the effective sample size (compared
+#'  to the nominal sample size) is used in the optimal bridge function and in
+#'  the iterative scheme's uncertainty calculations (making MCSE computation
+#'  take into account autocorrelation in MCMC samples). Default is TRUE. If
+#'  FALSE, the nominal sample size  is used instead. If \code{samples} is a
+#'  \code{matrix}, it is assumed that the \code{matrix} contains the samples of
+#'  one chain in order. If \code{samples} come from more than one chain, we
+#'  recommend to use an \code{mcmc.list} object for optimal performance.
 #'@param packages character vector with names of packages needed for evaluating
 #'  \code{log_posterior} in parallel (only relevant if \code{cores > 1} and
 #'  \code{.Platform$OS.type != "unix"}).
@@ -221,7 +219,6 @@ bridge_sampler.CmdStanMCMC <- function(
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
-  use_ess = TRUE,
   verbose = FALSE,
   ...
 ) {
@@ -238,7 +235,6 @@ bridge_sampler.CmdStanMCMC <- function(
     lb = lb,
     ub = ub,
     repetitions = repetitions,
-    use_ess = use_ess,
     method = method,
     log_posterior = .cmdstan_log_posterior,
     cores = cores,
@@ -261,7 +257,6 @@ bridge_sampler.stanfit <- function(
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
-  use_ess = TRUE,
   verbose = FALSE,
   ...
 ) {
@@ -341,7 +336,7 @@ bridge_sampler.stanfit <- function(
         samples_4_fit = samples_4_fit,
         samples_4_iter = samples_4_iter,
         neff = neff,
-        use_ess = use_ess,
+        use_ess = use_neff,
         log_posterior = .stan_log_posterior,
         data = list(stanfit = stanfit_model),
         lb = lb,
@@ -366,7 +361,7 @@ bridge_sampler.stanfit <- function(
         samples_4_fit = samples_4_fit,
         samples_4_iter = samples_4_iter,
         neff = neff,
-        use_ess = use_ess,
+        use_ess = use_neff,
         log_posterior = .stan_log_posterior,
         data = list(stanfit = stanfit_model),
         lb = lb,
@@ -411,8 +406,7 @@ bridge_sampler.mcmc.list <- function(
   rcppFile = NULL,
   maxiter = 1000,
   silent = FALSE,
-  verbose = FALSE,
-  use_ess = TRUE
+  verbose = FALSE
 ) {
   # split samples in two parts
   nr <- nrow(samples[[1]])
@@ -473,7 +467,7 @@ bridge_sampler.mcmc.list <- function(
       samples_4_fit = samples_4_fit,
       samples_4_iter = samples_4_iter,
       neff = neff,
-      use_ess = use_ess,
+      use_ess = use_neff,
       log_posterior = log_posterior,
       "..." = ...,
       data = data,
@@ -517,7 +511,6 @@ bridge_sampler.mcmc <- function(
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
-  use_ess = TRUE,
   param_types = rep("real", ncol(samples)),
   silent = FALSE,
   verbose = FALSE
@@ -539,7 +532,6 @@ bridge_sampler.mcmc <- function(
     envir = envir,
     rcppFile = rcppFile,
     maxiter = maxiter,
-    use_ess = use_ess,
     param_types = param_types,
     silent = silent,
     verbose = verbose
@@ -565,7 +557,6 @@ bridge_sampler.matrix <- function(
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
-  use_ess = TRUE,
   param_types = rep("real", ncol(samples)),
   silent = FALSE,
   verbose = FALSE
@@ -626,7 +617,7 @@ bridge_sampler.matrix <- function(
       samples_4_fit = samples_4_fit,
       samples_4_iter = samples_4_iter,
       neff = neff,
-      use_ess = use_ess,
+      use_ess = use_neff,
       log_posterior = log_posterior,
       "..." = ...,
       data = data,
@@ -663,7 +654,6 @@ bridge_sampler.stanreg <-
     use_neff = TRUE,
     maxiter = 1000,
     silent = FALSE,
-    use_ess = TRUE,
     verbose = FALSE,
     ...
   ) {
@@ -717,7 +707,6 @@ bridge_sampler.stanreg <-
         data = list(stanfit = sf),
         lb = lb,
         ub = ub,
-        use_ess = use_ess,
         repetitions = repetitions,
         method = method,
         cores = cores,
@@ -731,7 +720,6 @@ bridge_sampler.stanreg <-
       bridge_output <- bridge_sampler(
         samples = samples,
         log_posterior = .stan_log_posterior,
-        use_ess = use_ess,
         data = list(stanfit = sf),
         lb = lb,
         ub = ub,
@@ -760,7 +748,6 @@ bridge_sampler.rjags <- function(
   lb = NULL,
   ub = NULL,
   repetitions = 1,
-  use_ess = TRUE,
   method = "normal",
   cores = 1,
   use_neff = TRUE,
@@ -795,8 +782,7 @@ bridge_sampler.rjags <- function(
     rcppFile = rcppFile,
     maxiter = maxiter,
     silent = silent,
-    verbose = verbose,
-    use_ess = use_ess
+    verbose = verbose
   )
 
   return(out)
@@ -817,7 +803,6 @@ bridge_sampler.runjags <- function(
   use_neff = TRUE,
   packages = NULL,
   varlist = NULL,
-  use_ess = TRUE,
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
@@ -845,8 +830,7 @@ bridge_sampler.runjags <- function(
     rcppFile = rcppFile,
     maxiter = maxiter,
     silent = silent,
-    verbose = verbose,
-    use_ess = use_ess
+    verbose = verbose
   )
 
   return(out)
@@ -862,7 +846,6 @@ bridge_sampler.MCMC_refClass <- function(
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
-  use_ess = TRUE,
   verbose = FALSE,
   ...
 ) {
@@ -960,7 +943,6 @@ bridge_sampler.MCMC_refClass <- function(
     ...,
     data = NULL,
     lb = .nimble_bounds(mcmc_samples[[1]], nimble_model, "lower"),
-    use_ess = use_ess,
     ub = .nimble_bounds(mcmc_samples[[1]], nimble_model, "upper"),
     repetitions = repetitions,
     method = method,

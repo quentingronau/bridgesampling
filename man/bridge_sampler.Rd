@@ -23,7 +23,6 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
-  use_ess = TRUE,
   verbose = FALSE,
   ...
 )
@@ -37,7 +36,6 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
-  use_ess = TRUE,
   verbose = FALSE,
   ...
 )
@@ -60,8 +58,7 @@ bridge_sampler(samples, ...)
   rcppFile = NULL,
   maxiter = 1000,
   silent = FALSE,
-  verbose = FALSE,
-  use_ess = TRUE
+  verbose = FALSE
 )
 
 \method{bridge_sampler}{mcmc}(
@@ -80,7 +77,6 @@ bridge_sampler(samples, ...)
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
-  use_ess = TRUE,
   param_types = rep("real", ncol(samples)),
   silent = FALSE,
   verbose = FALSE
@@ -102,7 +98,6 @@ bridge_sampler(samples, ...)
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
-  use_ess = TRUE,
   param_types = rep("real", ncol(samples)),
   silent = FALSE,
   verbose = FALSE
@@ -116,7 +111,6 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
-  use_ess = TRUE,
   verbose = FALSE,
   ...
 )
@@ -129,7 +123,6 @@ bridge_sampler(samples, ...)
   lb = NULL,
   ub = NULL,
   repetitions = 1,
-  use_ess = TRUE,
   method = "normal",
   cores = 1,
   use_neff = TRUE,
@@ -155,7 +148,6 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   packages = NULL,
   varlist = NULL,
-  use_ess = TRUE,
   envir = .GlobalEnv,
   rcppFile = NULL,
   maxiter = 1000,
@@ -171,7 +163,6 @@ bridge_sampler(samples, ...)
   use_neff = TRUE,
   maxiter = 1000,
   silent = FALSE,
-  use_ess = TRUE,
   verbose = FALSE,
   ...
 )
@@ -197,23 +188,20 @@ used. Hence elements needed for evaluation should be in the
 \code{\link{makeCluster}} is used and further arguments specified below will
 be used.}
 
-\item{use_neff}{Boolean which determines whether the effective sample size is
-used in the optimal bridge function. Default is TRUE. If FALSE, the number
-of samples is used instead. If \code{samples} is a \code{matrix}, it is
-assumed that the \code{matrix} contains the samples of one chain in order.
-If \code{samples} come from more than one chain, we recommend to use an
-\code{mcmc.list} object for optimal performance.}
+\item{use_neff}{Logical. If \code{TRUE}, the effective sample size (compared
+to the nominal sample size) is used in the optimal bridge function and in
+the iterative scheme's uncertainty calculations (making MCSE computation
+take into account autocorrelation in MCMC samples). Default is TRUE. If
+FALSE, the nominal sample size  is used instead. If \code{samples} is a
+\code{matrix}, it is assumed that the \code{matrix} contains the samples of
+one chain in order. If \code{samples} come from more than one chain, we
+recommend to use an \code{mcmc.list} object for optimal performance.}
 
 \item{maxiter}{maximum number of iterations for the iterative updating scheme.
 Default is 1,000 to avoid infinite loops.}
 
 \item{silent}{Boolean which determines whether to print the number of
 iterations of the updating scheme to the console. Default is FALSE.}
-
-\item{use_ess}{Logical. If \code{TRUE}, the iterative scheme's uncertainty
-calculations replace the nominal sample size with the effective sample size
-(ESS), making MCSE computation take into account autocorrelation in MCMC
-samples.}
 
 \item{verbose}{Boolean. Should internal debug information be printed to
 console? Default is \code{FALSE}.}

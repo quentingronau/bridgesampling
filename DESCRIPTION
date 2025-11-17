@@ -45,8 +45,7 @@ Suggests:
     rstanarm,
     nimble,
     MCMCpack,
-    cmdstanr (>= 0.6.0),
-    posterior
+    cmdstanr (>= 0.6.0)
 Description: Provides functions for estimating marginal likelihoods, Bayes
     factors, posterior model probabilities, and normalizing constants in general,
     via different versions of bridge sampling (Meng & Wong, 1996, 
