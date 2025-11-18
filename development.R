@@ -18,4 +18,7 @@ devtools::check(build_args = '--compact-vignettes=gs+qpdf')
 ### check reverse dependencies:
 
 usethis::use_revdep()
-revdepcheck::revdep_check(num_workers = 4)
+revdepcheck::revdep_check(
+  num_workers = 8,
+  timeout = as.difftime(30, units = "mins")
+)
