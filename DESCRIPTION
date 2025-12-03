@@ -45,6 +45,7 @@ Suggests:
     rstanarm,
     nimble,
     MCMCpack,
+    posterior,
     cmdstanr (>= 0.6.0)
 Description: Provides functions for estimating marginal likelihoods, Bayes
     factors, posterior model probabilities, and normalizing constants in general,
