@@ -5,7 +5,7 @@
   samples_4_iter, # matrix with already transformed samples for the
   # iterative scheme (rows are samples), colnames are "trans_x"
   # where x is the parameter name
-  neff, # effective sample size of samples_4_iter (i.e., already transformed samples), scalar
+  ess, # effective sample size of samples_4_iter (i.e., already transformed samples), scalar
   log_posterior,
   ...,
   data,
@@ -27,8 +27,8 @@
   tol1,
   tol2
 ) {
-  if (is.null(neff)) {
-    neff <- nrow(samples_4_iter)
+  if (is.null(ess)) {
+    ess <- nrow(samples_4_iter)
   }
 
   n_post <- nrow(samples_4_iter)
@@ -402,7 +402,7 @@
       maxiter = maxiter,
       silent = silent,
       criterion = "r",
-      neff = neff,
+      ess = ess,
       use_ess = use_ess
     )
     if (is.na(tmp$logml) & !is.null(tmp$r_vals)) {
@@ -425,7 +425,7 @@
         maxiter = maxiter,
         silent = silent,
         criterion = "logml",
-        neff = neff,
+        ess = ess,
         use_ess = use_ess
       )
       tmp$niter <- maxiter + tmp$niter
