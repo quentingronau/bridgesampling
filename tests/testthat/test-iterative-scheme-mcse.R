@@ -22,7 +22,7 @@ test_that("MCSE is finite, positive, and returned for normal method", {
     maxiter = 1000,
     silent = TRUE,
     criterion = "r",
-    neff = length(q11),
+    ess = length(q11),
     use_ess = FALSE
   )
 
@@ -57,7 +57,7 @@ test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
     maxiter = 1000,
     silent = TRUE,
     criterion = "r",
-    neff = length(q11),
+    ess = length(q11),
     use_ess = FALSE
   )
 
@@ -73,7 +73,7 @@ test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
     maxiter = 1000,
     silent = TRUE,
     criterion = "r",
-    neff = length(q11),
+    ess = length(q11),
     use_ess = FALSE
   )
 
@@ -103,7 +103,7 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
     maxiter = 1000,
     silent = TRUE,
     criterion = "r",
-    neff = length(base_q11),
+    ess = length(base_q11),
     use_ess = FALSE
   )
 
@@ -121,7 +121,7 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
     maxiter = 1000,
     silent = TRUE,
     criterion = "r",
-    neff = length(base_q11) * k,
+    ess = length(base_q11) * k,
     use_ess = FALSE
   )
 
@@ -157,7 +157,7 @@ test_that("Function runs with use_ess = TRUE (if posterior installed)", {
     maxiter = 1000,
     silent = TRUE,
     criterion = "r",
-    neff = length(q11),
+    ess = length(q11),
     use_ess = TRUE
   )
 
