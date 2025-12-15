@@ -82,7 +82,7 @@ test_that(".cmdstan_log_posterior and bridge_sampler agree with analytical resul
     repetitions = 1,
     method      = "normal",
     cores       = 1L,
-    use_neff    = FALSE,
+    use_ess     = FALSE,
     silent      = TRUE,
     verbose     = FALSE
   )
@@ -211,7 +211,7 @@ test_that("bridgesampling and .cmdstan_log_posterior handle constrained paramete
     repetitions = 1,
     method      = "normal",
     cores       = 1L,
-    use_neff    = FALSE,
+    use_ess     = FALSE,
     silent      = TRUE,
     verbose     = FALSE
   )
