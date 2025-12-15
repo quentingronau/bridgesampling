@@ -11,57 +11,45 @@
 # Helper function to compute effective sample size for iterative scheme
 # - samples_4_iter: numeric matrix of draws (rows = iterations, cols = parameters)
 # - use_ess: logical, whether to use ESS instead of raw n
-# Behavior:
-#   * if use_ess = FALSE: return nrow(samples_4_iter)
-#   * else:
-#       1) try posterior::ess_mean() if:
-#          - option bridgesampling.use_posterior_ess is TRUE (default), AND
-#          - package 'posterior' is installed
-#       2) if that fails or is disabled, fall back to coda::effectiveSize()
-#       3) if everything fails or returns non-finite, fall back to nrow()
+# Option:
+#   getOption("bridgesampling.ess_function") in {"posterior","coda"}
 .bs_compute_ess <- function(samples_4_iter, use_ess) {
   n <- nrow(samples_4_iter)
+  if (!use_ess) return(n)
 
-  if (!use_ess) {
-    return(n)
+  method <- getOption("bridgesampling.ess_function", "coda")
+
+  # Check to not hard-fail user code:
+  # if invalid, fall back to "coda".
+  if (!method %in% c("posterior", "coda")) {
+    method <- "coda"
   }
 
   ess <- NA_real_
 
-  # 1) Try posterior::ess_mean() if allowed and available
-  if (getOption("bridgesampling.use_posterior_ess", TRUE) &&
-      requireNamespace("posterior", quietly = TRUE)) {
-
-    ess <- tryCatch(
-      {
+  if (identical(method, "posterior")) {
+    if (requireNamespace("posterior", quietly = TRUE)) {
+      ess <- tryCatch({
         draws <- posterior::as_draws_matrix(samples_4_iter)
         as.numeric(median(posterior::ess_mean(draws)))
-      },
-      error = function(e) NA_real_
-    )
+      }, error = function(e) NA_real_)
+    } else {
+      # If user forces posterior but it isn't installed, silently fall back
+      method <- "coda"
+    }
   }
 
-  # 2) If posterior path not used or failed, fall back to coda
   if (!is.finite(ess) || ess <= 0) {
-    message("Posterior ESS failed or unavailable, using coda::effectiveSize()")
-    # Keep existing behavior as close as possible
-    mcmc_obj <- coda::mcmc(samples_4_iter)
-    ess <- tryCatch(
-      {
-        as.numeric(median(coda::effectiveSize(mcmc_obj)))
-      },
-      error = function(e) NA_real_
-    )
+    ess <- tryCatch({
+      mcmc_obj <- coda::mcmc(samples_4_iter)
+      as.numeric(median(coda::effectiveSize(mcmc_obj)))
+    }, error = function(e) NA_real_)
   }
 
-  # 3) Final safety net: raw sample size
-  if (!is.finite(ess) || ess <= 0) {
-    message("ESS computations failed, using nrow(samples)")
-    ess <- n
-  }
-
+  if (!is.finite(ess) || ess <= 0) ess <- n
   ess
 }
+
 
 #### for matrix method ######
 
