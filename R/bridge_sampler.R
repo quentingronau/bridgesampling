@@ -33,17 +33,19 @@
 #'  \code{\link{.GlobalEnv}}. For other systems (e.g., Windows)
 #'  \code{\link{makeCluster}} is used and further arguments specified below will
 #'  be used.
-#'@param use_ess Logical. If \code{TRUE}, the effective sample size (compared
-#'  to the nominal sample size) is used in the optimal bridge function and in
-#'  the iterative scheme's uncertainty calculations (making MCSE computation
-#'  take into account autocorrelation in MCMC samples). Default is TRUE. If
-#'  FALSE, the nominal sample size  is used instead. If \code{samples} is a
-#'  \code{matrix}, it is assumed that the \code{matrix} contains the samples of
-#'  one chain in order. If \code{samples} come from more than one chain, we
-#'  recommend to use an \code{mcmc.list} object for optimal performance. By default 
-#'  this uses \code{posterior::ess_mean()} if the \pkg{posterior} package is
-#'  installed and the global option \code{bridgesampling.use_posterior_ess} is 
-#'  \code{TRUE}; otherwise it falls back to \code{coda::effectiveSize()}.
+#'@param use_ess Logical. If \code{TRUE} (default is \code{TRUE}), the effective 
+#'  sample size (compared to the nominal sample size) is used in the optimal
+#'  bridge function and in the iterative scheme's uncertainty calculations
+#'  (making MCSE computation take into account autocorrelation in MCMC samples).
+#'  If \code{FALSE}, the nominal sample size is used instead. If \code{samples}
+#'  is a \code{matrix}, it is assumed that the \code{matrix} contains the
+#'  samples of one chain in order. If \code{samples} come from more than one
+#'  chain, we recommend to use an \code{mcmc.list} object for optimal
+#'  performance. The ESS computation method is selected via the global option
+#'  \code{bridgesampling.ess_function}, which can be \code{"posterior"} (uses
+#'  \code{posterior::ess_mean()}) or \code{"coda"} (uses
+#'  \code{coda::effectiveSize()}). The package sets a default for this option
+#'  at load time depending on whether the \pkg{posterior} package is available.
 #'@param packages character vector with names of packages needed for evaluating
 #'  \code{log_posterior} in parallel (only relevant if \code{cores > 1} and
 #'  \code{.Platform$OS.type != "unix"}).
