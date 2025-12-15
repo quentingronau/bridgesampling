@@ -90,8 +90,8 @@ test_that("bridge_sampler runs with posterior-based ESS when available", {
     samples        = samples,
     log_posterior  = log_post,
     data           = x,
-    lb             = -Inf,
-    ub             = Inf,
+    lb             = c(theta = -Inf),
+    ub             = c(theta =  Inf),
     use_ess        = TRUE,
     method         = "normal",
     silent         = TRUE
