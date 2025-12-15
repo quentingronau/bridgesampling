@@ -303,9 +303,10 @@ bridge_sampler.stanfit <- function(
   }
   samples_4_iter_tmp <- coda::as.mcmc.list(samples_4_iter_tmp)
 
+  samples_4_iter <- apply(samples_4_iter_stan, 1, rbind)
+
   ess <- .bs_compute_ess(samples_4_iter, use_ess)
 
-  samples_4_iter <- apply(samples_4_iter_stan, 1, rbind)
 
   parameters <- paste0("x", (seq_len(dim(upars)[1])))
 
@@ -429,11 +430,11 @@ bridge_sampler.mcmc.list <- function(
     function(x) .transform2Real(x, lb = lb, ub = ub)$theta_t
   )
 
-  # compute effective sample size
-  ess <- .bs_compute_ess(samples_4_iter, use_ess)
-
   # convert to matrix
   samples_4_iter <- do.call("rbind", samples_4_iter_tmp)
+
+  # compute effective sample size
+  ess <- .bs_compute_ess(samples_4_iter, use_ess)
 
   # run bridge sampling
   out <- do.call(
