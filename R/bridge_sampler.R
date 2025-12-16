@@ -33,14 +33,19 @@
 #'  \code{\link{.GlobalEnv}}. For other systems (e.g., Windows)
 #'  \code{\link{makeCluster}} is used and further arguments specified below will
 #'  be used.
-#'@param use_neff Logical. If \code{TRUE}, the effective sample size (compared
-#'  to the nominal sample size) is used in the optimal bridge function and in
-#'  the iterative scheme's uncertainty calculations (making MCSE computation
-#'  take into account autocorrelation in MCMC samples). Default is TRUE. If
-#'  FALSE, the nominal sample size  is used instead. If \code{samples} is a
-#'  \code{matrix}, it is assumed that the \code{matrix} contains the samples of
-#'  one chain in order. If \code{samples} come from more than one chain, we
-#'  recommend to use an \code{mcmc.list} object for optimal performance.
+#'@param use_ess Logical. If \code{TRUE} (default is \code{TRUE}), the effective 
+#'  sample size (compared to the nominal sample size) is used in the optimal
+#'  bridge function and in the iterative scheme's uncertainty calculations
+#'  (making MCSE computation take into account autocorrelation in MCMC samples).
+#'  If \code{FALSE}, the nominal sample size is used instead. If \code{samples}
+#'  is a \code{matrix}, it is assumed that the \code{matrix} contains the
+#'  samples of one chain in order. If \code{samples} come from more than one
+#'  chain, we recommend to use an \code{mcmc.list} object for optimal
+#'  performance. The ESS computation method is selected via the global option
+#'  \code{bridgesampling.ess_function}, which can be \code{"posterior"} (uses
+#'  \code{posterior::ess_mean()}) or \code{"coda"} (uses
+#'  \code{coda::effectiveSize()}). The package sets a default for this option
+#'  at load time depending on whether the \pkg{posterior} package is available.
 #'@param packages character vector with names of packages needed for evaluating
 #'  \code{log_posterior} in parallel (only relevant if \code{cores > 1} and
 #'  \code{.Platform$OS.type != "unix"}).
@@ -216,7 +221,7 @@ bridge_sampler.CmdStanMCMC <- function(
   repetitions = 1,
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   maxiter = 1000,
   silent = FALSE,
   verbose = FALSE,
@@ -239,7 +244,7 @@ bridge_sampler.CmdStanMCMC <- function(
     log_posterior = .cmdstan_log_posterior,
     cores = cores,
     data = samples,
-    use_neff = use_neff,
+    use_ess = use_ess,
     verbose = verbose
   )
 
@@ -254,7 +259,7 @@ bridge_sampler.stanfit <- function(
   repetitions = 1,
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   maxiter = 1000,
   silent = FALSE,
   verbose = FALSE,
@@ -298,22 +303,10 @@ bridge_sampler.stanfit <- function(
   }
   samples_4_iter_tmp <- coda::as.mcmc.list(samples_4_iter_tmp)
 
-  if (use_neff) {
-    neff <- tryCatch(
-      median(coda::effectiveSize(samples_4_iter_tmp)),
-      error = function(e) {
-        warning(
-          "effective sample size cannot be calculated, has been replaced by number of samples.",
-          call. = FALSE
-        )
-        return(NULL)
-      }
-    )
-  } else {
-    neff <- NULL
-  }
-
   samples_4_iter <- apply(samples_4_iter_stan, 1, rbind)
+
+  ess <- .bs_compute_ess(samples_4_iter, use_ess)
+
 
   parameters <- paste0("x", (seq_len(dim(upars)[1])))
 
@@ -335,8 +328,8 @@ bridge_sampler.stanfit <- function(
       args = list(
         samples_4_fit = samples_4_fit,
         samples_4_iter = samples_4_iter,
-        neff = neff,
-        use_ess = use_neff,
+        ess = ess,
+        use_ess = use_ess,
         log_posterior = .stan_log_posterior,
         data = list(stanfit = stanfit_model),
         lb = lb,
@@ -360,8 +353,8 @@ bridge_sampler.stanfit <- function(
       args = list(
         samples_4_fit = samples_4_fit,
         samples_4_iter = samples_4_iter,
-        neff = neff,
-        use_ess = use_neff,
+        ess = ess,
+        use_ess = use_ess,
         log_posterior = .stan_log_posterior,
         data = list(stanfit = stanfit_model),
         lb = lb,
@@ -399,7 +392,7 @@ bridge_sampler.mcmc.list <- function(
   param_types = rep("real", ncol(samples[[1]])),
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   packages = NULL,
   varlist = NULL,
   envir = .GlobalEnv,
@@ -437,28 +430,11 @@ bridge_sampler.mcmc.list <- function(
     function(x) .transform2Real(x, lb = lb, ub = ub)$theta_t
   )
 
-  # compute effective sample size
-  if (use_neff) {
-    samples_4_iter_tmp <- coda::mcmc.list(lapply(
-      samples_4_iter_tmp,
-      coda::mcmc
-    ))
-    neff <- tryCatch(
-      median(coda::effectiveSize(samples_4_iter_tmp)),
-      error = function(e) {
-        warning(
-          "effective sample size cannot be calculated, has been replaced by number of samples.",
-          call. = FALSE
-        )
-        return(NULL)
-      }
-    )
-  } else {
-    neff <- NULL
-  }
-
   # convert to matrix
   samples_4_iter <- do.call("rbind", samples_4_iter_tmp)
+
+  # compute effective sample size
+  ess <- .bs_compute_ess(samples_4_iter, use_ess)
 
   # run bridge sampling
   out <- do.call(
@@ -466,8 +442,8 @@ bridge_sampler.mcmc.list <- function(
     args = list(
       samples_4_fit = samples_4_fit,
       samples_4_iter = samples_4_iter,
-      neff = neff,
-      use_ess = use_neff,
+      ess = ess,
+      use_ess = use_ess,
       log_posterior = log_posterior,
       "..." = ...,
       data = data,
@@ -505,7 +481,7 @@ bridge_sampler.mcmc <- function(
   repetitions = 1,
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   packages = NULL,
   varlist = NULL,
   envir = .GlobalEnv,
@@ -526,7 +502,7 @@ bridge_sampler.mcmc <- function(
     repetitions = repetitions,
     method = method,
     cores = cores,
-    use_neff = use_neff,
+    use_ess = use_ess,
     packages = packages,
     varlist = varlist,
     envir = envir,
@@ -551,7 +527,7 @@ bridge_sampler.matrix <- function(
   repetitions = 1,
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   packages = NULL,
   varlist = NULL,
   envir = .GlobalEnv,
@@ -596,28 +572,15 @@ bridge_sampler.matrix <- function(
   samples_4_iter <- theta_t[!samples4fit_index, , drop = FALSE]
 
   # compute effective sample size
-  if (use_neff) {
-    neff <- tryCatch(
-      median(coda::effectiveSize(coda::mcmc(samples_4_iter))),
-      error = function(e) {
-        warning(
-          "effective sample size cannot be calculated, has been replaced by number of samples.",
-          call. = FALSE
-        )
-        return(NULL)
-      }
-    )
-  } else {
-    neff <- NULL
-  }
+  ess <- .bs_compute_ess(samples_4_iter, use_ess)
 
   out <- do.call(
     what = paste0(".bridge.sampler.", method),
     args = list(
       samples_4_fit = samples_4_fit,
       samples_4_iter = samples_4_iter,
-      neff = neff,
-      use_ess = use_neff,
+      ess = ess,
+      use_ess = use_ess,
       log_posterior = log_posterior,
       "..." = ...,
       data = data,
@@ -651,7 +614,7 @@ bridge_sampler.stanreg <-
     repetitions = 1,
     method = "normal",
     cores = 1,
-    use_neff = TRUE,
+    use_ess = TRUE,
     maxiter = 1000,
     silent = FALSE,
     verbose = FALSE,
@@ -710,7 +673,7 @@ bridge_sampler.stanreg <-
         repetitions = repetitions,
         method = method,
         cores = cores,
-        use_neff = use_neff,
+        use_ess = use_ess,
         packages = "rstan",
         maxiter = maxiter,
         silent = silent,
@@ -728,7 +691,7 @@ bridge_sampler.stanreg <-
         envir = sys.frame(sys.nframe()),
         method = method,
         cores = cores,
-        use_neff = use_neff,
+        use_ess = use_ess,
         packages = "rstan",
         maxiter = maxiter,
         silent = silent,
@@ -750,7 +713,7 @@ bridge_sampler.rjags <- function(
   repetitions = 1,
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   packages = NULL,
   varlist = NULL,
   envir = .GlobalEnv,
@@ -775,7 +738,7 @@ bridge_sampler.rjags <- function(
     repetitions = repetitions,
     method = method,
     cores = cores,
-    use_neff = use_neff,
+    use_ess = use_ess,
     packages = packages,
     varlist = varlist,
     envir = envir,
@@ -800,7 +763,7 @@ bridge_sampler.runjags <- function(
   repetitions = 1,
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   packages = NULL,
   varlist = NULL,
   envir = .GlobalEnv,
@@ -823,7 +786,7 @@ bridge_sampler.runjags <- function(
     repetitions = repetitions,
     method = method,
     cores = cores,
-    use_neff = use_neff,
+    use_ess = use_ess,
     packages = packages,
     varlist = varlist,
     envir = envir,
@@ -843,7 +806,7 @@ bridge_sampler.MCMC_refClass <- function(
   repetitions = 1,
   method = "normal",
   cores = 1,
-  use_neff = TRUE,
+  use_ess = TRUE,
   maxiter = 1000,
   silent = FALSE,
   verbose = FALSE,
@@ -947,7 +910,7 @@ bridge_sampler.MCMC_refClass <- function(
     repetitions = repetitions,
     method = method,
     cores = cores,
-    use_neff = use_neff,
+    use_ess = use_ess,
     packages = "nimble",
     maxiter = maxiter,
     silent = silent,

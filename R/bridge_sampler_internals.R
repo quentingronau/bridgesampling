@@ -8,6 +8,47 @@
   ((th - md + pi) %% (2 * pi)) - pi + md
 }
 
+# Helper function to compute effective sample size for iterative scheme
+# - samples_4_iter: numeric matrix of draws (rows = iterations, cols = parameters)
+# - use_ess: logical, whether to use ESS instead of raw n
+# Option:
+#   getOption("bridgesampling.ess_function") in {"posterior","coda"}
+.bs_compute_ess <- function(samples_4_iter, use_ess) {
+  n <- nrow(samples_4_iter)
+  if (!use_ess) return(n)
+
+  method <- getOption("bridgesampling.ess_function", "coda")
+
+  # Validate user option; if invalid, fall back to "coda"
+  if (!(method %in% c("posterior", "coda"))) {
+    method <- "coda"
+  }
+
+  ess <- NA_real_
+
+  # Try posterior method only if explicitly requested
+  if (identical(method, "posterior")) {
+    ess <- tryCatch({
+        draws <- posterior::as_draws_matrix(samples_4_iter)
+        as.numeric(median(posterior::ess_mean(draws)))
+        }, error = function(e) NA_real_)
+    } else {
+      ess <- NA_real_
+    }
+  }
+
+  if (identical(method, "coda") || !is.finite(ess) || ess <= 0) {
+    ess <- tryCatch({
+        mcmc_obj <- coda::mcmc(samples_4_iter)
+        as.numeric(median(coda::effectiveSize(mcmc_obj)))
+        }, error = function(e) NA_real_)
+  }
+
+  # Final fallback: use raw n
+  if (!is.finite(ess) || ess <= 0) ess <- n
+  ess
+}
+
 
 #### for matrix method ######
 
@@ -255,7 +296,7 @@
   maxiter,
   silent,
   criterion,
-  neff,
+  ess,
   use_ess
 ) {
   ### run iterative updating scheme (using "optimal" bridge function,
@@ -273,15 +314,15 @@
   #   l1, l2,
   #   r0, tol, L,
   #   method, maxiter, silent,
-  #   criterion, neff,
+  #   criterion, ess,
   #   file = "iterative_scheme.rda"
   # )
 
   lstar <- median(l1)
   n.1 <- length(l1)
   n.2 <- length(l2)
-  s1 <- neff / (neff + n.2)
-  s2 <- n.2 / (neff + n.2)
+  s1 <- ess / (ess + n.2)
+  s2 <- n.2 / (ess + n.2)
   r <- r0
   r_vals <- r
   logml <- log(r) + lstar
