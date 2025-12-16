@@ -19,33 +19,32 @@
 
   method <- getOption("bridgesampling.ess_function", "coda")
 
-  # Check to not hard-fail user code:
-  # if invalid, fall back to "coda".
-  if (!method %in% c("posterior", "coda")) {
+  # Validate user option; if invalid, fall back to "coda"
+  if (!(method %in% c("posterior", "coda"))) {
     method <- "coda"
   }
 
   ess <- NA_real_
 
+  # Try posterior method only if explicitly requested
   if (identical(method, "posterior")) {
-    if (requireNamespace("posterior", quietly = TRUE)) {
-      ess <- tryCatch({
+    ess <- tryCatch({
         draws <- posterior::as_draws_matrix(samples_4_iter)
         as.numeric(median(posterior::ess_mean(draws)))
-      }, error = function(e) NA_real_)
+        }, error = function(e) NA_real_)
     } else {
-      # If user forces posterior but it isn't installed, silently fall back
-      method <- "coda"
+      ess <- NA_real_
     }
   }
 
-  if (!is.finite(ess) || ess <= 0) {
+  if (identical(method, "coda") || !is.finite(ess) || ess <= 0) {
     ess <- tryCatch({
-      mcmc_obj <- coda::mcmc(samples_4_iter)
-      as.numeric(median(coda::effectiveSize(mcmc_obj)))
-    }, error = function(e) NA_real_)
+        mcmc_obj <- coda::mcmc(samples_4_iter)
+        as.numeric(median(coda::effectiveSize(mcmc_obj)))
+        }, error = function(e) NA_real_)
   }
 
+  # Final fallback: use raw n
   if (!is.finite(ess) || ess <= 0) ess <- n
   ess
 }
