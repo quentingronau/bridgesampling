@@ -1,8 +1,6 @@
 context("Iterative scheme MCSE calculations")
 
 test_that("MCSE is finite, positive, and returned for normal method", {
-  skip_if_not_installed("Brobdingnag")
-
   # Minimal deterministic inputs
   q11 <- c(0.10, 0.20, 0.30, 0.40)
   q12 <- c(0.02, 0.09, 0.10, 0.15)
@@ -35,8 +33,6 @@ test_that("MCSE is finite, positive, and returned for normal method", {
 })
 
 test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
-  skip_if_not_installed("Brobdingnag")
-
   # Same base inputs as above
   q11 <- c(0.10, 0.20, 0.30, 0.40)
   q12 <- c(0.02, 0.09, 0.10, 0.15)
@@ -82,8 +78,6 @@ test_that("MCSE is invariant to constant shifts (warp3 vs normal)", {
 })
 
 test_that("MCSE roughly scales like 1/sqrt(n)", {
-  skip_if_not_installed("Brobdingnag")
-
   base_q11 <- c(0.10, 0.20, 0.30, 0.40)
   base_q12 <- c(0.02, 0.09, 0.10, 0.15)
   base_q21 <- c(0.05, 0.18, 0.22, 0.28)
@@ -134,7 +128,6 @@ test_that("MCSE roughly scales like 1/sqrt(n)", {
 })
 
 test_that("Function runs with use_ess = TRUE (if posterior installed)", {
-  skip_if_not_installed("Brobdingnag")
   # if (!requireNamespace("posterior", quietly = TRUE)) {
   #   skip("posterior not installed")
   # } ## uses coda currently

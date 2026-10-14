@@ -147,8 +147,6 @@ post_prob.default <- function(x, ..., prior_prob = NULL, model_names = NULL) {
 }
 
 .post_prob_calc <- function(logml, model_names, prior_prob) {
-  e <- as.brob(exp(1))
-
   if (is.null(prior_prob)) {
     prior_prob <- rep(1 / length(logml), length(logml))
   }
@@ -171,7 +169,8 @@ post_prob.default <- function(x, ..., prior_prob = NULL, model_names = NULL) {
       call. = FALSE
     )
   } else {
-    post_prob <- as.numeric(e^logml * prior_prob / sum(e^logml * prior_prob))
+    log_w <- logml + log(prior_prob)
+    post_prob <- exp(log_w - .log_sum_exp(log_w))
     if (!isTRUE(all.equal(sum(post_prob), 1))) {
       warning("Posterior model probabilities do not sum to one.", call. = FALSE)
     }

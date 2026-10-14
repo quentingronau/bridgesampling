@@ -26,7 +26,6 @@
 #'
 #' @references
 #' Fruehwirth-Schnatter, S. (2004). Estimating marginal likelihoods for mixture and Markov switching models using bridge sampling techniques. \emph{The Econometrics Journal, 7}, 143-167. \doi{10.1111/j.1368-423X.2004.00125.x}
-#' @import Brobdingnag
 #' @importFrom coda spectrum0.ar
 #' @export
 error_measures <- function(bridge_object, ...) {
@@ -45,23 +44,20 @@ error_measures.bridge <- function(bridge_object, ...) {
     ))
   }
 
-  e <- as.brob(exp(1))
+  ## all densities on the log scale
+  log_g_p <- bridge_object$q12
+  log_g_g <- bridge_object$q22
+  log_p_p <- bridge_object$q11 - bridge_object$logml
+  log_p_g <- bridge_object$q21 - bridge_object$logml
 
-  ml <- e^(bridge_object$logml)
-  g_p <- e^(bridge_object$q12)
-  g_g <- e^(bridge_object$q22)
-  priorTimesLik_p <- e^(bridge_object$q11)
-  priorTimesLik_g <- e^(bridge_object$q21)
-  p_p <- priorTimesLik_p / ml
-  p_g <- priorTimesLik_g / ml
-
-  N1 <- length(p_p)
-  N2 <- length(g_g)
+  N1 <- length(log_p_p)
+  N2 <- length(log_g_g)
   s1 <- N1 / (N1 + N2)
   s2 <- N2 / (N1 + N2)
 
-  f1 <- as.numeric(p_g / (s1 * p_g + s2 * g_g))
-  f2 <- as.numeric(g_p / (s1 * p_p + s2 * g_p))
+  ## f1 = p_g / (s1 * p_g + s2 * g_g), f2 = g_p / (s1 * p_p + s2 * g_p)
+  f1 <- exp(log_p_g - .log_add_exp(log(s1) + log_p_g, log(s2) + log_g_g))
+  f2 <- exp(log_g_p - .log_add_exp(log(s1) + log_p_p, log(s2) + log_g_p))
   rho_f2 <- spectrum0.ar(f2)$spec
 
   term1 <- 1 / N2 * var(f1) / mean(f1)^2

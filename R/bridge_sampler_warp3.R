@@ -59,21 +59,19 @@
     )
   }
 
-  e <- as.brob(exp(1))
-
   # evaluate log of likelihood times prior for posterior samples and generated samples
   q21 <- vector(mode = "list", length = repetitions)
   if (cores == 1) {
-    q11 <- log(
-      e^(apply(
+    q11 <- .log_add_exp(
+      (apply(
         .invTransform2Real(samples_4_iter, lb, ub, param_types),
         1,
         log_posterior,
         data = data,
         ...
       ) +
-        .logJacobian(samples_4_iter, transTypes, lb, ub)) +
-        e^(apply(
+        .logJacobian(samples_4_iter, transTypes, lb, ub)),
+        (apply(
           .invTransform2Real(
             matrix(2 * m, nrow = n_post, ncol = length(m), byrow = TRUE) -
               samples_4_iter,
@@ -95,8 +93,8 @@
           ))
     )
     for (i in seq_len(repetitions)) {
-      q21[[i]] <- log(
-        e^(apply(
+      q21[[i]] <- .log_add_exp(
+        (apply(
           .invTransform2Real(
             matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
               gen_samples[[i]] %*% t(L),
@@ -115,8 +113,8 @@
             transTypes,
             lb,
             ub
-          )) +
-          e^(apply(
+          )),
+          (apply(
             .invTransform2Real(
               matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                 gen_samples[[i]] %*% t(L),
@@ -166,9 +164,9 @@
         mc.preschedule = FALSE,
         mc.cores = cores
       )
-      q11 <- log(
-        e^(unlist(q11a) + .logJacobian(samples_4_iter, transTypes, lb, ub)) +
-          e^(unlist(q11b) +
+      q11 <- .log_add_exp(
+        (unlist(q11a) + .logJacobian(samples_4_iter, transTypes, lb, ub)),
+          (unlist(q11b) +
             .logJacobian(
               matrix(2 * m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                 samples_4_iter,
@@ -210,16 +208,16 @@
           mc.preschedule = FALSE,
           mc.cores = cores
         )
-        q21[[i]] <- log(
-          e^(unlist(q21a) +
+        q21[[i]] <- .log_add_exp(
+          (unlist(q21a) +
             .logJacobian(
               matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
                 tmp_mat2,
               transTypes,
               lb,
               ub
-            )) +
-            e^(unlist(q21b) +
+            )),
+            (unlist(q21b) +
               .logJacobian(
                 matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +
                   tmp_mat2,
@@ -259,16 +257,16 @@
         parallel::clusterExport(cl = cl, varlist = log_posterior, envir = envir)
       }
 
-      q11 <- log(
-        e^(parallel::parRapply(
+      q11 <- .log_add_exp(
+        (parallel::parRapply(
           cl = cl,
           x = .invTransform2Real(samples_4_iter, lb, ub, param_types),
           log_posterior,
           data = data,
           ...
         ) +
-          .logJacobian(samples_4_iter, transTypes, lb, ub)) +
-          e^(parallel::parRapply(
+          .logJacobian(samples_4_iter, transTypes, lb, ub)),
+          (parallel::parRapply(
             cl = cl,
             x = .invTransform2Real(
               matrix(2 * m, nrow = n_post, ncol = length(m), byrow = TRUE) -
@@ -290,8 +288,8 @@
             ))
       )
       for (i in seq_len(repetitions)) {
-        q21[[i]] <- log(
-          e^(parallel::parRapply(
+        q21[[i]] <- .log_add_exp(
+          (parallel::parRapply(
             cl = cl,
             x = .invTransform2Real(
               matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) -
@@ -310,8 +308,8 @@
               transTypes,
               lb,
               ub
-            )) +
-            e^(parallel::parRapply(
+            )),
+            (parallel::parRapply(
               cl = cl,
               x = .invTransform2Real(
                 matrix(m, nrow = n_post, ncol = length(m), byrow = TRUE) +

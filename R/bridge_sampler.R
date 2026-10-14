@@ -201,7 +201,6 @@
 #'
 #'@importFrom mvtnorm rmvnorm dmvnorm
 #'@importFrom Matrix nearPD
-#'@import Brobdingnag
 #'@importFrom stringr str_sub
 #'@importFrom stats qnorm pnorm dnorm median cov var
 #'@export

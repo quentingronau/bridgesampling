@@ -288,7 +288,6 @@
   logml_vals <- logml
   criterion_val <- 1 + tol
 
-  e <- as.brob(exp(1))
   i <- 1
 
   while (i <= maxiter && criterion_val > tol) {
@@ -298,13 +297,16 @@
 
     rold <- r
     logmlold <- logml
-    numi <- e^(l2 - lstar) / (s1 * e^(l2 - lstar) + s2 * r)
-    deni <- 1 / (s1 * e^(l1 - lstar) + s2 * r)
+    ## numi = exp(l2 - lstar) / (s1 * exp(l2 - lstar) + s2 * r)
+    ## deni = 1 / (s1 * exp(l1 - lstar) + s2 * r)
+    ## computed on the log scale
+    log_s2r <- log(s2) + log(r)
+    numi <- exp(
+      (l2 - lstar) - .log_add_exp(log(s1) + l2 - lstar, log_s2r)
+    )
+    deni <- exp(-.log_add_exp(log(s1) + l1 - lstar, log_s2r))
 
-    if (
-      any(is.infinite(as.numeric(numi))) ||
-        any(is.infinite(as.numeric((deni))))
-    ) {
+    if (any(is.infinite(numi)) || any(is.infinite(deni))) {
       warning(
         "Infinite value in iterative scheme, returning NA.\n Try rerunning with more samples.",
         call. = FALSE
