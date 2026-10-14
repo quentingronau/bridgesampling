@@ -51,8 +51,8 @@ transformed data {
   zeros = rep_vector(0.0, m);
 }
 parameters {
-  real beta_lower[r - k];  // lower-diagonal elements of beta
-  real<lower = 0> beta_diag [k]; // diagonal elements of beta
+  array[r - k] real beta_lower;  // lower-diagonal elements of beta
+  array[k] real<lower = 0> beta_diag; // diagonal elements of beta
   vector<lower = 0>[m] sigma2; // residual variances
 }
 transformed parameters {

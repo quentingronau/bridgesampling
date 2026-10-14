@@ -9,6 +9,7 @@ test_that(".cmdstan_log_posterior and bridge_sampler agree with analytical resul
   if (!file.exists(cmdstanr::cmdstan_path())) {
     skip("CmdStan is not installed in the expected path for cmdstanr.")
   }
+  skip_if_rstan_loaded()
 
   # Access the internal helper from bridgesampling
   pkg <- "bridgesampling"
@@ -138,6 +139,7 @@ test_that("bridgesampling and .cmdstan_log_posterior handle constrained paramete
   if (!file.exists(cmdstanr::cmdstan_path())) {
     skip("CmdStan is not installed in the expected path for cmdstanr.")
   }
+  skip_if_rstan_loaded()
 
   # Access bridgesampling's internal helper
   pkg <- "bridgesampling"

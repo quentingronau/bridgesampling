@@ -2,6 +2,7 @@
 context('Stan Bridge Sampler Bugs')
 
 test_that("subscript out of bounds error", {
+  skip_if_cmdstanr_methods_loaded() # before rstan is loaded
   ## https://github.com/quentingronau/bridgesampling/issues/26
   stan_mod = "
   data{
@@ -10,13 +11,13 @@ test_that("subscript out of bounds error", {
     int T;
     int E;
     int G;
-    int N[G];
-    int ii[M];
-    int jj[M];
-    int gg[M];
-    int g_all[sum(N)];
-    int y[M];
-    matrix[J,J] obs_corr[G];
+    array[G] int N;
+    array[M] int ii;
+    array[M] int jj;
+    array[M] int gg;
+    array[sum(N)] int g_all;
+    array[M] int y;
+    array[G] matrix[J,J] obs_corr;
   }
 
   transformed data{
@@ -24,14 +25,14 @@ test_that("subscript out of bounds error", {
   }
 
   parameters{
-    ordered[T] thresholds_raw[G,J];
-    matrix<multiplier=5>[E,J] lam[G];
+    array[G,J] ordered[T] thresholds_raw;
+    array[G] matrix<multiplier=5>[E,J] lam;
     matrix[N_all,E] eta;
     matrix[N_all,J] ystar_raw;
   }
 
   transformed parameters {
-    ordered[T] thresholds[G,J];
+    array[G,J] ordered[T] thresholds;
 
     for(g in 1:G)
       for(j in 1:J)
@@ -47,7 +48,7 @@ test_that("subscript out of bounds error", {
     target += std_normal_lpdf(to_vector(eta));
 
     for(g in 1:G){
-      int g_ids[N[g]] = segment(g_all,pos,N[g]);
+      array[N[g]] int g_ids = segment(g_all,pos,N[g]);
       target += normal_lpdf(to_vector(eta)| 0,5);
 
       for(j in 1:J)
@@ -78,6 +79,7 @@ test_that("subscript out of bounds error", {
 })
 
 test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
+  skip_if_cmdstanr_methods_loaded() # before rstan is loaded
 
   skip_on_cran()
   skip_on_ci()
@@ -123,6 +125,7 @@ test_that("bridge_sampler.stanfit multicore works for one-parameter model.", {
 })
 
 test_that("turtle example",{
+  skip_if_cmdstanr_methods_loaded() # before rstan is loaded
   skip_on_cran()
   skip_on_ci()
 
@@ -135,10 +138,10 @@ test_that("turtle example",{
     m1_code_nc <-
       "data {
         int<lower = 1> nobs;
-        int<lower = 0, upper = 1> y[nobs];
-        real<lower = 0> x[nobs];
+        array[nobs] int<lower = 0, upper = 1> y;
+        array[nobs] real<lower = 0> x;
         int<lower = 1> m;
-        int<lower = 1> clutch[nobs];
+        array[nobs] int<lower = 1> clutch;
       }
       parameters {
         real alpha0_raw;
@@ -182,8 +185,8 @@ test_that("turtle example",{
   m0_code_nc <-
     "data {
       int<lower = 1> nobs;
-      int<lower = 0, upper = 1> y[nobs];
-      real<lower = 0> x[nobs];
+      array[nobs] int<lower = 0, upper = 1> y;
+      array[nobs] real<lower = 0> x;
     }
     parameters {
       real alpha0_raw;

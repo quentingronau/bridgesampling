@@ -2,6 +2,7 @@
 context('bridge_sampler.stanreg works.')
 
 test_that("stan_bridge_sampler", {
+  skip_if_cmdstanr_methods_loaded() # before rstan is loaded
 
   testthat::skip_on_cran()
   testthat::skip_on_ci()
@@ -23,6 +24,7 @@ test_that("stan_bridge_sampler", {
 
 
 test_that("stan_bridge_sampler in multicore", {
+  skip_if_cmdstanr_methods_loaded() # before rstan is loaded
   testthat::skip_on_cran()
   testthat::skip_on_ci()
   #testthat::skip_on_os("windows")

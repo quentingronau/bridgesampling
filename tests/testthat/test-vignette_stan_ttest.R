@@ -2,6 +2,7 @@
 context('test vignette bridgesampling_stan_ttest.Rmd')
 
 test_that("bridge sampler yields correct results", {
+  skip_if_cmdstanr_methods_loaded() # before rstan is loaded
 
   testthat::skip_on_cran()
   testthat::skip_on_ci()

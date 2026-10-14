@@ -73,8 +73,8 @@ mtext("Birth Weight (Grams)", side = 2, line = 2.6, cex = 1.8)
 H0_code <-
 "data {
   int<lower = 1> N;
-  int<lower = 0, upper = 1> y[N];
-  real<lower = 0> x[N];
+  array[N] int<lower = 0, upper = 1> y;
+  array[N] real<lower = 0> x;
 }
 parameters {
   real alpha0_raw;
@@ -99,10 +99,10 @@ model {
 H1_code <-
 "data {
   int<lower = 1> N;
-  int<lower = 0, upper = 1> y[N];
-  real<lower = 0> x[N];
+  array[N] int<lower = 0, upper = 1> y;
+  array[N] real<lower = 0> x;
   int<lower = 1> C;
-  int<lower = 1, upper = C> clutch[N];
+  array[N] int<lower = 1, upper = C> clutch;
 }
 parameters {
   real alpha0_raw;
