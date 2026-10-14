@@ -24,6 +24,7 @@ bridge_sampler(samples, ...)
   maxiter = 1000,
   silent = FALSE,
   verbose = FALSE,
+  proposal_fit = c("sample", "hybrid"),
   ...
 )
 
@@ -37,6 +38,7 @@ bridge_sampler(samples, ...)
   maxiter = 1000,
   silent = FALSE,
   verbose = FALSE,
+  proposal_fit = c("sample", "hybrid"),
   ...
 )
 
@@ -100,7 +102,9 @@ bridge_sampler(samples, ...)
   maxiter = 1000,
   param_types = rep("real", ncol(samples)),
   silent = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  gradients = NULL,
+  proposal_fit = c("sample", "hybrid")
 )
 
 \method{bridge_sampler}{stanreg}(
@@ -206,6 +210,15 @@ iterations of the updating scheme to the console. Default is FALSE.}
 \item{verbose}{Boolean. Should internal debug information be printed to
 console? Default is \code{FALSE}.}
 
+\item{proposal_fit}{character string determining how the covariance matrix of
+the multivariate normal proposal is estimated. \code{"sample"} (the
+default) uses the sample covariance matrix of the draws.
+\code{"hybrid"} combines the sample covariance matrix with a
+score-matching estimate obtained from the posterior gradients, as described
+in \code{Details}. \code{"hybrid"} requires gradients and is only
+implemented for \code{method = "normal"}; if gradients are unavailable the
+sample covariance matrix is used and a warning is given.}
+
 \item{stanfit_model}{for the \code{stanfit} method, an additional object of
 class \code{"stanfit"} with the same model as \code{samples}, which will be
 used for evaluating the \code{log_posterior} (i.e., it does not need to
@@ -256,6 +269,15 @@ will be exported to the nodes). Default is \code{\link{.GlobalEnv}}.}
 \item{rcppFile}{in case \code{cores > 1} and \code{log_posterior} is an
 \code{Rcpp} function, \code{rcppFile} specifies the path to the cpp file
 (will be compiled on all cores).}
+
+\item{gradients}{for the \code{matrix} method, an optional matrix of
+posterior scores \eqn{s(\theta) = \nabla \log p(\theta)} with the same
+dimensions as \code{samples}, evaluated at the rows of \code{samples}. Only
+used when \code{proposal_fit = "hybrid"}, and only when all parameters are
+unbounded (i.e. \code{lb = -Inf} and \code{ub = Inf}), since the chain-rule
+correction of the gradients for a non-identity transformation is not
+implemented. The \code{stanfit} and \code{CmdStanMCMC} methods obtain the
+gradients automatically and do not take this argument.}
 }
 \value{
 If \code{repetitions = 1}, returns a list of class \code{"bridge"}
@@ -272,6 +294,15 @@ If \code{repetitions = 1}, returns a list of class \code{"bridge"}
    \item \code{q22}: log proposal evaluations for samples from the proposal.
    \item \code{mcse_logml}: Monte Carlo standard error of \code{logml}
          on the log-scale (Micaletto & Vehtari, 2025).
+   \item \code{proposal_fit_info}: for \code{method = "normal"}, a list
+         recording how the proposal covariance matrix was obtained:
+         \code{proposal_fit} (the requested value), \code{combiner}
+         (\code{"none"} if the sample covariance matrix was used,
+         \code{"geometric"} if the matrix geometric mean was used, and
+         \code{"geometric_fallback_arithmetic"} if the geometric mean could
+         not be formed and the arithmetic mean was used instead), and
+         \code{n_gradients_used} (the number of draws with finite
+         gradients).
  }
  If \code{repetitions > 1}, returns a list of class \code{"bridge_list"}
  with components:
@@ -284,6 +315,10 @@ If \code{repetitions = 1}, returns a list of class \code{"bridge"}
    \item \code{repetitions}: number of repetitions.
    \item \code{mcse_logml}: numeric vector of Monte Carlo standard errors
          on the log-scale (Micaletto & Vehtari, 2025), one per repetition.
+   \item \code{proposal_fit_info}: for \code{method = "normal"}, a list
+         recording how the proposal covariance matrix was obtained (see
+         above). The proposal is fitted once, so there is one such list
+         rather than one per repetition.
 }
 }
 \description{
@@ -302,6 +337,22 @@ Bridge sampling is implemented as described in Meng and Wong (1996,
  (Meng & Schilling, 2002) so that it has the same mean vector, covariance
  matrix, and skew as the samples. \code{method = "warp3"} takes approximately
  twice as long as \code{method = "normal"}.
+
+ With \code{proposal_fit = "hybrid"} the covariance matrix of the normal
+ proposal is not the sample covariance matrix \eqn{\hat\Sigma_n} alone.
+ A second estimate is obtained by score matching from the
+ posterior gradients \eqn{s_i = \nabla \log p(\theta_i)} evaluated at the
+ draws used to fit the proposal,
+ \deqn{\hat\Sigma_{score} = \left( n^{-1} \sum_i (s_i - \bar s)(s_i - \bar
+ s)^\top \right)^{-1},} and the two are combined by their matrix geometric
+ mean \eqn{\hat\Sigma_n \# \hat\Sigma_{score} = \hat\Sigma_n^{1/2}
+ (\hat\Sigma_n^{-1/2} \hat\Sigma_{score} \hat\Sigma_n^{-1/2})^{1/2}
+ \hat\Sigma_n^{1/2}}, which is the dense Fisher-divergence-optimal combiner
+ of Seyboldt et al. (2026). Because the two estimates have largely
+ independent errors, the combination is typically a better estimate of the
+ posterior covariance matrix than either one, which mainly helps when the
+ number of parameters is not small relative to the number of draws used to
+ fit the proposal.
 
  Note that for the \code{matrix} method, the lower and upper bound of a
  parameter cannot be a function of the bounds of another parameter.
@@ -586,14 +637,19 @@ Gronau, Q. F., Singmann, H., & Wagenmakers, E.-J. (2020). bridgesampling: An
  Computational and Graphical Statistics, 11(3)}, 552-586.
  \doi{10.1198/106186002457}
 
- Micaletto, G., & Vehtari, A. (2025). Monte Carlo standard errors for bridge
- sampling marginal likelihood estimation. \emph{arXiv preprint},
- arXiv:2508.14487. \url{https://arxiv.org/abs/2508.14487}
+ Micaletto, G., & Vehtari, A. (2025). Bridge sampling diagnostics.
+ \emph{arXiv preprint}, arXiv:2508.14487.
+ \url{https://arxiv.org/abs/2508.14487}
 
  Overstall, A. M., & Forster, J. J. (2010). Default Bayesian model
  determination methods for generalised linear mixed models.
  \emph{Computational Statistics & Data Analysis, 54}, 3269-3288.
  \doi{10.1016/j.csda.2010.03.008}
+
+ Seyboldt, A., Carlson, C., & Carpenter, B. (2026). Preconditioning
+ Hamiltonian Monte Carlo by minimizing Fisher divergence.
+ \emph{arXiv preprint}, arXiv:2603.18845.
+ \url{https://arxiv.org/abs/2603.18845}
 }
 \seealso{
 \code{\link{bf}} allows the user to calculate Bayes factors and

@@ -1,3 +1,7 @@
+# bridgesampling (development version)
+
+* `bridge_sampler()` gains `proposal_fit`. With `proposal_fit = "hybrid"`, the covariance matrix of the normal proposal is the matrix geometric mean of the sample covariance matrix and a score-matching estimate built from the posterior gradients, rather than the sample covariance matrix alone. Gradients are obtained automatically for `stanfit` and `CmdStanMCMC` objects, and can be supplied via the new `gradients` argument of the `matrix` method. The default `proposal_fit = "sample"` is the previous behaviour.
+
 # bridgesampling 1.2-1 (2025-11-18)
 
 * Added CmdStanR method and corresponding tests (thanks to @GiorgioMB and @avehtari #44).

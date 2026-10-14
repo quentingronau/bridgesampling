@@ -25,8 +25,13 @@
   use_ess,
   r0,
   tol1,
-  tol2
+  tol2,
+  gradients_4_fit = NULL, # optional n_fit x p matrix of posterior scores
+  # grad log p(theta) at the rows of samples_4_fit
+  proposal_fit = c("sample", "hybrid")
 ) {
+  proposal_fit <- match.arg(proposal_fit)
+
   if (is.null(neff)) {
     neff <- nrow(samples_4_iter)
   }
@@ -35,7 +40,106 @@
 
   # get mean & covariance matrix and generate samples from proposal
   m <- apply(samples_4_fit, 2, mean)
-  V_tmp <- cov(samples_4_fit)
+  V_sample <- cov(samples_4_fit)
+
+  use_gradients <- !is.null(gradients_4_fit) && proposal_fit != "sample"
+  if (use_gradients) {
+    if (
+      nrow(gradients_4_fit) != nrow(samples_4_fit) ||
+        ncol(gradients_4_fit) != ncol(samples_4_fit)
+    ) {
+      warning(
+        "gradients_4_fit dimensions do not match samples_4_fit; ",
+        "falling back to the sample covariance.",
+        call. = FALSE
+      )
+      use_gradients <- FALSE
+    }
+  }
+
+  # combiner records how V_sample and V_score were combined:
+  #   "none"      : V = V_sample
+  #   "geometric" : V = V_sample # V_score
+  #   "geometric_fallback_arithmetic" : .geometric_mean_psd() fell back
+  proposal_fit_info <- list(
+    proposal_fit = proposal_fit,
+    combiner = NA_character_,
+    n_gradients_used = NA_integer_
+  )
+
+  if (use_gradients) {
+    # Score-matching estimate of the inverse covariance. The scores are
+    # centred: the uncentred form retains an O(bar s bar s^T) bias in
+    # finite samples even though E_pi[s] = 0.
+    finite_rows <- apply(is.finite(gradients_4_fit), 1, all)
+    if (sum(finite_rows) < ncol(gradients_4_fit) + 1L) {
+      warning(
+        sprintf(
+          "only %d of %d gradient rows are finite (need more than ncol = %d); ",
+          sum(finite_rows),
+          nrow(gradients_4_fit),
+          ncol(gradients_4_fit)
+        ),
+        "falling back to the sample covariance.",
+        call. = FALSE
+      )
+      use_gradients <- FALSE
+    } else {
+      if (sum(finite_rows) < nrow(gradients_4_fit)) {
+        warning(
+          sprintf(
+            "%d of %d draws produced non-finite gradients; ",
+            sum(!finite_rows),
+            nrow(gradients_4_fit)
+          ),
+          "they are dropped from the score-matched proposal fit.",
+          call. = FALSE
+        )
+      }
+      G <- gradients_4_fit[finite_rows, , drop = FALSE]
+      G <- sweep(G, 2L, colMeans(G), check.margin = FALSE)
+      Prec_score <- crossprod(G) / nrow(G)
+      Prec_score <- as.matrix(nearPD(Prec_score)$mat)
+      V_score <- tryCatch(
+        chol2inv(chol(Prec_score)),
+        error = function(e) solve(Prec_score)
+      )
+      proposal_fit_info$n_gradients_used <- nrow(G)
+    }
+  }
+
+  if (use_gradients) {
+    # .geometric_mean_psd() expects positive-definite inputs; V_score is
+    # already nearPD'd above, V_sample is not.
+    V_sample_pd <- as.matrix(nearPD(V_sample)$mat)
+    V_tmp <- .geometric_mean_psd(V_sample_pd, V_score)
+    proposal_fit_info$combiner <- if (isTRUE(attr(V_tmp, "fallback"))) {
+      "geometric_fallback_arithmetic"
+    } else {
+      "geometric"
+    }
+    attr(V_tmp, "fallback") <- NULL
+    if (verbose) {
+      cat(sprintf(
+        "[proposal_fit = hybrid] combiner = %s\n",
+        proposal_fit_info$combiner
+      ))
+      cat(sprintf(
+        "  sample Sigma eigenvalues: %.3g .. %.3g\n",
+        min(eigen(V_sample, symmetric = TRUE, only.values = TRUE)$values),
+        max(eigen(V_sample, symmetric = TRUE, only.values = TRUE)$values)
+      ))
+      cat(sprintf(
+        "  score Sigma eigenvalues : %.3g .. %.3g\n",
+        min(eigen(V_score, symmetric = TRUE, only.values = TRUE)$values),
+        max(eigen(V_score, symmetric = TRUE, only.values = TRUE)$values)
+      ))
+    }
+  } else {
+    V_tmp <- V_sample
+    proposal_fit_info$combiner <- "none"
+  }
+
   V <- as.matrix(nearPD(V_tmp)$mat) # make sure that V is positive-definite
 
   # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
@@ -288,7 +392,8 @@
       q12 = q12,
       q21 = q21[[1]],
       q22 = q22[[1]],
-      mcse_logml = mcse_logmls
+      mcse_logml = mcse_logmls,
+      proposal_fit_info = proposal_fit_info
     )
     class(out) <- "bridge"
   } else if (repetitions > 1) {
@@ -297,7 +402,8 @@
       niter = niter,
       method = "normal",
       repetitions = repetitions,
-      mcse_logml = mcse_logmls
+      mcse_logml = mcse_logmls,
+      proposal_fit_info = proposal_fit_info
     )
     class(out) <- "bridge_list"
   }

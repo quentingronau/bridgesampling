@@ -25,8 +25,21 @@
   use_ess,
   r0,
   tol1,
-  tol2
+  tol2,
+  # Passed through by bridge_sampler.matrix(); warp3 fits its own affine
+  # transformation and ignores them.
+  gradients_4_fit = NULL,
+  proposal_fit = c("sample", "hybrid")
 ) {
+  proposal_fit <- match.arg(proposal_fit)
+  if (proposal_fit != "sample") {
+    warning(
+      "proposal_fit = 'hybrid' is only implemented for method = 'normal'; ",
+      "warp3 uses the sample covariance.",
+      call. = FALSE
+    )
+  }
+
   if (is.null(neff)) {
     neff <- nrow(samples_4_iter)
   }
