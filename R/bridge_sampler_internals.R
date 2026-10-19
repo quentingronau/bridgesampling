@@ -342,8 +342,7 @@
     i <- i + 1
     var_r <- (mean_numi^2) /
       (mean_deni^2) *
-      (var_numi / (mean_numi)^2 + var_deni / mean_deni^2)
-    var_r <- var_r / length(numi)
+      (var_numi / (mean_numi)^2 / length(numi) + var_deni / mean_deni^2 / length(deni))
 
     ## Compute variance in log scale by match the variance of a
     ## log-normal approximation

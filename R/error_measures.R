@@ -62,11 +62,10 @@ error_measures.bridge <- function(bridge_object, ...) {
 
   f1 <- as.numeric(p_g / (s1 * p_g + s2 * g_g))
   f2 <- as.numeric(g_p / (s1 * p_p + s2 * g_p))
-  rho_f2 <- spectrum0.ar(f2)$spec
-
   term1 <- 1 / N2 * var(f1) / mean(f1)^2
-  term2 <- rho_f2 / N1 * var(f2) / mean(f2)^2
-
+  # spectrum0.ar() returns the spectral density at frequency zero, i.e. the
+  # long-run variance tau * var(f2) of the posterior terms
+  term2 <- spectrum0.ar(f2)$spec / (N1 * mean(f2)^2) 
   re2 <- term1 + term2
 
   # convert to coefficient of variation (assumes that bridge estimate is unbiased)
