@@ -36,8 +36,13 @@
   # get mean & covariance matrix and generate samples from proposal
   m <- apply(samples_4_fit, 2, mean)
   V_tmp <- cov(samples_4_fit)
-  V <- as.matrix(nearPD(V_tmp)$mat) # make sure that V is positive-definite
-
+  # make sure that V is positive-definite
+  if(is.null(tryCatch(chol(V_tmp), error = function(e) NULL))) {
+    V <- as.matrix(nearPD(V_tmp)$mat)
+  } else {
+    V <- V_tmp
+  }
+  
   # sample from multivariate normal distribution and evaluate for posterior samples and generated samples
   q12 <- dmvnorm(samples_4_iter, mean = m, sigma = V, log = TRUE)
   gen_samples <- vector(mode = "list", length = repetitions)
